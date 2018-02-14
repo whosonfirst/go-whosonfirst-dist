@@ -20,6 +20,33 @@ This is work in progress. It's probably not worth trying to use yet unless you'r
 
 Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the "[bundles](https://dist.whosonfirst.org/bundles/)".
 
+## Tools
+
+### wof-dist-fetch
+
+Fetch all (or some) of the files listed in a distribution inventory file. `wof-dist-fetch` will uncompress files as they are written to disk (it's possible this should or needs to be an optional flag...)
+
+```
+./bin/wof-dist-fetch -h
+Usage of ./bin/wof-dist-fetch:
+  -dest string
+    	Where distribution files should be written (default "/tmp")
+  -exclude value
+    	A valid regular expression for comparing against an item's filename, for exclusion
+  -include value
+    	A valid regular expression for comparing against an item's filename, for inclusion
+  -inventory string
+    	The URL of a valid distribution inventory file (default "https://dist.whosonfirst.org/sqlite/inventory.json")
+```
+
+For example:
+
+```
+./bin/wof-dist-fetch -include '.*constituency-.*-latest.*'
+2018/02/14 15:46:28 WROTE /tmp/whosonfirst-data-constituency-ca-latest.db (33398784 bytes)
+2018/02/14 15:47:29 WROTE /tmp/whosonfirst-data-constituency-us-latest.db (1147850752 bytes)
+```
+
 ## See also
 
 * https://whosonfirst.mapzen.com/sqlite
