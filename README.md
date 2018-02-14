@@ -47,6 +47,8 @@ For example:
 2018/02/14 15:47:29 WROTE /tmp/whosonfirst-data-constituency-us-latest.db (1147850752 bytes)
 ```
 
+This tool is not very smart about checking whether a given distribution _needs_ to be downloaded (as in the local and remote files are the same). This is largely a function of the overall scaffolding for distributions still being a work in progress.
+
 ## See also
 
 * https://whosonfirst.mapzen.com/sqlite
