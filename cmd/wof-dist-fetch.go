@@ -96,7 +96,7 @@ func FetchItem(ctx context.Context, item distribution.Item, source *url.URL, des
 
 		bz_reader := bzip2.NewReader(rsp.Body)
 		
-		fh, err := os.OpenFile(local, os.O_RDWR|os.O_CREATE, 0755)
+		fh, err := os.OpenFile(local, os.O_RDWR|os.O_CREATE, 0644)
 
 		if err != nil {
 			error_ch <- err
