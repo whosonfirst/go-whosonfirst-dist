@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"gopkg.in/src-d/go-git.v4"
+	// "github.com/whosonfirst/go-whosonfirst-sqlite-feature"
 	"io/ioutil"
 	"log"
 	"os"
@@ -73,27 +74,29 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 	log.Println(local_repo)
 
-	/*
-	select {
+	if opts.SQLite {
 
-	case <-ctx.Done():
-		return
-	default:
+		select {
 
-		db, err := BuildSQLite(ctx, local_repo)
-
-		if err != nil {
-			err_ch <- err
+		case <-ctx.Done():
 			return
-		}
+		default:
 
+			_, err := BuildSQLite(ctx, local_repo)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+		}
 	}
-	*/
+
 }
 
 func BuildSQLite(ctx context.Context, repo string) (string, error) {
 
-     return "", errors.New("please write me")
+	return "", errors.New("please write me")
 }
 
 func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
