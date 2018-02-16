@@ -1,7 +1,7 @@
 package main
 
 import (
-       "compress/bzip2"
+	"compress/bzip2"
 	"context"
 	"encoding/json"
 	"errors"
@@ -76,8 +76,8 @@ func FetchItem(ctx context.Context, item distribution.Item, source *url.URL, des
 
 		source.Path = filepath.Join(source.Path, item.NameCompressed)
 		remote := source.String()
-		
-		local := filepath.Join(dest, item.Name)	// note the uncompressed name since we're going to decompress on the fly
+
+		local := filepath.Join(dest, item.Name) // note the uncompressed name since we're going to decompress on the fly
 
 		rsp, err := http.Get(remote)
 
@@ -95,7 +95,7 @@ func FetchItem(ctx context.Context, item distribution.Item, source *url.URL, des
 		defer rsp.Body.Close()
 
 		bz_reader := bzip2.NewReader(rsp.Body)
-		
+
 		fh, err := os.OpenFile(local, os.O_RDWR|os.O_CREATE, 0644)
 
 		if err != nil {
@@ -198,9 +198,9 @@ func main() {
 		src, err := url.Parse(source.String())
 
 		if err != nil {
-		   log.Fatal(err)
+			log.Fatal(err)
 		}
-		
+
 		src.Path = filepath.Dir(src.Path)
 		go FetchItem(ctx, item, src, *dest, error_ch, done_ch)
 	}

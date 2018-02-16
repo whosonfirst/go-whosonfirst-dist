@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"gopkg.in/src-d/go-git.v4"
@@ -16,22 +17,46 @@ import (
 	"time"
 )
 
-func Build(ctx context.Context, repo string, done_ch chan bool, err_ch chan error) {
+type BuildOptions struct {
+	Organization string
+	Repo         string
+	SQLite       bool
+	Bundle       bool
+	WorkDir      string
+}
+
+func NewBuildOptions() *BuildOptions {
+
+	opts := BuildOptions{
+		Organization: "whosonfirst-data",
+		Repo:         "whosonfirst-data",
+		SQLite:       true,
+		Bundle:       false,
+		WorkDir:      "",
+	}
+
+	return &opts
+}
+
+func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch chan error) {
 
 	t1 := time.Now()
 
 	defer func() {
 		t2 := time.Since(t1)
-		log.Printf("time to build %s %v\n", repo, t2)
+		log.Printf("time to build %s %v\n", opts.Repo, t2)
 		done_ch <- true
 	}()
+
+	var local_repo string
 
 	select {
 
 	case <-ctx.Done():
 		return
 	default:
-		dir, err := ioutil.TempDir("", repo)
+
+		repo, err := Clone(ctx, opts)
 
 		if err != nil {
 			err_ch <- err
@@ -39,23 +64,73 @@ func Build(ctx context.Context, repo string, done_ch chan bool, err_ch chan erro
 		}
 
 		defer func() {
-			os.RemoveAll(dir)
+			log.Println("remove", repo)
+			os.RemoveAll(repo)
 		}()
 
-		// MAKE ORG/USER CONFIGURABLE?
+		local_repo = repo
+	}
 
-		url := fmt.Sprintf("https://github.com/whosonfirst-data/%s.git", repo)
+	log.Println(local_repo)
 
-		_, err = git.PlainClone(dir, false, &git.CloneOptions{
-			URL: url,
-		})
+	/*
+	select {
+
+	case <-ctx.Done():
+		return
+	default:
+
+		db, err := BuildSQLite(ctx, local_repo)
 
 		if err != nil {
 			err_ch <- err
 			return
 		}
-	}
 
+	}
+	*/
+}
+
+func BuildSQLite(ctx context.Context, repo string) (string, error) {
+
+     return "", errors.New("please write me")
+}
+
+func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
+
+	select {
+
+	case <-ctx.Done():
+		return "", nil
+	default:
+
+		t1 := time.Now()
+
+		defer func() {
+			t2 := time.Since(t1)
+			log.Printf("time to clone %s %v\n", opts.Repo, t2)
+		}()
+
+		// MAKE THIS CONFIGURABLE
+
+		dir, err := ioutil.TempDir("", opts.Repo)
+
+		if err != nil {
+			return "", err
+		}
+
+		// DO NOT HOG-TIE THIS TO GITHUB...
+
+		url := fmt.Sprintf("https://github.com/%s/%s.git", opts.Organization, opts.Repo)
+
+		// SOMETHING SOMETHING SOMETHING LFS...
+
+		_, err = git.PlainClone(dir, false, &git.CloneOptions{
+			URL: url,
+		})
+
+		return dir, err
+	}
 }
 
 func main() {
@@ -74,7 +149,11 @@ func main() {
 	t1 := time.Now()
 
 	for _, repo := range flag.Args() {
-		go Build(ctx, repo, done_ch, err_ch)
+
+		opts := NewBuildOptions()
+		opts.Repo = repo
+
+		go Build(ctx, opts, done_ch, err_ch)
 	}
 
 	for count > 0 {
