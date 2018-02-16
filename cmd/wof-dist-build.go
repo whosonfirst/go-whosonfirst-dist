@@ -9,12 +9,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	// "github.com/whosonfirst/go-whosonfirst-sqlite-feature/tables"
+	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"gopkg.in/src-d/go-git.v4"
-	// "github.com/whosonfirst/go-whosonfirst-sqlite-feature"
 	"io/ioutil"
 	"log"
 	"os"
-	_ "path/filepath"
+	"path/filepath"
 	"time"
 )
 
@@ -82,7 +83,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 			return
 		default:
 
-			_, err := BuildSQLite(ctx, local_repo)
+			_, err := BuildSQLite(ctx, opts, local_repo)
 
 			if err != nil {
 				err_ch <- err
@@ -94,9 +95,36 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 }
 
-func BuildSQLite(ctx context.Context, repo string) (string, error) {
+func BuildSQLite(ctx context.Context, opts *BuildOptions, repo string) (string, error) {
 
 	return "", errors.New("please write me")
+
+	dir := fmt.Sprintf("%s-sqlite", opts.Repo)
+
+	root, err := ioutil.TempDir("", dir)
+
+	if err != nil {
+		return "", err
+	}
+
+	fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+	dsn := filepath.Join(root, fname)
+
+	db, err := database.NewDBWithDriver("sqlite3", dsn)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer db.Close()
+
+	err = db.LiveHardDieFast()
+
+	if err != nil {
+		return "", err
+	}
+
+	return dsn, nil
 }
 
 func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
