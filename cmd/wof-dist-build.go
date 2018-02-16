@@ -9,7 +9,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	// "github.com/whosonfirst/go-whosonfirst-sqlite-feature/tables"
+	// "github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
+	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
@@ -95,7 +96,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 }
 
-func BuildSQLite(ctx context.Context, opts *BuildOptions, repo string) (string, error) {
+func BuildSQLite(ctx context.Context, opts *BuildOptions, local_repo string) (string, error) {
 
 	return "", errors.New("please write me")
 
@@ -123,6 +124,28 @@ func BuildSQLite(ctx context.Context, opts *BuildOptions, repo string) (string, 
 	if err != nil {
 		return "", err
 	}
+
+	to_index, err := tables.CommonTablesWithDatabase(db)
+
+	if err != nil {
+		return "", err
+	}
+
+	log.Println(to_index)
+
+	/*
+		idx, err := index.NewDefaultSQLiteIndexer(db, to_index)
+
+		if err != nil {
+			return nil, err
+		}
+
+		err = idx.IndexPaths("repo", []string{ local_repo })
+
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	return dsn, nil
 }
