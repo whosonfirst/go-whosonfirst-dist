@@ -6,15 +6,16 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
+	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"gopkg.in/src-d/go-git.v4"
+	"io"
 	"io/ioutil"
-	"log"
+	_ "log"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,9 +27,12 @@ type BuildOptions struct {
 	SQLite       bool
 	Bundle       bool
 	WorkDir      string
+	Logger       *log.WOFLogger
 }
 
 func NewBuildOptions() *BuildOptions {
+
+	logger := log.SimpleWOFLogger()
 
 	opts := BuildOptions{
 		Organization: "whosonfirst-data",
@@ -36,6 +40,7 @@ func NewBuildOptions() *BuildOptions {
 		SQLite:       true,
 		Bundle:       false,
 		WorkDir:      "",
+		Logger:       logger,
 	}
 
 	return &opts
@@ -47,7 +52,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 	defer func() {
 		t2 := time.Since(t1)
-		log.Printf("time to build %s %v\n", opts.Repo, t2)
+		opts.Logger.Status("time to build %s %v\n", opts.Repo, t2)
 		done_ch <- true
 	}()
 
@@ -67,14 +72,11 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 		}
 
 		defer func() {
-			log.Println("remove", repo)
 			os.RemoveAll(repo)
 		}()
 
 		local_repo = repo
 	}
-
-	log.Println(local_repo)
 
 	if opts.SQLite {
 
@@ -84,68 +86,86 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 			return
 		default:
 
-			_, err := BuildSQLite(ctx, opts, local_repo)
+			dsn, err := BuildSQLite(ctx, opts, local_repo)
 
 			if err != nil {
 				err_ch <- err
 				return
 			}
 
+			opts.Logger.Status("CREATED %s", dsn)
 		}
 	}
-
 }
 
 func BuildSQLite(ctx context.Context, opts *BuildOptions, local_repo string) (string, error) {
 
-	return "", errors.New("please write me")
+	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
+	return BuildSQLiteCommon(ctx, opts, local_repo)
+}
 
-	dir := fmt.Sprintf("%s-sqlite", opts.Repo)
+func BuildSQLiteCommon(ctx context.Context, opts *BuildOptions, local_repo string) (string, error) {
 
-	root, err := ioutil.TempDir("", dir)
+	select {
 
-	if err != nil {
-		return "", err
+	case <-ctx.Done():
+		return "", nil
+	default:
+
+		t1 := time.Now()
+
+		defer func() {
+			t2 := time.Since(t1)
+			opts.Logger.Status("time to build sqlite db for %s %v\n", opts.Repo, t2)
+		}()
+
+		dir := fmt.Sprintf("%s-sqlite", opts.Repo)
+		root, err := ioutil.TempDir("", dir)
+
+		if err != nil {
+			return "", err
+		}
+
+		fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+		dsn := filepath.Join(root, fname)
+
+		db, err := database.NewDBWithDriver("sqlite3", dsn)
+
+		if err != nil {
+			return "", err
+		}
+
+		defer db.Close()
+
+		err = db.LiveHardDieFast()
+
+		if err != nil {
+			return "", err
+		}
+
+		to_index, err := tables.CommonTablesWithDatabase(db)
+
+		if err != nil {
+			return "", err
+		}
+
+		idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
+
+		if err != nil {
+			return "", err
+		}
+
+		idx.Timings = true
+		idx.Logger = opts.Logger
+
+		err = idx.IndexPaths("repo", []string{local_repo})
+
+		if err != nil {
+			return "", err
+		}
+
+		return dsn, nil
 	}
-
-	fname := fmt.Sprintf("%s-latest.db", opts.Repo)
-	dsn := filepath.Join(root, fname)
-
-	db, err := database.NewDBWithDriver("sqlite3", dsn)
-
-	if err != nil {
-		return "", err
-	}
-
-	defer db.Close()
-
-	err = db.LiveHardDieFast()
-
-	if err != nil {
-		return "", err
-	}
-
-	to_index, err := tables.CommonTablesWithDatabase(db)
-
-	if err != nil {
-		return "", err
-	}
-
-	log.Println(to_index)
-
-	idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
-
-	if err != nil {
-		return "", err
-	}
-
-	err = idx.IndexPaths("repo", []string{local_repo})
-
-	if err != nil {
-		return "", err
-	}
-
-	return dsn, nil
 }
 
 func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
@@ -160,7 +180,7 @@ func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
 
 		defer func() {
 			t2 := time.Since(t1)
-			log.Printf("time to clone %s %v\n", opts.Repo, t2)
+			opts.Logger.Status("time to clone %s %v\n", opts.Repo, t2)
 		}()
 
 		// MAKE THIS CONFIGURABLE
@@ -200,9 +220,15 @@ func main() {
 
 	t1 := time.Now()
 
+	logger := log.SimpleWOFLogger()
+
+	stdout := io.Writer(os.Stdout)
+	logger.AddLogger(stdout, "status")
+
 	for _, repo := range flag.Args() {
 
 		opts := NewBuildOptions()
+		opts.Logger = logger
 		opts.Repo = repo
 
 		go Build(ctx, opts, done_ch, err_ch)
@@ -214,7 +240,7 @@ func main() {
 		case <-done_ch:
 			count--
 		case err := <-err_ch:
-			log.Println(err)
+			logger.Error("%s", err)
 			cancel()
 		default:
 			// pass
@@ -222,5 +248,5 @@ func main() {
 	}
 
 	t2 := time.Since(t1)
-	log.Printf("time to build all %v\n", t2)
+	logger.Status("time to build all %v\n", t2)
 }
