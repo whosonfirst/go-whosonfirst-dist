@@ -17,6 +17,7 @@ build:	fmt bin
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "gopkg.in/src-d/go-git.v4/..."
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite"
 
 vendor-deps: rmdeps deps
 	if test -d vendor; then rm -rf vendor; fi
