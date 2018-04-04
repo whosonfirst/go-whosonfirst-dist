@@ -270,9 +270,7 @@ func dotGitToOSFilesystems(path string) (dot, wt billy.Filesystem, err error) {
 	return dot, fs, nil
 }
 
-func dotGitFileToOSFilesystem(path string, fs billy.Filesystem) (billy.Filesystem, error) {
-	var err error
-
+func dotGitFileToOSFilesystem(path string, fs billy.Filesystem) (bfs billy.Filesystem, err error) {
 	f, err := fs.Open(".git")
 	if err != nil {
 		return nil, err
@@ -449,7 +447,7 @@ func (r *Repository) clone(ctx context.Context, o *CloneOptions) error {
 		return err
 	}
 
-	if r.wt != nil {
+	if r.wt != nil && !o.NoCheckout {
 		w, err := r.Worktree()
 		if err != nil {
 			return err
@@ -728,7 +726,19 @@ func (r *Repository) Log(o *LogOptions) (object.CommitIter, error) {
 		return nil, err
 	}
 
-	return object.NewCommitPreorderIter(commit, nil, nil), nil
+	switch o.Order {
+	case LogOrderDefault:
+		return object.NewCommitPreorderIter(commit, nil, nil), nil
+	case LogOrderDFS:
+		return object.NewCommitPreorderIter(commit, nil, nil), nil
+	case LogOrderDFSPost:
+		return object.NewCommitPostorderIter(commit, nil), nil
+	case LogOrderBSF:
+		return object.NewCommitIterBSF(commit, nil, nil), nil
+	case LogOrderCommitterTime:
+		return object.NewCommitIterCTime(commit, nil, nil), nil
+	}
+	return nil, fmt.Errorf("invalid Order=%v", o.Order)
 }
 
 // Tags returns all the References from Tags. This method returns all the tag
@@ -1080,7 +1090,7 @@ func (r *Repository) createNewObjectPack(cfg *RepackConfig) (h plumbing.Hash, er
 	if los, ok := r.Storer.(storer.LooseObjectStorer); ok {
 		err = los.ForEachObjectHash(func(hash plumbing.Hash) error {
 			if ow.isSeen(hash) {
-				err := los.DeleteLooseObject(hash)
+				err = los.DeleteLooseObject(hash)
 				if err != nil {
 					return err
 				}

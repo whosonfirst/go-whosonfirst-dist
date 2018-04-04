@@ -73,7 +73,7 @@ func (r *Remote) Push(o *PushOptions) error {
 // The provided Context must be non-nil. If the context expires before the
 // operation is complete, an error is returned. The context only affects to the
 // transport operations.
-func (r *Remote) PushContext(ctx context.Context, o *PushOptions) error {
+func (r *Remote) PushContext(ctx context.Context, o *PushOptions) (err error) {
 	if err := o.Validate(); err != nil {
 		return err
 	}
@@ -130,10 +130,7 @@ func (r *Remote) PushContext(ctx context.Context, o *PushOptions) error {
 		return NoErrAlreadyUpToDate
 	}
 
-	objects, err := objectsToPush(req.Commands)
-	if err != nil {
-		return err
-	}
+	objects := objectsToPush(req.Commands)
 
 	haves, err := referencesToHashes(remoteRefs)
 	if err != nil {
@@ -246,12 +243,12 @@ func (r *Remote) Fetch(o *FetchOptions) error {
 	return r.FetchContext(context.Background(), o)
 }
 
-func (r *Remote) fetch(ctx context.Context, o *FetchOptions) (storer.ReferenceStorer, error) {
+func (r *Remote) fetch(ctx context.Context, o *FetchOptions) (sto storer.ReferenceStorer, err error) {
 	if o.RemoteName == "" {
 		o.RemoteName = r.c.Name
 	}
 
-	if err := o.Validate(); err != nil {
+	if err = o.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -298,7 +295,7 @@ func (r *Remote) fetch(ctx context.Context, o *FetchOptions) (storer.ReferenceSt
 			return nil, err
 		}
 
-		if err := r.fetchPack(ctx, o, s, req); err != nil {
+		if err = r.fetchPack(ctx, o, s, req); err != nil {
 			return nil, err
 		}
 	}
@@ -357,7 +354,7 @@ func (r *Remote) fetchPack(ctx context.Context, o *FetchOptions, s transport.Upl
 
 	defer ioutil.CheckClose(reader, &err)
 
-	if err := r.updateShallow(o, reader); err != nil {
+	if err = r.updateShallow(o, reader); err != nil {
 		return err
 	}
 
@@ -875,7 +872,7 @@ func (r *Remote) buildFetchedTags(refs memory.ReferenceStorage) (updated bool, e
 }
 
 // List the references on the remote repository.
-func (r *Remote) List(o *ListOptions) ([]*plumbing.Reference, error) {
+func (r *Remote) List(o *ListOptions) (rfs []*plumbing.Reference, err error) {
 	s, err := newUploadPackSession(r.c.URLs[0], o.Auth)
 	if err != nil {
 		return nil, err
@@ -907,7 +904,7 @@ func (r *Remote) List(o *ListOptions) ([]*plumbing.Reference, error) {
 	return resultRefs, nil
 }
 
-func objectsToPush(commands []*packp.Command) ([]plumbing.Hash, error) {
+func objectsToPush(commands []*packp.Command) []plumbing.Hash {
 	var objects []plumbing.Hash
 	for _, cmd := range commands {
 		if cmd.New == plumbing.ZeroHash {
@@ -916,8 +913,7 @@ func objectsToPush(commands []*packp.Command) ([]plumbing.Hash, error) {
 
 		objects = append(objects, cmd.New)
 	}
-
-	return objects, nil
+	return objects
 }
 
 func referencesToHashes(refs storer.ReferenceStorer) ([]plumbing.Hash, error) {
