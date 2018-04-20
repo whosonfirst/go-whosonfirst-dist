@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	wof_utils "github.com/whosonfirst/go-whosonfirst-index/utils"
+ 	wof_utils "github.com/whosonfirst/go-whosonfirst-index/utils"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite/index"
+	"github.com/whosonfirst/warning"
 	"io"
 )
 
@@ -57,7 +58,7 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 
 			i, err := feature.LoadWOFFeatureFromReader(closer)
 
-			if err != nil {
+			if err != nil && !warning.IsWarning(err){
 				msg := fmt.Sprintf("Unable to load %s, because %s", path, err)
 				return nil, errors.New(msg)
 			}
