@@ -7,17 +7,12 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
+	"github.com/whosonfirst/go-whosonfirst-dist/sqlite"
 	"github.com/whosonfirst/go-whosonfirst-log"
-	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
-	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
-	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"io"
-	"io/ioutil"
 	_ "log"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -68,15 +63,16 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 		if !opts.Local {
 
+			cl, _ := git.NewNativeCloner()
+
 			clone_opts := git.CloneOptions{
+				Cloner:       cl,
 				Logger:       opts.Logger,
 				Repo:         opts.Repo,
 				Organization: opts.Organization,
 			}
 
-			cl, _ := git.NewNativeCloner()
-
-			repo, err := cl.Clone(ctx, &clone_opts)
+			repo, err := git.CloneRepo(ctx, &clone_opts)
 
 			if err != nil {
 				err_ch <- err
@@ -86,7 +82,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 			// make me a flag or something (20180405/thisisaaronland)
 
 			defer func() {
-				os.RemoveAll(repo)
+				// os.RemoveAll(repo)
 			}()
 
 			local_repo = repo
@@ -98,7 +94,6 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 	}
 
 	opts.Logger.Status("LOCAL %s", local_repo)
-	return
 
 	if opts.SQLite {
 
@@ -108,7 +103,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 			return
 		default:
 
-			dsn, err := BuildSQLite(ctx, opts, local_repo)
+			dsn, err := sqlite.BuildSQLite(ctx, local_repo)
 
 			if err != nil {
 				err_ch <- err
@@ -117,84 +112,6 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 			opts.Logger.Status("CREATED %s", dsn)
 		}
-	}
-}
-
-func BuildSQLite(ctx context.Context, opts *BuildOptions, local_repo string) (string, error) {
-
-	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
-	return BuildSQLiteCommon(ctx, opts, local_repo)
-}
-
-func BuildSQLiteCommon(ctx context.Context, opts *BuildOptions, local_repo string) (string, error) {
-
-	select {
-
-	case <-ctx.Done():
-		return "", nil
-	default:
-
-		t1 := time.Now()
-
-		defer func() {
-			t2 := time.Since(t1)
-			opts.Logger.Status("time to build sqlite db for %s %v\n", opts.Repo, t2)
-		}()
-
-		name := opts.Repo
-
-		if opts.Local {
-			name = filepath.Base(name)
-		}
-
-		dir := fmt.Sprintf("%s-sqlite", name)
-		root, err := ioutil.TempDir("", dir)
-
-		if err != nil {
-			return "", err
-		}
-
-		fname := fmt.Sprintf("%s-latest.db", name)
-		dsn := filepath.Join(root, fname)
-
-		opts.Logger.Status("DSN %s", dsn)
-
-		db, err := database.NewDBWithDriver("sqlite3", dsn)
-
-		if err != nil {
-			return "", err
-		}
-
-		defer db.Close()
-
-		err = db.LiveHardDieFast()
-
-		if err != nil {
-			return "", err
-		}
-
-		to_index, err := tables.CommonTablesWithDatabase(db)
-
-		if err != nil {
-			return "", err
-		}
-
-		idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
-
-		if err != nil {
-			return "", err
-		}
-
-		idx.Timings = true
-		idx.Logger = opts.Logger
-
-		err = idx.IndexPaths("repo", []string{local_repo})
-
-		if err != nil {
-			return "", err
-		}
-
-		return dsn, nil
 	}
 }
 

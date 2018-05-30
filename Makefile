@@ -8,6 +8,7 @@ self:   prep rmdeps
 	if test -d src/github.com/whosonfirst/go-whosonfirst-dist; then rm -rf src/github.com/whosonfirst/go-whosonfirst-dist; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-dist
 	cp -r git src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r sqlite src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp *.go src/github.com/whosonfirst/go-whosonfirst-dist
 	cp -r vendor/* src/
 
@@ -32,6 +33,7 @@ vendor-deps: rmdeps deps
 fmt:
 	go fmt cmd/*.go
 	go fmt git/*.go
+	go fmt sqlite/*.go
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build.go
