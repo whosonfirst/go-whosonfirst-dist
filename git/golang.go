@@ -3,17 +3,10 @@ package git
 import (
 	"context"
 	"fmt"
-	"github.com/whosonfirst/go-whosonfirst-log"
 	gogit "gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
 	"time"
 )
-
-type CloneOptions struct {
-	Organization string
-	Repo         string
-	Logger       *log.WOFLogger
-}
 
 func Clone(ctx context.Context, opts *CloneOptions) (string, error) {
 
