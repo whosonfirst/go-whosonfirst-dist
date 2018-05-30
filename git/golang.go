@@ -9,7 +9,18 @@ import (
 	"time"
 )
 
-func Clone(ctx context.Context, opts *CloneOptions) (string, error) {
+type GolangCloner struct {
+	Cloner
+}
+
+func NewGolangCloner() (Cloner, error) {
+
+	cl := GolangCloner{}
+
+	return &cl, nil
+}
+
+func (cl *GolangCloner) Clone(ctx context.Context, opts *CloneOptions) (string, error) {
 
 	select {
 
