@@ -8,11 +8,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
-	"gopkg.in/src-d/go-git.v4"
 	"io"
 	"io/ioutil"
 	_ "log"
@@ -68,7 +68,13 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 		if !opts.Local {
 
-			repo, err := Clone(ctx, opts)
+			clone_opts := git.CloneOptions{
+				Logger:       opts.Logger,
+				Repo:         opts.Repo,
+				Organization: opts.Organization,
+			}
+
+			repo, err := git.Clone(ctx, &clone_opts)
 
 			if err != nil {
 				err_ch <- err
@@ -147,7 +153,7 @@ func BuildSQLiteCommon(ctx context.Context, opts *BuildOptions, local_repo strin
 		dsn := filepath.Join(root, fname)
 
 		opts.Logger.Status("DSN %s", dsn)
-		
+
 		db, err := database.NewDBWithDriver("sqlite3", dsn)
 
 		if err != nil {
@@ -184,43 +190,6 @@ func BuildSQLiteCommon(ctx context.Context, opts *BuildOptions, local_repo strin
 		}
 
 		return dsn, nil
-	}
-}
-
-func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
-
-	select {
-
-	case <-ctx.Done():
-		return "", nil
-	default:
-
-		t1 := time.Now()
-
-		defer func() {
-			t2 := time.Since(t1)
-			opts.Logger.Status("time to clone %s %v\n", opts.Repo, t2)
-		}()
-
-		// MAKE THIS CONFIGURABLE
-
-		dir, err := ioutil.TempDir("", opts.Repo)
-
-		if err != nil {
-			return "", err
-		}
-
-		// DO NOT HOG-TIE THIS TO GITHUB...
-
-		url := fmt.Sprintf("https://github.com/%s/%s.git", opts.Organization, opts.Repo)
-
-		// SOMETHING SOMETHING SOMETHING LFS...
-
-		_, err = git.PlainClone(dir, false, &git.CloneOptions{
-			URL: url,
-		})
-
-		return dir, err
 	}
 }
 
