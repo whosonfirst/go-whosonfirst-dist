@@ -28,6 +28,7 @@ type BuildOptions struct {
 	Bundle       bool
 	WorkDir      string
 	Logger       *log.WOFLogger
+	Local        bool
 }
 
 func NewBuildOptions() *BuildOptions {
@@ -41,6 +42,7 @@ func NewBuildOptions() *BuildOptions {
 		Bundle:       false,
 		WorkDir:      "",
 		Logger:       logger,
+		Local:        false,
 	}
 
 	return &opts
@@ -64,18 +66,27 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 		return
 	default:
 
-		repo, err := Clone(ctx, opts)
+		if !opts.Local {
 
-		if err != nil {
-			err_ch <- err
-			return
+			repo, err := Clone(ctx, opts)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			// make me a flag or something (20180405/thisisaaronland)
+
+			defer func() {
+				os.RemoveAll(repo)
+			}()
+
+			local_repo = repo
+
+		} else {
+			local_repo = opts.Repo
 		}
 
-		defer func() {
-			os.RemoveAll(repo)
-		}()
-
-		local_repo = repo
 	}
 
 	if opts.SQLite {
@@ -119,16 +130,24 @@ func BuildSQLiteCommon(ctx context.Context, opts *BuildOptions, local_repo strin
 			opts.Logger.Status("time to build sqlite db for %s %v\n", opts.Repo, t2)
 		}()
 
-		dir := fmt.Sprintf("%s-sqlite", opts.Repo)
+		name := opts.Repo
+
+		if opts.Local {
+			name = filepath.Base(name)
+		}
+
+		dir := fmt.Sprintf("%s-sqlite", name)
 		root, err := ioutil.TempDir("", dir)
 
 		if err != nil {
 			return "", err
 		}
 
-		fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+		fname := fmt.Sprintf("%s-latest.db", name)
 		dsn := filepath.Join(root, fname)
 
+		opts.Logger.Status("DSN %s", dsn)
+		
 		db, err := database.NewDBWithDriver("sqlite3", dsn)
 
 		if err != nil {
@@ -207,6 +226,8 @@ func Clone(ctx context.Context, opts *BuildOptions) (string, error) {
 
 func main() {
 
+	local := flag.Bool("local", false, "...")
+
 	flag.Parse()
 
 	done_ch := make(chan bool)
@@ -230,6 +251,7 @@ func main() {
 		opts := NewBuildOptions()
 		opts.Logger = logger
 		opts.Repo = repo
+		opts.Local = *local
 
 		go Build(ctx, opts, done_ch, err_ch)
 	}
