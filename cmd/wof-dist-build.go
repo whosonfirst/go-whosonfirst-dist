@@ -74,7 +74,9 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 				Organization: opts.Organization,
 			}
 
-			repo, err := git.Clone(ctx, &clone_opts)
+			cl, _ := git.NewNativeCloner()
+
+			repo, err := cl.Clone(ctx, &clone_opts)
 
 			if err != nil {
 				err_ch <- err
@@ -94,6 +96,9 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 		}
 
 	}
+
+	opts.Logger.Status("LOCAL %s", local_repo)
+	return
 
 	if opts.SQLite {
 

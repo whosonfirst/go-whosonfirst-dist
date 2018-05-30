@@ -3,13 +3,28 @@ package git
 import (
 	"context"
 	"fmt"
-	gogit "gopkg.in/src-d/go-git.v4"
 	"io/ioutil"
-	"os"
+	"os/exec"
 	"time"
 )
 
-func Clone(ctx context.Context, opts *CloneOptions) (string, error) {
+type NativeCloner struct {
+	Cloner
+	git string
+}
+
+func NewNativeCloner() (Cloner, error) {
+
+	// check that git binary is present here...
+
+	cl := NativeCloner{
+		git: "git",
+	}
+
+	return &cl, nil
+}
+
+func (cl *NativeCloner) Clone(ctx context.Context, opts *CloneOptions) (string, error) {
 
 	select {
 
@@ -38,11 +53,17 @@ func Clone(ctx context.Context, opts *CloneOptions) (string, error) {
 
 		// SOMETHING SOMETHING SOMETHING LFS...
 
-		_, err = gogit.PlainCloneContext(ctx, dir, false, &gogit.CloneOptions{
-			URL:      url,
-			Depth:    1,
-			Progress: os.Stdout,
-		})
+		git_args := []string{
+			"clone",
+			"--depth",
+			"1",
+			url,
+			dir,
+		}
+
+		cmd := exec.Command(cl.git, git_args...)
+
+		_, err = cmd.Output()
 
 		return dir, err
 	}
