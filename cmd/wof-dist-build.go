@@ -82,7 +82,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 			// make me a flag or something (20180405/thisisaaronland)
 
 			defer func() {
-				// os.RemoveAll(repo)
+				os.RemoveAll(repo)
 			}()
 
 			local_repo = repo
@@ -113,11 +113,14 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 			opts.Logger.Status("CREATED %s", dsn)
 		}
 	}
+
+	csv.BuildMetaFiles(ctx, local_repo)
 }
 
 func main() {
 
 	local := flag.Bool("local", false, "...")
+	build_sqlite := flag.Bool("build-sqlite", true, "...")	
 
 	flag.Parse()
 
@@ -143,7 +146,8 @@ func main() {
 		opts.Logger = logger
 		opts.Repo = repo
 		opts.Local = *local
-
+		opts.SQLite = *build_sqlite
+		
 		go Build(ctx, opts, done_ch, err_ch)
 	}
 

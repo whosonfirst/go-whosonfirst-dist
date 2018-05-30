@@ -44,6 +44,6 @@ func CloneRepo(ctx context.Context, opts *CloneOptions) (string, error) {
 
 	cl := opts.Cloner
 
-	err = cl.Clone(ctx, local, remote)
+	err = cl.Clone(ctx, remote, local)
 	return local, err
 }
