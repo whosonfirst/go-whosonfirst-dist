@@ -87,8 +87,9 @@ func main() {
 	build_sqlite := flag.Bool("build-sqlite", true, "...")
 
 	clone := flag.String("git-clone", "native", "...")
-	source := flag.String("git-source", "github.com", "...")
 	proto := flag.String("git-protocol", "https", "...")
+	source := flag.String("git-source", "github.com", "...")
+	org := flag.String("git-organization", "whosonfirst-data", "...")
 
 	flag.Parse()
 
@@ -112,6 +113,7 @@ func main() {
 
 		opts := options.NewBuildOptions()
 		opts.Logger = logger
+		opts.Organization = *org
 		opts.Repo = repo
 		opts.Local = *local
 		opts.SQLite = *build_sqlite
@@ -121,6 +123,9 @@ func main() {
 
 		go Build(ctx, opts, done_ch, err_ch)
 	}
+
+	// see the way we cancel if any repo fails? I am not sure
+	// that's really necessary or useful... (20180601/thisisaaronland)
 
 	for count > 0 {
 
