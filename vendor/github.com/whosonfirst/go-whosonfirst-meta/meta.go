@@ -222,7 +222,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 	name := gjson.GetBytes(feature, "properties.wof:name")
 
-	if !name.Exists(){
+	if !name.Exists() {
 		msg := fmt.Sprintf("ID %d is missing wof:name!", wofid)
 		return row, errors.New(msg)
 	}
