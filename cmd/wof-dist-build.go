@@ -63,7 +63,8 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 		if !opts.Local {
 
-			cl, _ := git.NewNativeCloner()
+			// cl, _ := git.NewNativeCloner()
+			cl, _ := git.NewGolangCloner()			
 
 			clone_opts := git.CloneOptions{
 				Cloner:       cl,
@@ -114,7 +115,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 		}
 	}
 
-	csv.BuildMetaFiles(ctx, local_repo)
+
 }
 
 func main() {
