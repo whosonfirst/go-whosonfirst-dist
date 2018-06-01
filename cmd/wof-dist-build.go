@@ -5,141 +5,62 @@ package main
 // AND WHATEVER THE NEXT THING IS (20180112/thisisaaronland)
 
 import (
-	"context"
 	"flag"
-	"github.com/whosonfirst/go-whosonfirst-dist/git"
+	"github.com/whosonfirst/go-whosonfirst-dist/build"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	"github.com/whosonfirst/go-whosonfirst-dist/sqlite"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"io"
 	_ "log"
 	"os"
-	"time"
 )
-
-func Build(ctx context.Context, opts *options.BuildOptions, done_ch chan bool, err_ch chan error) {
-
-	t1 := time.Now()
-
-	defer func() {
-		t2 := time.Since(t1)
-		opts.Logger.Status("time to build %s %v\n", opts.Repo, t2)
-		done_ch <- true
-	}()
-
-	var local_repo string
-
-	select {
-
-	case <-ctx.Done():
-		return
-	default:
-
-		if !opts.Local {
-
-			repo, err := git.CloneRepo(ctx, opts)
-
-			if err != nil {
-				err_ch <- err
-				return
-			}
-
-			// make me a flag or something (20180405/thisisaaronland)
-
-			defer func() {
-				os.RemoveAll(repo)
-			}()
-
-			local_repo = repo
-
-		} else {
-			local_repo = opts.Repo
-		}
-
-	}
-
-	opts.Logger.Status("LOCAL %s", local_repo)
-
-	if opts.SQLite {
-
-		select {
-
-		case <-ctx.Done():
-			return
-		default:
-
-			dsn, err := sqlite.BuildSQLite(ctx, local_repo)
-
-			if err != nil {
-				err_ch <- err
-				return
-			}
-
-			opts.Logger.Status("CREATED %s", dsn)
-		}
-	}
-
-}
 
 func main() {
 
-	local := flag.Bool("local", false, "...")
 	build_sqlite := flag.Bool("build-sqlite", true, "...")
+	// build_meta := flag.Bool("build-meta", true, "...")
+	// build_bundle := flag.Bool("build-bundle", true, "...")
+	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
 	clone := flag.String("git-clone", "native", "...")
 	proto := flag.String("git-protocol", "https", "...")
 	source := flag.String("git-source", "github.com", "...")
 	org := flag.String("git-organization", "whosonfirst-data", "...")
 
+	local := flag.Bool("local", false, "...")
+	strict := flag.Bool("strict", false, "...")
+	timings := flag.Bool("timings", false, "...")
+	verbose := flag.Bool("verbose", false, "...")
+
 	flag.Parse()
-
-	done_ch := make(chan bool)
-	err_ch := make(chan error)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	repos := flag.Args()
-	count := len(repos)
-
-	t1 := time.Now()
 
 	logger := log.SimpleWOFLogger()
 
-	stdout := io.Writer(os.Stdout)
-	logger.AddLogger(stdout, "status")
-
-	for _, repo := range flag.Args() {
-
-		opts := options.NewBuildOptions()
-		opts.Logger = logger
-		opts.Organization = *org
-		opts.Repo = repo
-		opts.Local = *local
-		opts.SQLite = *build_sqlite
-		opts.Cloner = *clone
-		opts.Source = *source
-		opts.Protocol = *proto
-
-		go Build(ctx, opts, done_ch, err_ch)
+	if *verbose {
+		stdout := io.Writer(os.Stdout)
+		logger.AddLogger(stdout, "status")
 	}
 
-	// see the way we cancel if any repo fails? I am not sure
-	// that's really necessary or useful... (20180601/thisisaaronland)
+	opts := options.NewBuildOptions()
+	opts.Logger = logger
 
-	for count > 0 {
+	opts.Cloner = *clone
+	opts.Protocol = *proto
+	opts.Source = *source
+	opts.Organization = *org
 
-		select {
-		case <-done_ch:
-			count--
-		case err := <-err_ch:
-			logger.Error("%s", err)
-			cancel()
-		default:
-			// pass
-		}
+	opts.SQLite = *build_sqlite
+
+	opts.Local = *local
+	opts.Strict = *strict
+	opts.Timings = *timings
+
+	repos := flag.Args()
+
+	err := build.BuildDistributions(opts, repos)
+
+	if err != nil {
+		logger.Fatal("Failed to build distributions because %s", err)
 	}
 
-	t2 := time.Since(t1)
-	logger.Status("time to build all %v\n", t2)
+	os.Exit(0)
 }

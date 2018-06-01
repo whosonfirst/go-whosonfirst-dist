@@ -7,6 +7,7 @@ prep:
 self:   prep rmdeps
 	if test -d src/github.com/whosonfirst/go-whosonfirst-dist; then rm -rf src/github.com/whosonfirst/go-whosonfirst-dist; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-dist
+	cp -r build src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r csv src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r git src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r options src/github.com/whosonfirst/go-whosonfirst-dist/
@@ -35,9 +36,11 @@ vendor-deps: rmdeps deps
 	rm -rf src
 
 fmt:
+	go fmt build/*.go
 	go fmt cmd/*.go
 	go fmt csv/*.go
 	go fmt git/*.go
+	go fmt options/*.go
 	go fmt sqlite/*.go
 
 bin: 	self
