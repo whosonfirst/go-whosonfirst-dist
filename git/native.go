@@ -32,6 +32,7 @@ func (cl *NativeCloner) Clone(ctx context.Context, remote string, local string) 
 	default:
 
 		git_args := []string{
+			"lfs",
 			"clone",
 			"--depth",
 			"1",

@@ -33,12 +33,14 @@ func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
 
 func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) {
 
-	t1 := time.Now()
+	if opts.Timings {
+		t1 := time.Now()
 
-	defer func() {
-		t2 := time.Since(t1)
-		opts.Logger.Status("time to clone %s %v\n", opts.Repo, t2)
-	}()
+		defer func() {
+			t2 := time.Since(t1)
+			opts.Logger.Status("time to clone %s %v\n", opts.Repo, t2)
+		}()
+	}
 
 	uri := "{protocol}://{source}/{organization}/{repo}.git"
 
@@ -71,8 +73,25 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 
 	cl, err := NewClonerFromOptions(opts)
 
-	// SOMETHING SOMETHING LFS
+	if err != nil {
+		return "", err
+	}
 
 	err = cl.Clone(ctx, remote, local)
-	return local, err
+
+	if err != nil {
+		return "", err
+	}
+
+	if opts.Cloner != "native" && opts.Repo == "whosonfirst-data" {
+
+		err = LFSFetchAndCheckout(local, opts)
+
+		if err != nil {
+			return "", err
+		}
+
+	}
+
+	return local, nil
 }
