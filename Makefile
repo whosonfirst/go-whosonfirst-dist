@@ -9,6 +9,7 @@ self:   prep rmdeps
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-dist
 	cp -r csv src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r git src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r options src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r sqlite src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp *.go src/github.com/whosonfirst/go-whosonfirst-dist
 	cp -r vendor/* src/
@@ -20,6 +21,7 @@ build:	fmt bin
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "gopkg.in/src-d/go-git.v4/..."
+	@GOPATH=$(GOPATH) go get -u "github.com/jtacoma/uritemplates"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-meta"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite-features"
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-sqlite src/github.com/whosonfirst/

@@ -2,10 +2,10 @@ package sqlite
 
 import (
 	"context"
+	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -36,7 +36,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string) (string, error) {
 		name := filepath.Base(local_repo)
 
 		dir := fmt.Sprintf("%s-sqlite", name)
-		root, err := ioutil.TempDir("", dir)	// PLEASE MAKE THIS CONFIGURABLE
+		root, err := ioutil.TempDir("", dir) // PLEASE MAKE THIS CONFIGURABLE
 
 		if err != nil {
 			return "", err

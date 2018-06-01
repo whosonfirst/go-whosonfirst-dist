@@ -8,6 +8,7 @@ import (
 	"context"
 	"flag"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
+	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/sqlite"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"io"
@@ -16,34 +17,7 @@ import (
 	"time"
 )
 
-type BuildOptions struct {
-	Organization string
-	Repo         string
-	SQLite       bool
-	Bundle       bool
-	WorkDir      string
-	Logger       *log.WOFLogger
-	Local        bool
-}
-
-func NewBuildOptions() *BuildOptions {
-
-	logger := log.SimpleWOFLogger()
-
-	opts := BuildOptions{
-		Organization: "whosonfirst-data",
-		Repo:         "whosonfirst-data",
-		SQLite:       true,
-		Bundle:       false,
-		WorkDir:      "",
-		Logger:       logger,
-		Local:        false,
-	}
-
-	return &opts
-}
-
-func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch chan error) {
+func Build(ctx context.Context, opts *options.BuildOptions, done_ch chan bool, err_ch chan error) {
 
 	t1 := time.Now()
 
@@ -63,17 +37,7 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 
 		if !opts.Local {
 
-			// cl, _ := git.NewNativeCloner()
-			cl, _ := git.NewGolangCloner()			
-
-			clone_opts := git.CloneOptions{
-				Cloner:       cl,
-				Logger:       opts.Logger,
-				Repo:         opts.Repo,
-				Organization: opts.Organization,
-			}
-
-			repo, err := git.CloneRepo(ctx, &clone_opts)
+			repo, err := git.CloneRepo(ctx, opts)
 
 			if err != nil {
 				err_ch <- err
@@ -115,13 +79,16 @@ func Build(ctx context.Context, opts *BuildOptions, done_ch chan bool, err_ch ch
 		}
 	}
 
-
 }
 
 func main() {
 
 	local := flag.Bool("local", false, "...")
-	build_sqlite := flag.Bool("build-sqlite", true, "...")	
+	build_sqlite := flag.Bool("build-sqlite", true, "...")
+
+	clone := flag.String("git-clone", "native", "...")
+	source := flag.String("git-source", "github.com", "...")
+	proto := flag.String("git-protocol", "https", "...")
 
 	flag.Parse()
 
@@ -143,12 +110,15 @@ func main() {
 
 	for _, repo := range flag.Args() {
 
-		opts := NewBuildOptions()
+		opts := options.NewBuildOptions()
 		opts.Logger = logger
 		opts.Repo = repo
 		opts.Local = *local
 		opts.SQLite = *build_sqlite
-		
+		opts.Cloner = *clone
+		opts.Source = *source
+		opts.Protocol = *proto
+
 		go Build(ctx, opts, done_ch, err_ch)
 	}
 

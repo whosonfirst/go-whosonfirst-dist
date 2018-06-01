@@ -2,8 +2,9 @@ package git
 
 import (
 	"context"
-	"fmt"
-	"github.com/whosonfirst/go-whosonfirst-log"
+	"errors"
+	"github.com/jtacoma/uritemplates"
+	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"io/ioutil"
 	"time"
 )
@@ -12,14 +13,25 @@ type Cloner interface {
 	Clone(context.Context, string, string) error
 }
 
-type CloneOptions struct {
-	Cloner       Cloner
-	Organization string
-	Repo         string
-	Logger       *log.WOFLogger
+func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
+
+	var cl Cloner
+	var err error
+
+	switch opts.Cloner {
+
+	case "native":
+		cl, err = NewNativeCloner()
+	case "golang":
+		cl, err = NewGolangCloner()
+	default:
+		err = errors.New("Invalid cloner")
+	}
+
+	return cl, err
 }
 
-func CloneRepo(ctx context.Context, opts *CloneOptions) (string, error) {
+func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) {
 
 	t1 := time.Now()
 
@@ -27,6 +39,27 @@ func CloneRepo(ctx context.Context, opts *CloneOptions) (string, error) {
 		t2 := time.Since(t1)
 		opts.Logger.Status("time to clone %s %v\n", opts.Repo, t2)
 	}()
+
+	uri := "{protocol}://{source}/{organization}/{repo}.git"
+
+	template, err := uritemplates.Parse(uri)
+
+	if err != nil {
+		return "", err
+	}
+
+	values := make(map[string]interface{})
+
+	values["protocol"] = opts.Protocol
+	values["source"] = opts.Source
+	values["organization"] = opts.Organization
+	values["repo"] = opts.Repo
+
+	remote, err := template.Expand(values)
+
+	if err != nil {
+		return "", err
+	}
 
 	// MAKE THIS CONFIGURABLE
 
@@ -36,13 +69,9 @@ func CloneRepo(ctx context.Context, opts *CloneOptions) (string, error) {
 		return "", err
 	}
 
-	// DO NOT HOG-TIE THIS TO GITHUB...
-
-	remote := fmt.Sprintf("https://github.com/%s/%s.git", opts.Organization, opts.Repo)
+	cl, err := NewClonerFromOptions(opts)
 
 	// SOMETHING SOMETHING LFS
-
-	cl := opts.Cloner
 
 	err = cl.Clone(ctx, remote, local)
 	return local, err

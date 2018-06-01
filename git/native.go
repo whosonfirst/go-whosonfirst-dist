@@ -42,9 +42,9 @@ func (cl *NativeCloner) Clone(ctx context.Context, remote string, local string) 
 		cmd := exec.Command(cl.git, git_args...)
 
 		log.Println(cl.git, strings.Join(git_args, " "))
-		
+
 		_, err := cmd.Output()
-		
+
 		return err
 	}
 }
