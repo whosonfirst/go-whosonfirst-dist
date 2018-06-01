@@ -115,7 +115,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			return
 		default:
 
-			dsn, err := sqlite.BuildSQLite(ctx, local_repo)
+			dsn, err := sqlite.BuildSQLite(ctx, local_repo, opts)
 
 			if err != nil {
 				err_ch <- err

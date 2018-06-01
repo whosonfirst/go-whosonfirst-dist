@@ -3,22 +3,23 @@ package sqlite
 import (
 	"context"
 	"fmt"
+	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"io/ioutil"
-	"log"
+	_ "log"
 	"path/filepath"
 	"time"
 )
 
-func BuildSQLite(ctx context.Context, local_repo string) (string, error) {
+func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (string, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
-	return BuildSQLiteCommon(ctx, local_repo)
+	return BuildSQLiteCommon(ctx, local_repo, opts)
 }
 
-func BuildSQLiteCommon(ctx context.Context, local_repo string) (string, error) {
+func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (string, error) {
 
 	select {
 
@@ -26,12 +27,14 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string) (string, error) {
 		return "", nil
 	default:
 
-		t1 := time.Now()
+		if opts.Timings {
+			t1 := time.Now()
 
-		defer func() {
-			t2 := time.Since(t1)
-			log.Println("SQLITE", t2)
-		}()
+			defer func() {
+				t2 := time.Since(t1)
+				opts.Logger.Info("time to generate (common) sqlite tables %v", t2)
+			}()
+		}
 
 		name := filepath.Base(local_repo)
 
@@ -71,8 +74,8 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string) (string, error) {
 			return "", err
 		}
 
-		idx.Timings = true
-		// idx.Logger = opts.Logger
+		idx.Timings = opts.Timings
+		idx.Logger = opts.Logger
 
 		err = idx.IndexPaths("repo", []string{local_repo})
 
