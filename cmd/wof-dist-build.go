@@ -26,7 +26,9 @@ func main() {
 	source := flag.String("git-source", "github.com", "...")
 	org := flag.String("git-organization", "whosonfirst-data", "...")
 
-	local := flag.Bool("local", false, "...")
+	local_checkout := flag.Bool("local-checkout", false, "...")
+	preserve_checkout := flag.Bool("preserve-checkout", false, "...")
+
 	strict := flag.Bool("strict", false, "...")
 	timings := flag.Bool("timings", false, "...")
 	verbose := flag.Bool("verbose", false, "...")
@@ -50,7 +52,9 @@ func main() {
 
 	opts.SQLite = *build_sqlite
 
-	opts.Local = *local
+	opts.LocalCheckout = *local_checkout
+	opts.PreserveCheckout = *preserve_checkout
+
 	opts.Strict = *strict
 	opts.Timings = *timings
 

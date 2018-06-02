@@ -82,7 +82,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 		return
 	default:
 
-		if !opts.Local {
+		if !opts.LocalCheckout {
 
 			repo, err := git.CloneRepo(ctx, opts)
 
@@ -91,10 +91,13 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 				return
 			}
 
-			// make me a flag or something (20180405/thisisaaronland)
-
 			defer func() {
-				os.RemoveAll(repo)
+
+				if opts.PreserveCheckout {
+					opts.Logger.Info("local checkout left in place at %s", repo)
+				} else {
+					os.RemoveAll(repo)
+				}
 			}()
 
 			local_repo = repo
