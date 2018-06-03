@@ -2,9 +2,11 @@ package build
 
 import (
 	"context"
+	"github.com/whosonfirst/go-whosonfirst-dist/bundles"
+	"github.com/whosonfirst/go-whosonfirst-dist/csv"
+	"github.com/whosonfirst/go-whosonfirst-dist/database"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	"github.com/whosonfirst/go-whosonfirst-dist/sqlite"
 	"os"
 	"time"
 )
@@ -74,7 +76,12 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 		done_ch <- true
 	}()
 
+	// TO DO: account for opts.WorkDir and move stuff in here as necessary
+	
 	var local_repo string
+	var local_sqlite string
+	var local_metafiles []string
+	var local_bundlefiles []string
 
 	select {
 
@@ -118,7 +125,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			return
 		default:
 
-			dsn, err := sqlite.BuildSQLite(ctx, local_repo, opts)
+			dsn, err := database.BuildSQLite(ctx, local_repo, opts)
 
 			if err != nil {
 				err_ch <- err
@@ -126,7 +133,66 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			}
 
 			opts.Logger.Status("CREATED %s", dsn)
+
+			// PLEASE FIX ME AND MOVE ME IN TO opts.WorkDir
+
+			local_sqlite = dsn
 		}
+	}
+
+	// eventually we should be able to do these two operations in parallel
+	// assuming that a SQLite database has been created - and the bundles
+	// code has been updated to read from those databases...
+	// (20180602/thisisaaronland)
+
+	if opts.Meta {
+
+		mode := "repo"
+		source := local_repo
+
+		if opts.SQLite {
+			mode = "sqlite"
+			source = local_sqlite
+		}
+
+		select {
+
+		case <-ctx.Done():
+			return
+		default:
+
+			metafiles, err := csv.BuildMetaFiles(ctx, mode, source)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			local_metafiles = metafiles
+		}
+	}
+
+	if opts.Bundle {
+
+		select {
+
+		case <-ctx.Done():
+			return
+		default:
+
+			source := local_repo // PLEASE UPDATE ME READ FROM sqlite ALSO
+
+			bundlefiles, err := bundles.BuildBundle(ctx, local_metafiles, source)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			local_bundlefiles = bundlefiles
+			opts.Logger.Debug("%v", local_bundlefiles)	// temporary - just to make the compiler shut up...					
+		}
+
 	}
 
 }

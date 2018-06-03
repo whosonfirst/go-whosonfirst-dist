@@ -11,6 +11,7 @@ type BuildOptions struct {
 	Organization     string
 	Repo             string
 	SQLite           bool
+	Meta             bool
 	Bundle           bool
 	WorkDir          string
 	Logger           *log.WOFLogger
@@ -31,6 +32,7 @@ func NewBuildOptions() *BuildOptions {
 		Organization:     "whosonfirst-data",
 		Repo:             "whosonfirst-data",
 		SQLite:           true,
+		Meta:             false,
 		Bundle:           false,
 		WorkDir:          "",
 		Logger:           logger,
@@ -52,6 +54,7 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		Organization:     opts.Organization,
 		Repo:             opts.Repo,
 		SQLite:           opts.SQLite,
+		Meta:             opts.Meta,
 		Bundle:           opts.Bundle,
 		WorkDir:          opts.WorkDir,
 		Logger:           opts.Logger,

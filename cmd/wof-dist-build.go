@@ -17,8 +17,8 @@ import (
 func main() {
 
 	build_sqlite := flag.Bool("build-sqlite", true, "...")
-	// build_meta := flag.Bool("build-meta", true, "...")
-	// build_bundle := flag.Bool("build-bundle", true, "...")
+	build_meta := flag.Bool("build-meta", false, "...")
+	build_bundle := flag.Bool("build-bundle", false, "...")
 	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
 	clone := flag.String("git-clone", "native", "...")
@@ -34,6 +34,10 @@ func main() {
 	verbose := flag.Bool("verbose", false, "...")
 
 	flag.Parse()
+
+	if *build_bundle {
+		*build_meta = true
+	}
 
 	logger := log.SimpleWOFLogger()
 
@@ -51,6 +55,8 @@ func main() {
 	opts.Organization = *org
 
 	opts.SQLite = *build_sqlite
+	opts.Meta = *build_meta
+	opts.Bundle = *build_bundle
 
 	opts.LocalCheckout = *local_checkout
 	opts.PreserveCheckout = *preserve_checkout
