@@ -25,7 +25,7 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/jtacoma/uritemplates"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-meta"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite-features"
-	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite-meta"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-meta"
 	# @GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite-bundles"
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-sqlite src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-index src/github.com/whosonfirst/
