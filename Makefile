@@ -7,11 +7,12 @@ prep:
 self:   prep rmdeps
 	if test -d src/github.com/whosonfirst/go-whosonfirst-dist; then rm -rf src/github.com/whosonfirst/go-whosonfirst-dist; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-dist
+	cp -r bundles src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r build src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r csv src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r git src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r options src/github.com/whosonfirst/go-whosonfirst-dist/
-	cp -r sqlite src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r database src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp *.go src/github.com/whosonfirst/go-whosonfirst-dist
 	cp -r vendor/* src/
 
