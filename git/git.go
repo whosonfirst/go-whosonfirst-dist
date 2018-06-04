@@ -63,13 +63,16 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 		return "", err
 	}
 
-	// MAKE THIS CONFIGURABLE
+	// SOMETHING SOMETHING SOMETHING opts.WorkDir
 
 	local, err := ioutil.TempDir("", opts.Repo)
 
 	if err != nil {
 		return "", err
 	}
+
+	// SOMETHING SOMETHING SOMETHING check for presence of git-lfs
+	// (20180604/thisisaaronland)
 
 	cl, err := NewClonerFromOptions(opts)
 

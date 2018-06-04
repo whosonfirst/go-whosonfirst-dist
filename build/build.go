@@ -8,6 +8,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -77,7 +78,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 	}()
 
 	// TO DO: account for opts.WorkDir and move stuff in here as necessary
-	
+
 	var local_repo string
 	var local_sqlite string
 	var local_metafiles []string
@@ -90,6 +91,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 	default:
 
 		if !opts.LocalCheckout {
+
+			// SOMETHING SOMETHING SOMETHING opts.WorkDir
 
 			repo, err := git.CloneRepo(ctx, opts)
 
@@ -132,11 +135,17 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 				return
 			}
 
-			opts.Logger.Status("CREATED %s", dsn)
+			fname := filepath.Base(dsn)
+			local_sqlite = filepath.Join(opts.Workdir, fname)
 
-			// PLEASE FIX ME AND MOVE ME IN TO opts.WorkDir
+			err = os.Rename(dsn, local_sqlite)
 
-			local_sqlite = dsn
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			opts.Logger.Status("CREATED %s", local_sqlite)
 		}
 	}
 
@@ -190,7 +199,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			}
 
 			local_bundlefiles = bundlefiles
-			opts.Logger.Debug("%v", local_bundlefiles)	// temporary - just to make the compiler shut up...					
+			opts.Logger.Debug("%v", local_bundlefiles) // temporary - just to make the compiler shut up...
 		}
 
 	}

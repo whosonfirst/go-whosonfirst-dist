@@ -33,6 +33,8 @@ func main() {
 	timings := flag.Bool("timings", false, "...")
 	verbose := flag.Bool("verbose", false, "...")
 
+	workdir := flag.String("workdir", "", "...")
+
 	flag.Parse()
 
 	if *build_bundle {
@@ -46,6 +48,27 @@ func main() {
 		logger.AddLogger(stdout, "status")
 	}
 
+	if *workdir == "" {
+
+		cwd, err := os.Getwd()
+
+		if err != nil {
+			logger.Fatal("Unable to determine current working directory because %s", err)
+		}
+
+		*workdir = cwd
+	}
+
+	info, err := os.Stat(*workdir)
+
+	if err != nil {
+		logger.Fatal("Unable to validate working directory because %s", err)
+	}
+
+	if !info.IsDir() {
+		logger.Fatal("-workdir is not actually a directory")
+	}
+
 	opts := options.NewBuildOptions()
 	opts.Logger = logger
 
@@ -57,6 +80,7 @@ func main() {
 	opts.SQLite = *build_sqlite
 	opts.Meta = *build_meta
 	opts.Bundle = *build_bundle
+	opts.Workdir = *workdir
 
 	opts.LocalCheckout = *local_checkout
 	opts.PreserveCheckout = *preserve_checkout
@@ -66,7 +90,7 @@ func main() {
 
 	repos := flag.Args()
 
-	err := build.BuildDistributions(opts, repos)
+	err = build.BuildDistributions(opts, repos)
 
 	if err != nil {
 		logger.Fatal("Failed to build distributions because %s", err)

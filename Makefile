@@ -41,11 +41,12 @@ vendor-deps: rmdeps deps
 
 fmt:
 	go fmt build/*.go
+	go fmt bundles/*.go
 	go fmt cmd/*.go
+	go fmt database/*.go
 	go fmt csv/*.go
 	go fmt git/*.go
 	go fmt options/*.go
-	go fmt sqlite/*.go
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build.go

@@ -13,7 +13,7 @@ type BuildOptions struct {
 	SQLite           bool
 	Meta             bool
 	Bundle           bool
-	WorkDir          string
+	Workdir          string
 	Logger           *log.WOFLogger
 	LocalCheckout    bool
 	PreserveCheckout bool
@@ -34,7 +34,7 @@ func NewBuildOptions() *BuildOptions {
 		SQLite:           true,
 		Meta:             false,
 		Bundle:           false,
-		WorkDir:          "",
+		Workdir:          "",
 		Logger:           logger,
 		LocalCheckout:    false,
 		PreserveCheckout: false,
@@ -56,7 +56,7 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		SQLite:           opts.SQLite,
 		Meta:             opts.Meta,
 		Bundle:           opts.Bundle,
-		WorkDir:          opts.WorkDir,
+		Workdir:          opts.Workdir,
 		Logger:           opts.Logger,
 		LocalCheckout:    opts.LocalCheckout,
 		PreserveCheckout: opts.PreserveCheckout,
