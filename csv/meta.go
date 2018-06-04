@@ -2,10 +2,26 @@ package csv
 
 import (
 	"context"
-	"errors"
+	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
+	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
 )
 
-func BuildMetaFiles(ctx context.Context, mode string, source string) ([]string, error) {
+// Not really sure about this signature... (20180604/thisisaaronland)
 
-	return nil, errors.New("Please write me")
+func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]string, error) {
+
+	meta_opts, err := meta_options.DefaultBuildOptions()
+
+	if err != nil {
+		return nil, err
+	}
+
+	meta_opts.Workdir = dist_opts.Workdir
+	meta_opts.Timings = dist_opts.Timings
+
+	// FIX ME
+	// meta_opts.Logger = dist_opts.Logger
+
+	return meta.BuildFromIndex(meta_opts, mode, []string{source})
 }
