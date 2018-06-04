@@ -10,9 +10,10 @@ self:   prep rmdeps
 	cp -r bundles src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r build src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r csv src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r database src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r git src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r options src/github.com/whosonfirst/go-whosonfirst-dist/
-	cp -r database src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r utils src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp *.go src/github.com/whosonfirst/go-whosonfirst-dist
 	cp -r vendor/* src/
 
@@ -47,6 +48,7 @@ fmt:
 	go fmt csv/*.go
 	go fmt git/*.go
 	go fmt options/*.go
+	go fmt utils/*.go
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build.go

@@ -8,6 +8,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	// "github.com/whosonfirst/go-whosonfirst-repo"
 	"os"
 	"path/filepath"
@@ -142,7 +143,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			fname := fmt.Sprintf("%s-latest.db", opts.Repo)
 			local_sqlite = filepath.Join(opts.Workdir, fname)
 
-			err = os.Rename(dsn, local_sqlite)
+			err = utils.Rename(dsn, local_sqlite)
 
 			if err != nil {
 				err_ch <- err
