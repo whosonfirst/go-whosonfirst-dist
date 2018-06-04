@@ -19,9 +19,7 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 
 	meta_opts.Workdir = dist_opts.Workdir
 	meta_opts.Timings = dist_opts.Timings
-
-	// FIX ME
-	// meta_opts.Logger = dist_opts.Logger
+	meta_opts.Logger = dist_opts.Logger
 
 	return meta.BuildFromIndex(meta_opts, mode, []string{source})
 }

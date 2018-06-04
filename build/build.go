@@ -140,7 +140,9 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			// SOMETHING SOMETHING SOMETHING PLEASE USE go-whosonfirst-repo
 
-			fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+			fname := filepath.Base(opts.Repo)
+			fname = fmt.Sprintf("%s-latest.db", fname)
+
 			local_sqlite = filepath.Join(opts.Workdir, fname)
 
 			err = utils.Rename(dsn, local_sqlite)
