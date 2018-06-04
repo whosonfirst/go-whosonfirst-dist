@@ -171,6 +171,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			source = local_sqlite
 		}
 
+		opts.Logger.Status("BUILD METAFILE %s %s", mode, source)
+
 		select {
 
 		case <-ctx.Done():
@@ -185,6 +187,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			}
 
 			local_metafiles = metafiles
+			opts.Logger.Status("OKAY", local_metafiles)
 		}
 	}
 
