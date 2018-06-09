@@ -7,7 +7,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
-	"io/ioutil"
 	_ "log"
 	"path/filepath"
 	"time"
@@ -39,11 +38,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		name := filepath.Base(local_repo)
 
 		dir := fmt.Sprintf("%s-sqlite", name)
-		root, err := ioutil.TempDir("", dir) // PLEASE MAKE THIS CONFIGURABLE
-
-		if err != nil {
-			return "", err
-		}
+		root := filepath.Join(opts.Workdir, dir)
 
 		fname := fmt.Sprintf("%s-latest.db", name)
 		dsn := filepath.Join(root, fname)

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jtacoma/uritemplates"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	"io/ioutil"
+	"path/filepath"
 	"time"
 )
 
@@ -63,13 +63,7 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 		return "", err
 	}
 
-	// SOMETHING SOMETHING SOMETHING opts.WorkDir
-
-	local, err := ioutil.TempDir("", opts.Repo)
-
-	if err != nil {
-		return "", err
-	}
+	local := filepath.Join(opts.Workdir, opts.Repo)
 
 	// SOMETHING SOMETHING SOMETHING check for presence of git-lfs
 	// (20180604/thisisaaronland)
