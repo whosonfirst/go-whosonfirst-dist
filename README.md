@@ -12,6 +12,8 @@ make bin
 
 All of this package's dependencies are bundled with the code in the `vendor` directory.
 
+You will need to manually install the [Git LFS](https://git-lfs.github.com/) dependency for **wof-dist-build**.
+
 ## Important
 
 This is work in progress. It's probably not worth trying to use yet unless you're me.
