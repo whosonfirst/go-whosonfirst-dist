@@ -9,6 +9,8 @@ import (
 
 // Not really sure about this signature... (20180604/thisisaaronland)
 
+// PLEASE MAKE ME RETURN A LIST OF distribution.Item THINGIES... (20180611/thisisaaronland)
+
 func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]string, error) {
 
 	meta_opts, err := meta_options.DefaultBuildOptions()

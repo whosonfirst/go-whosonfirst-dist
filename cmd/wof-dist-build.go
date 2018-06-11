@@ -17,6 +17,14 @@ import (
 func main() {
 
 	build_sqlite := flag.Bool("build-sqlite", true, "...")
+
+	/*
+	build_sqlite_common := flag.Bool("build-sqlite-common", true, "...")
+	build_sqlite_spatial := flag.Bool("build-sqlite-spatial", true, "...")
+	build_sqlite_search := flag.Bool("build-sqlite-search", true, "...")
+	build_sqlite_all := flag.Bool("build-sqlite-all", true, "...")
+	*/
+		
 	build_meta := flag.Bool("build-meta", true, "...")
 	build_bundle := flag.Bool("build-bundle", false, "...")
 	// build_shapefile := flag.Bool("build-shapefile", true, "...")

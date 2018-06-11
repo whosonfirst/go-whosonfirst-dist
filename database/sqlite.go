@@ -12,11 +12,15 @@ import (
 	"time"
 )
 
+// PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
+
 func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (string, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
 	return BuildSQLiteCommon(ctx, local_repo, opts)
 }
+
+// PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
 func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (string, error) {
 

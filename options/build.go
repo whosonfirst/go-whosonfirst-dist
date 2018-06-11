@@ -5,12 +5,16 @@ import (
 )
 
 type BuildOptions struct {
-	Cloner           string
-	Protocol         string
-	Source           string
-	Organization     string
-	Repo             string
-	SQLite           bool
+	Cloner       string
+	Protocol     string
+	Source       string
+	Organization string
+	Repo         string
+	SQLite       bool
+	// these are the new new and will replace "SQLite"
+	// SQLiteCommon     bool
+	// SQLiteSpatial    bool
+	// SQLiteSearch     bool
 	Meta             bool
 	Bundle           bool
 	Workdir          string
