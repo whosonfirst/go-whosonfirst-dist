@@ -22,6 +22,62 @@ Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the 
 
 ## Tools
 
+### wof-dist-build
+
+Build one or more distribution files for a repository. _This is code that is actively been worked on so don't rely on it yet, or approach it accordingly._
+
+```
+./bin/wof-dist-build -h
+Usage of ./bin/wof-dist-build:
+  -build-bundle
+	Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)
+  -build-meta
+	Build meta files for a repo (default true)
+  -build-sqlite
+	Build a (common) SQLite distribution for a repo (default true)
+  -git-clone string
+    	     Indicate how to clone a repo, using either a native Git binary or the go-git implementation (default "native")
+  -git-organization string
+    		    Fetch repos from the user (or organization) (default "whosonfirst-data")
+  -git-protocol string
+    		Fetch repos using this protocol (default "https")
+  -git-source string
+    	      Fetch repos from this endpoint (default "github.com")
+  -local-checkout
+	Do not fetch a repo from a remote source but instead use a local checkout on disk
+  -preserve-checkout
+	Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.
+  -strict
+	...
+  -timings
+	Display timings during the build process
+  -verbose
+	Be chatty
+  -workdir string
+    	   Where to store temporary and final build files. If empty the code will attempt to use the current working directory.
+```
+
+For example:
+
+```
+$> mkdir tmp
+
+$> ./bin/wof-dist-build -timings -verbose -workdir ./tmp -build-sqlite -build-meta whosonfirst-data-constituency-ca
+
+13:09:59.008358 [wof-dist-build] STATUS git lfs clone --depth 1 https://github.com/whosonfirst-data/whosonfirst-data-constituency-ca.git tmp/whosonfirst-data-constituency-ca
+13:10:04.008358 [wof-dist-build] STATUS time to clone whosonfirst-data-constituency-ca 4.425250127s
+13:10:04.008388 [wof-dist-build] STATUS LOCAL tmp/whosonfirst-data-constituency-ca
+13:10:07.620093 [wof-dist-build] STATUS CREATED tmp/whosonfirst-data-constituency-ca-latest.db
+13:10:07.620126 [wof-dist-build] STATUS BUILD METAFILE sqlite tmp/whosonfirst-data-constituency-ca-latest.db
+2018/06/11 13:10:08 time to prepare tmp/whosonfirst-data-constituency-ca-latest.db 874.109451ms
+2018/06/11 13:10:08 time to prepare all 55 records 874.133191ms
+13:10:08.613818 [wof-dist-build] STATUS time to build all 9.030797929s
+
+$> ls -al ./tmp
+-rw-r--r--  1 asc  staff  33390592 Jun 11 13:10 whosonfirst-data-constituency-ca-latest.db
+-rw-r--r--  1 asc  staff     17895 Jun 11 13:10 wof-constituency-ca-latest.csv
+```
+
 ### wof-dist-fetch
 
 Fetch all (or some) of the files listed in a distribution inventory file. `wof-dist-fetch` will uncompress files as they are written to disk (it's possible this should or needs to be an optional flag...)
