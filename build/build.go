@@ -2,16 +2,12 @@ package build
 
 import (
 	"context"
-	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist/bundles"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	"github.com/whosonfirst/go-whosonfirst-dist/utils"
-	// "github.com/whosonfirst/go-whosonfirst-repo"
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -138,19 +134,27 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 				return
 			}
 
-			// SOMETHING SOMETHING SOMETHING PLEASE USE go-whosonfirst-repo
+			local_sqlite = dsn
 
-			fname := filepath.Base(opts.Repo)
-			fname = fmt.Sprintf("%s-latest.db", fname)
+			// this is what we used to do when we were still writing to os.Tmpdir
+			// and is deprecated - it's left here for now "just in case..."
+			// (20180611/thisisaaronland)
 
-			local_sqlite = filepath.Join(opts.Workdir, fname)
+			/*
 
-			err = utils.Rename(dsn, local_sqlite)
+				fname := filepath.Base(opts.Repo)
+				fname = fmt.Sprintf("%s-latest.db", fname)
 
-			if err != nil {
-				err_ch <- err
-				return
-			}
+				local_sqlite = filepath.Join(opts.Workdir, fname)
+
+				err = utils.Rename(dsn, local_sqlite)
+
+				if err != nil {
+					err_ch <- err
+					return
+				}
+
+			*/
 
 			opts.Logger.Status("CREATED %s", local_sqlite)
 		}

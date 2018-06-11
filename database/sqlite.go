@@ -35,13 +35,13 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 			}()
 		}
 
+		// SOMETHING SOMETHING SOMETHING PLEASE USE
+		// go-whosonfirst-repo (20180611/thisisaaronland)
+
 		name := filepath.Base(local_repo)
 
-		dir := fmt.Sprintf("%s-sqlite", name)
-		root := filepath.Join(opts.Workdir, dir)
-
 		fname := fmt.Sprintf("%s-latest.db", name)
-		dsn := filepath.Join(root, fname)
+		dsn := filepath.Join(opts.Workdir, fname)
 
 		db, err := database.NewDBWithDriver("sqlite3", dsn)
 
