@@ -76,7 +76,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 		done_ch <- true
 	}()
 
-	// TO DO: account for opts.WorkDir and move stuff in here as necessary
+	// eventually these will all be replaced by distibution Item and/or
+	// distribution.Inventory thingies... (20180613/thisisaaronland)
 
 	var local_repo string
 	var local_sqlite string
@@ -90,8 +91,6 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 	default:
 
 		if !opts.LocalCheckout {
-
-			// SOMETHING SOMETHING SOMETHING opts.WorkDir
 
 			repo, err := git.CloneRepo(ctx, opts)
 
@@ -117,7 +116,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 	}
 
-	opts.Logger.Status("LOCAL %s", local_repo)
+	opts.Logger.Status("local_repo is %s", local_repo)
 
 	if opts.SQLite {
 
@@ -136,27 +135,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			local_sqlite = dsn
 
-			// this is what we used to do when we were still writing to os.Tmpdir
-			// and is deprecated - it's left here for now "just in case..."
-			// (20180611/thisisaaronland)
-
-			/*
-
-				fname := filepath.Base(opts.Repo)
-				fname = fmt.Sprintf("%s-latest.db", fname)
-
-				local_sqlite = filepath.Join(opts.Workdir, fname)
-
-				err = utils.Rename(dsn, local_sqlite)
-
-				if err != nil {
-					err_ch <- err
-					return
-				}
-
-			*/
-
-			opts.Logger.Status("CREATED %s", local_sqlite)
+			opts.Logger.Status("local sqlite is %s", local_sqlite)
 		}
 	}
 
@@ -175,7 +154,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			source = local_sqlite
 		}
 
-		opts.Logger.Status("BUILD METAFILE %s %s", mode, source)
+		opts.Logger.Status("build metafile from %s (%s)", mode, source)
 
 		select {
 
@@ -191,7 +170,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			}
 
 			local_metafiles = metafiles
-			opts.Logger.Status("OKAY", local_metafiles)
+			opts.Logger.Status("built metafiles %s", local_metafiles)
 		}
 	}
 
