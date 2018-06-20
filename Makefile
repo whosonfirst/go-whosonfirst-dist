@@ -28,12 +28,14 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-meta"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite-features"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-repo"
-	# @GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-bundles"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-bundles"
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-sqlite src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-index src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-log src/github.com/whosonfirst/
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-index
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-log
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-log
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-meta
 
 vendor-deps: rmdeps deps
 	if test -d vendor; then rm -rf vendor; fi
