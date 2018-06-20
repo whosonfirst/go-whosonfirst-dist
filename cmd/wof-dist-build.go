@@ -38,6 +38,8 @@ func main() {
 	org := flag.String("git-organization", "whosonfirst-data", "Fetch repos from the user (or organization)")
 
 	local_checkout := flag.Bool("local-checkout", false, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
+	local_sqlite := flag.Bool("local-sqlite", false, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
+
 	preserve_checkout := flag.Bool("preserve-checkout", false, "Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.")
 
 	strict := flag.Bool("strict", false, "...")
@@ -99,6 +101,8 @@ func main() {
 
 	opts.LocalCheckout = *local_checkout
 	opts.PreserveCheckout = *preserve_checkout
+
+	opts.LocalSQLite = *local_sqlite
 
 	opts.Strict = *strict
 	opts.Timings = *timings

@@ -88,8 +88,8 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		// compress stuff here or later? if we do it here then by the time we
 		// call NewDistributionItemFromDB - see notes after this - then we'll
 		// have all the stuff we need to build a distribution.Item thingy...
-		// (20180613/thisisaaronland)		   
-		
+		// (20180613/thisisaaronland)
+
 		// ideally we could just return NewDistributionItemFromDB(dsn) but I am
 		// not sure about open/closed database handles - maybe we just don't care
 		// and assume the function is private and pass it a laundry list of things

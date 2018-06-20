@@ -20,6 +20,7 @@ type BuildOptions struct {
 	Workdir          string
 	Logger           *log.WOFLogger
 	LocalCheckout    bool
+	LocalSQLite      bool
 	PreserveCheckout bool
 	Timings          bool
 	Strict           bool
@@ -41,6 +42,7 @@ func NewBuildOptions() *BuildOptions {
 		Workdir:          "",
 		Logger:           logger,
 		LocalCheckout:    false,
+		LocalSQLite:      false,
 		PreserveCheckout: false,
 		Timings:          false,
 		Strict:           false,
@@ -63,6 +65,7 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		Workdir:          opts.Workdir,
 		Logger:           opts.Logger,
 		LocalCheckout:    opts.LocalCheckout,
+		LocalSQLite:      opts.LocalSQLite,
 		PreserveCheckout: opts.PreserveCheckout,
 		Timings:          opts.Timings,
 		Strict:           opts.Strict,

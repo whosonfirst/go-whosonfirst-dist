@@ -2,12 +2,14 @@ package build
 
 import (
 	"context"
+	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist/bundles"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -126,14 +128,30 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			return
 		default:
 
-			dsn, err := database.BuildSQLite(ctx, local_repo, opts)
+			// PLEASE FIX ME
+			// 1. use go-whosonfirst-repo
+			// 2. reconcile me with the code in database/sqlite.go
+			//    which should also do (1)
+			// (20180620/thisisaaronland)
 
-			if err != nil {
-				err_ch <- err
-				return
+			if opts.LocalSQLite {
+
+				name := filepath.Base(local_repo)
+
+				fname := fmt.Sprintf("%s-latest.db", name)
+				local_sqlite = filepath.Join(opts.Workdir, fname)
+
+			} else {
+
+				dsn, err := database.BuildSQLite(ctx, local_repo, opts)
+
+				if err != nil {
+					err_ch <- err
+					return
+				}
+
+				local_sqlite = dsn
 			}
-
-			local_sqlite = dsn
 
 			opts.Logger.Status("local sqlite is %s", local_sqlite)
 		}
