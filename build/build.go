@@ -200,9 +200,11 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			return
 		default:
 
-			source := local_repo // PLEASE UPDATE ME READ FROM sqlite ALSO
+			// THIS DOES NOT WORK YET (20180621/thisisaaronland)
+			
+			source := local_sqlite // PLEASE UPDATE ME READ FROM sqlite ALSO
 
-			bundlefiles, err := bundles.BuildBundle(ctx, local_metafiles, source)
+			bundlefiles, err := bundles.BuildBundle(ctx, opts, local_metafiles, source)
 
 			if err != nil {
 				err_ch <- err
