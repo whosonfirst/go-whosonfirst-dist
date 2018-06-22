@@ -11,11 +11,15 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-index"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-meta"
+	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
+	"github.com/whosonfirst/go-whosonfirst-sqlite/tables"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -28,6 +32,7 @@ type BundleOptions struct {
 
 type Bundle struct {
 	Options *BundleOptions
+	mu      *sync.Mutex
 }
 
 func DefaultBundleOptions() *BundleOptions {
@@ -47,11 +52,191 @@ func DefaultBundleOptions() *BundleOptions {
 
 func NewBundle(options *BundleOptions) (*Bundle, error) {
 
+	mu := new(sync.Mutex)
+
 	b := Bundle{
 		Options: options,
+		mu:      mu,
 	}
 
 	return &b, nil
+}
+
+// require context.Context or just add another function?
+// (20180622/thisisaaronland)
+
+func (b *Bundle) BundleMetafilesFromSQLite(db *database.SQLiteDatabase, metafiles ...string) error {
+
+	done_ch := make(chan bool)
+	err_ch := make(chan error)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for _, path := range metafiles {
+
+		go func(b *Bundle, db *database.SQLiteDatabase, metafile string, done_ch chan bool, err_ch chan error) {
+
+			defer func() {
+				done_ch <- true
+			}()
+
+			select {
+
+			case <-ctx.Done():
+				return
+			default:
+				err := b.BundleMetafileFromSQLite(ctx, db, path)
+
+				if err != nil {
+					err_ch <- err
+				}
+			}
+
+		}(b, db, path, done_ch, err_ch)
+	}
+
+	remaining := len(metafiles)
+
+	for remaining > 0 {
+
+		select {
+		case <-done_ch:
+			remaining -= 1
+		case e := <-err_ch:
+			return e
+		default:
+			// pass
+		}
+	}
+
+	return nil
+}
+
+func (b *Bundle) BundleMetafileFromSQLite(ctx context.Context, db *database.SQLiteDatabase, metafile string) error {
+
+	/*
+	     	defer func() {
+			b.Options.Logger.Status("Finished processing %s", metafile)
+		}()
+	*/
+
+	// is it worth wrapping all of this in a select / context block ?
+	// today it doesn't seem like it... (20180622/thisisaaronland)
+
+	abs_metafile, err := filepath.Abs(metafile)
+
+	if err != nil {
+		return err
+	}
+
+	reader, err := csv.NewDictReaderFromPath(abs_metafile)
+
+	if err != nil {
+		return nil
+	}
+
+	conn, err := db.Conn()
+
+	if err != nil {
+		return err
+	}
+
+	defer db.Close()
+
+	tbl, err := tables.NewGeoJSONTable()
+
+	if err != nil {
+		return err
+	}
+
+	// this is necessary so we can break out of the select block which is
+	// wrapped in a for block... good times (20180622/thisisaaronland)
+
+	eof := false
+
+	for {
+
+		select {
+
+		case <-ctx.Done():
+			return nil
+		default:
+
+			csv_row, err := reader.Read()
+
+			if err == io.EOF {
+				eof = true
+				break
+			}
+
+			if err != nil {
+				return err
+			}
+
+			str_id, ok := csv_row["id"]
+
+			if !ok {
+				return errors.New("Missing ID")
+			}
+
+			// we could wait until after the DB query to do this but if
+			// it's going to fail maybe we want to know sooner...
+			// (20180622/thisisaaronland)
+
+			id, err := strconv.ParseInt(str_id, 10, 64)
+
+			if err != nil {
+				return err
+			}
+
+			sql := fmt.Sprintf("SELECT body FROM %s WHERE id= ?", tbl.Name())
+
+			db_row := conn.QueryRow(sql, id)
+
+			var body string
+			err = db_row.Scan(&body)
+
+			if err != nil {
+				return err
+			}
+
+			fh := strings.NewReader(body)
+
+			abs_path, err := b.ensurePathForID(b.Options.Destination, id)
+
+			if err != nil {
+				return nil
+			}
+
+			err = b.cloneFH(fh, abs_path)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		if eof {
+			break
+		}
+	}
+
+	fname := filepath.Base(abs_metafile)
+	cp_metafile := filepath.Join(b.Options.Destination, fname)
+
+	in, err := os.Open(abs_metafile)
+
+	if err != nil {
+		return err
+	}
+
+	err = b.cloneFH(in, cp_metafile)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (b *Bundle) BundleMetafile(metafile string) error {
@@ -124,8 +309,6 @@ func (b *Bundle) Bundle(to_index ...string) error {
 	var meta_writer *csv.DictWriter
 	var meta_fh *atomicfile.File
 
-	mu := new(sync.Mutex)
-
 	f := func(fh io.Reader, ctx context.Context, args ...interface{}) error {
 
 		path, err := index.PathForContext(ctx)
@@ -154,27 +337,10 @@ func (b *Bundle) Bundle(to_index ...string) error {
 
 		id := whosonfirst.Id(f)
 
-		abs_path, err := uri.Id2AbsPath(root, id)
+		abs_path, err := b.ensurePathForID(root, id)
 
 		if err != nil {
 			return nil
-		}
-
-		abs_root := filepath.Dir(abs_path)
-
-		_, err = os.Stat(abs_root)
-
-		if os.IsNotExist(err) {
-
-			mu.Lock()
-
-			err = os.MkdirAll(abs_root, 0755)
-
-			mu.Unlock()
-
-			if err != nil {
-				return err
-			}
 		}
 
 		err = b.cloneFH(fh, abs_path)
@@ -260,6 +426,34 @@ func (b *Bundle) Bundle(to_index ...string) error {
 	}
 
 	return nil
+}
+
+func (b *Bundle) ensurePathForID(root string, id int64) (string, error) {
+
+	abs_path, err := uri.Id2AbsPath(root, id)
+
+	if err != nil {
+		return "", err
+	}
+
+	abs_root := filepath.Dir(abs_path)
+
+	_, err = os.Stat(abs_root)
+
+	if os.IsNotExist(err) {
+
+		b.mu.Lock()
+
+		err = os.MkdirAll(abs_root, 0755)
+
+		b.mu.Unlock()
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return abs_path, nil
 }
 
 func (b *Bundle) cloneFH(in io.Reader, out_path string) error {
