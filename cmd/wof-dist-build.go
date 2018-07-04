@@ -28,7 +28,7 @@ func main() {
 		build_sqlite_all := flag.Bool("build-sqlite-all", true, "...")
 	*/
 
-	build_meta := flag.Bool("build-meta", true, "Build meta files for a repo")
+	build_meta := flag.Bool("build-meta", false, "Build meta files for a repo")
 	build_bundle := flag.Bool("build-bundle", false, "Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)")
 	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
@@ -59,10 +59,6 @@ func main() {
 
 	flag.Parse()
 
-	if *build_bundle {
-		*build_meta = true
-	}
-
 	logger := log.SimpleWOFLogger()
 
 	if *verbose {
@@ -71,12 +67,18 @@ func main() {
 	}
 
 	if *compress_all {
+
+		logger.Info("-compress-all flag is set so auto-enabling -compress-sqlite -compress-meta -compress-bundle")
+
 		*compress_sqlite = true
 		*compress_meta = true
 		*compress_bundle = true
 	}
 
 	if *preserve_all {
+
+		logger.Info("-preserve-all flag is set so auto-enabling -preserve-checkout -preserve-sqlite -preserve-meta -preserve-bundle")
+
 		*preserve_checkout = true
 		*preserve_sqlite = true
 		*preserve_meta = true
@@ -84,7 +86,24 @@ func main() {
 	}
 
 	if *local_checkout == true {
+
+		logger.Info("local-checkout flag is set so auto-enabling -preserve-checkout")
+
 		*preserve_checkout = true
+	}
+
+	if *local_sqlite == true {
+
+		logger.Info("-local-sqlite flag is set so auto-enabling -preserve-sqlite")
+
+		*preserve_sqlite = true
+	}
+
+	if *build_bundle {
+
+		logger.Info("-build-bundle flag is set so auto-enabling -build-meta")
+
+		*build_meta = true
 	}
 
 	if *workdir == "" {

@@ -24,6 +24,8 @@ Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the 
 
 ## Build process(es)
 
+_These are works in progress. I am still trying to work it out..._
+
 ### Building SQLite databases
 
 * Fetch remote clone or use local checkout
@@ -31,15 +33,21 @@ Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the 
 * Compress databases, optionally preserve uncompressed
 * Clean up (remote clone or use local checkout)
 
+For example:
+
 ```
 wof-build-dist --build-sqlite --preserve-checkout --workdir /usr/local/dist whosonfirst-data
 ```
 
 ```
-wof-build-dist --build-sqlite --local-checkout --workdir /usr/local/dist /usr/local/data/whosonfirst-data
+wof-build-dist --build-sqlite --local-checkout --compress-all --workdir /usr/local/dist /usr/local/data/dist/whosonfirst-data
 ```
 
+_`--preserve-checkout` is assumed (and assumed to be true) if `--local-checkout` is true._
+
 ### Building meta file(s)
+
+_Please write me._
 
 ### Building bundles
 
@@ -48,6 +56,12 @@ wof-build-dist --build-sqlite --local-checkout --workdir /usr/local/dist /usr/lo
 * Build bundle, generate index
 * Compress bundle, optionally preserve uncompressed
 * Clean up (remote clone or remote (compressed) SQLite database or local (uncompressed) SQLite database)
+
+```
+wof-build-dist --build-sqlite=false --build-bundle --local-sqlite --workdir /usr/local/dist whosonfirst-data
+```
+
+_`--preserve-sqlite` is assumed (and assumed to be true) if `--local-sqlite` is true._
 
 ## Tools
 

@@ -86,14 +86,18 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 	var local_metafiles []string
 	var local_bundlefiles []string
 
+	// do we need to work with a remote (or local) Git checkout and if so
+	// where is it?
+
 	select {
 
 	case <-ctx.Done():
 		return
 	default:
 
-		if !opts.LocalCheckout {
-
+		if opts.LocalCheckout || opts.LocalSQLite {
+			local_repo = opts.Repo
+		} else {
 			repo, err := git.CloneRepo(ctx, opts)
 
 			if err != nil {
@@ -112,10 +116,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			local_repo = repo
 
-		} else {
-			local_repo = opts.Repo
 		}
-
 	}
 
 	opts.Logger.Status("local_repo is %s", local_repo)
@@ -136,9 +137,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			if opts.LocalSQLite {
 
-				name := filepath.Base(local_repo)
-
-				fname := fmt.Sprintf("%s-latest.db", name)
+				fname := fmt.Sprintf("%s-latest.db", opts.Repo)
 				local_sqlite = filepath.Join(opts.Workdir, fname)
 
 			} else {
@@ -155,6 +154,13 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			opts.Logger.Status("local sqlite is %s", local_sqlite)
 		}
+	}
+
+	_, err := os.Stat(local_sqlite)
+
+	if err != nil {
+		err_ch <- err
+		return
 	}
 
 	// eventually we should be able to do these two operations in parallel
@@ -200,11 +206,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			return
 		default:
 
-			// THIS DOES NOT WORK YET (20180621/thisisaaronland)
-
-			source := local_sqlite // PLEASE UPDATE ME READ FROM sqlite ALSO
-
-			bundlefiles, err := bundles.BuildBundle(ctx, opts, local_metafiles, source)
+			bundlefiles, err := bundles.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
 			if err != nil {
 				err_ch <- err
@@ -212,7 +214,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			}
 
 			local_bundlefiles = bundlefiles
-			opts.Logger.Debug("%v", local_bundlefiles) // temporary - just to make the compiler shut up...
+
+			opts.Logger.Status("made bundle %s", local_bundlefiles)
 		}
 
 	}
