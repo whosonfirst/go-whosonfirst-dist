@@ -7,7 +7,7 @@ prep:
 self:   prep rmdeps
 	if test -d src/github.com/whosonfirst/go-whosonfirst-dist; then rm -rf src/github.com/whosonfirst/go-whosonfirst-dist; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-dist
-	cp -r bundles src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r fs src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r build src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r csv src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r database src/github.com/whosonfirst/go-whosonfirst-dist/
@@ -32,6 +32,7 @@ deps:
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-sqlite src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-index src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-log src/github.com/whosonfirst/
+	mv src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/facebookgo src/github.com/
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-index
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-log
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-log
@@ -47,7 +48,7 @@ vendor-deps: rmdeps deps
 
 fmt:
 	go fmt build/*.go
-	go fmt bundles/*.go
+	go fmt fs/*.go
 	go fmt cmd/*.go
 	go fmt database/*.go
 	go fmt csv/*.go

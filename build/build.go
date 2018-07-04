@@ -1,13 +1,17 @@
 package build
 
 import (
+	_ "compress/bzip2"
 	"context"
 	"fmt"
-	"github.com/whosonfirst/go-whosonfirst-dist/bundles"
+	_ "github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
+	"github.com/whosonfirst/go-whosonfirst-dist/fs"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	_ "io"
+	_ "net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -121,6 +125,56 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 	opts.Logger.Status("local_repo is %s", local_repo)
 
+	// if opts.RemoteSQLite then fetch from dist.whosonfirst.org (and uncompressed) and
+	// store in opts.Workdir here... (20180704/thisisaaronland)
+
+	/*
+	if opts.RemoteSQLite {
+
+		local_fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+		local_sqlite = filepath.Join(opts.Workdir, local_fname)
+
+		remote_fname := fmt.Sprintf("%s.bz2", local_fname)
+		remote_sqlite := fmt.Sprintf("https://dist.whosonfirst.org/sqlite/%s", remote_fname)
+
+		rsp, err := http.Get(remote_sqlite)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		defer rsp.Body.Close()
+
+		br := bzip2.NewReader(rsp.Body)
+
+		wr, err := atomicfile.New(local_sqlite, 0644)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		_, err = io.Copy(wr, br)
+
+		if err != nil {
+			wr.Abort()
+
+			err_ch <- err
+			return
+		}
+
+		err = wr.Close()
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		logger.Info("Retrieved remote SQLite (%s) and stored as %s", remote_sqlite, local_sqlite)
+	}
+	*/
+	
 	if opts.SQLite {
 
 		select {
@@ -206,7 +260,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			return
 		default:
 
-			bundlefiles, err := bundles.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
+			bundlefiles, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
 			if err != nil {
 				err_ch <- err

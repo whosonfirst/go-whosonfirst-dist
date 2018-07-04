@@ -51,6 +51,9 @@ func main() {
 	local_checkout := flag.Bool("local-checkout", false, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
 	local_sqlite := flag.Bool("local-sqlite", false, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
 
+	// PLEASE MAKE ME WORK, YEAH... (20180704/thisisaaronland)
+	// remote_sqlite := flag.Bool("remote-sqlite", false, "Do not build a new SQLite database but use a pre-existing database that is stored (on dist.whosonfirst.org for now)")
+
 	strict := flag.Bool("strict", false, "...")
 	timings := flag.Bool("timings", false, "Display timings during the build process")
 	verbose := flag.Bool("verbose", false, "Be chatty")
