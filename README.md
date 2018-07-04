@@ -22,6 +22,33 @@ This is work in progress. It's probably not worth trying to use yet unless you'r
 
 Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the "[bundles](https://dist.whosonfirst.org/bundles/)".
 
+## Build process(es)
+
+### Building SQLite databases
+
+* Fetch remote clone or use local checkout
+* Build databases, generate indices
+* Compress databases, optionally preserve uncompressed
+* Clean up (remote clone or use local checkout)
+
+```
+wof-build-dist --build-sqlite --preserve-checkout --workdir /usr/local/dist whosonfirst-data
+```
+
+```
+wof-build-dist --build-sqlite --local-checkout --workdir /usr/local/dist /usr/local/data/whosonfirst-data
+```
+
+### Building meta file(s)
+
+### Building bundles
+
+* Fetch remote clone or use remote (compressed) SQLite database or use local (uncompressed) SQLite database
+* Generate metafiles
+* Build bundle, generate index
+* Compress bundle, optionally preserve uncompressed
+* Clean up (remote clone or remote (compressed) SQLite database or local (uncompressed) SQLite database)
+
 ## Tools
 
 ### wof-dist-build

@@ -32,6 +32,17 @@ func main() {
 	build_bundle := flag.Bool("build-bundle", false, "Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)")
 	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
+	compress_sqlite := flag.Bool("compress-sqlite", true, "...")
+	compress_meta := flag.Bool("compress-meta", true, "...")
+	compress_bundle := flag.Bool("compress-bundle", true, "...")
+	compress_all := flag.Bool("compress-all", true, "...")
+
+	preserve_checkout := flag.Bool("preserve-checkout", false, "Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.")
+	preserve_sqlite := flag.Bool("preserve-sqlite", false, "...")
+	preserve_meta := flag.Bool("preserve-meta", false, "...")
+	preserve_bundle := flag.Bool("preserve-bundle", false, "...")
+	preserve_all := flag.Bool("preserve-all", false, "...")
+
 	clone := flag.String("git-clone", "native", "Indicate how to clone a repo, using either a native Git binary or the go-git implementation")
 	proto := flag.String("git-protocol", "https", "Fetch repos using this protocol")
 	source := flag.String("git-source", "github.com", "Fetch repos from this endpoint")
@@ -39,8 +50,6 @@ func main() {
 
 	local_checkout := flag.Bool("local-checkout", false, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
 	local_sqlite := flag.Bool("local-sqlite", false, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
-
-	preserve_checkout := flag.Bool("preserve-checkout", false, "Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.")
 
 	strict := flag.Bool("strict", false, "...")
 	timings := flag.Bool("timings", false, "Display timings during the build process")
@@ -59,6 +68,23 @@ func main() {
 	if *verbose {
 		stdout := io.Writer(os.Stdout)
 		logger.AddLogger(stdout, "status")
+	}
+
+	if *compress_all {
+		*compress_sqlite = true
+		*compress_meta = true
+		*compress_bundle = true
+	}
+
+	if *preserve_all {
+		*preserve_checkout = true
+		*preserve_sqlite = true
+		*preserve_meta = true
+		*preserve_bundle = true
+	}
+
+	if *local_checkout == true {
+		*preserve_checkout = true
 	}
 
 	if *workdir == "" {
@@ -82,10 +108,6 @@ func main() {
 		logger.Fatal("-workdir is not actually a directory")
 	}
 
-	if *local_checkout == true {
-		*preserve_checkout = true
-	}
-
 	opts := options.NewBuildOptions()
 	opts.Logger = logger
 
@@ -94,15 +116,23 @@ func main() {
 	opts.Source = *source
 	opts.Organization = *org
 
+	opts.Workdir = *workdir
+
 	opts.SQLite = *build_sqlite
 	opts.Meta = *build_meta
 	opts.Bundle = *build_bundle
-	opts.Workdir = *workdir
 
 	opts.LocalCheckout = *local_checkout
-	opts.PreserveCheckout = *preserve_checkout
-
 	opts.LocalSQLite = *local_sqlite
+
+	opts.CompressSQLite = *compress_sqlite
+	opts.CompressMeta = *compress_meta
+	opts.CompressBundle = *compress_bundle
+
+	opts.PreserveCheckout = *preserve_checkout
+	opts.PreserveSQLite = *preserve_sqlite
+	opts.PreserveMeta = *preserve_meta
+	opts.PreserveBundle = *preserve_bundle
 
 	opts.Strict = *strict
 	opts.Timings = *timings

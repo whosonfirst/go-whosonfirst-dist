@@ -37,6 +37,7 @@ deps:
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-log
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-meta
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-index
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-sqlite
 
 vendor-deps: rmdeps deps
 	if test -d vendor; then rm -rf vendor; fi

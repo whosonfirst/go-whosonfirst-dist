@@ -22,8 +22,15 @@ type BuildOptions struct {
 	LocalCheckout    bool
 	LocalSQLite      bool
 	PreserveCheckout bool
-	Timings          bool
-	Strict           bool
+	PreserveSQLite   bool
+	PreserveMeta     bool
+	PreserveBundle   bool
+	CompressSQLite   bool
+	CompressMeta     bool
+	CompressBundle   bool
+
+	Timings bool
+	Strict  bool
 }
 
 func NewBuildOptions() *BuildOptions {
@@ -44,6 +51,12 @@ func NewBuildOptions() *BuildOptions {
 		LocalCheckout:    false,
 		LocalSQLite:      false,
 		PreserveCheckout: false,
+		PreserveSQLite:   false,
+		PreserveMeta:     false,
+		PreserveBundle:   false,
+		CompressSQLite:   true,
+		CompressMeta:     true,
+		CompressBundle:   true,
 		Timings:          false,
 		Strict:           false,
 	}
