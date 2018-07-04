@@ -6,13 +6,17 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 )
 
+// PLEASE MAKE ME RETURN A LIST OF distribution.Item THINGIES... (20180611/thisisaaronland)
+
 func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles []string, source string) ([]string, error) {
 
 	bundles := make([]string, 0)
 
+	dest := dist_opts.Workdir	// FIX ME TO INCLUDE BUNDLE NAME OR SOMETHING...
+	
 	bundle_opts := wof_bundles.DefaultBundleOptions()
 	bundle_opts.Mode = "sqlite"
-	bundle_opts.Destination = dist_opts.Workdir
+	bundle_opts.Destination = dest
 	bundle_opts.Logger = dist_opts.Logger
 
 	b, err := wof_bundles.NewBundle(bundle_opts)
@@ -34,7 +38,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 		return bundles, err
 	}
 
-	// FIX ME - UPDATE bundles HERE...
+	bundles = append(bundles, dest)
 
 	return bundles, nil
 }
