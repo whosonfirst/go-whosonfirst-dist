@@ -129,52 +129,52 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 	// store in opts.Workdir here... (20180704/thisisaaronland)
 
 	/*
-	if opts.RemoteSQLite {
+		if opts.RemoteSQLite {
 
-		local_fname := fmt.Sprintf("%s-latest.db", opts.Repo)
-		local_sqlite = filepath.Join(opts.Workdir, local_fname)
+			local_fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+			local_sqlite = filepath.Join(opts.Workdir, local_fname)
 
-		remote_fname := fmt.Sprintf("%s.bz2", local_fname)
-		remote_sqlite := fmt.Sprintf("https://dist.whosonfirst.org/sqlite/%s", remote_fname)
+			remote_fname := fmt.Sprintf("%s.bz2", local_fname)
+			remote_sqlite := fmt.Sprintf("https://dist.whosonfirst.org/sqlite/%s", remote_fname)
 
-		rsp, err := http.Get(remote_sqlite)
+			rsp, err := http.Get(remote_sqlite)
 
-		if err != nil {
-			err_ch <- err
-			return
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			defer rsp.Body.Close()
+
+			br := bzip2.NewReader(rsp.Body)
+
+			wr, err := atomicfile.New(local_sqlite, 0644)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			_, err = io.Copy(wr, br)
+
+			if err != nil {
+				wr.Abort()
+
+				err_ch <- err
+				return
+			}
+
+			err = wr.Close()
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			logger.Info("Retrieved remote SQLite (%s) and stored as %s", remote_sqlite, local_sqlite)
 		}
-
-		defer rsp.Body.Close()
-
-		br := bzip2.NewReader(rsp.Body)
-
-		wr, err := atomicfile.New(local_sqlite, 0644)
-
-		if err != nil {
-			err_ch <- err
-			return
-		}
-
-		_, err = io.Copy(wr, br)
-
-		if err != nil {
-			wr.Abort()
-
-			err_ch <- err
-			return
-		}
-
-		err = wr.Close()
-
-		if err != nil {
-			err_ch <- err
-			return
-		}
-
-		logger.Info("Retrieved remote SQLite (%s) and stored as %s", remote_sqlite, local_sqlite)
-	}
 	*/
-	
+
 	if opts.SQLite {
 
 		select {
