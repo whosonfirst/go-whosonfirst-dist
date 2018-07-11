@@ -3,6 +3,7 @@ package build
 import (
 	_ "compress/bzip2"
 	"context"
+	"errors"
 	"fmt"
 	_ "github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
@@ -244,6 +245,11 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			if err != nil {
 				err_ch <- err
+				return
+			}
+
+			if len(metafiles) == 0 {
+				err_ch <- errors.New("No metafiles produced")
 				return
 			}
 

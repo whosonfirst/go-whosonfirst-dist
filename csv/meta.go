@@ -5,6 +5,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
 	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
+	_ "log"
 )
 
 // Not really sure about this signature... (20180604/thisisaaronland)

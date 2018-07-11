@@ -16,37 +16,6 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 	golog.Println("BUNDLE FROM", source)
 	golog.Println("BUNDLE WITH", metafiles)
 
-	/*
-
-		2018/07/10 14:28:09 BUNDLE WITH [planet region macroregion country microhood continent ocean marinearea borough dependency disputed neighbourhood locality macrocounty timezone county macrohood campus localadmin empire]
-		2018/07/10 14:28:09 HELLO planet
-		2018/07/10 14:28:09 HELLO region
-		2018/07/10 14:28:09 HELLO macroregion
-		2018/07/10 14:28:09 HELLO country
-		2018/07/10 14:28:09 HELLO microhood
-		2018/07/10 14:28:09 HELLO continent
-		2018/07/10 14:28:09 HELLO ocean
-		2018/07/10 14:28:09 HELLO marinearea
-		2018/07/10 14:28:09 HELLO borough
-		2018/07/10 14:28:09 HELLO dependency
-		2018/07/10 14:28:09 HELLO disputed
-		2018/07/10 14:28:09 HELLO neighbourhood
-		2018/07/10 14:28:09 HELLO locality
-		2018/07/10 14:28:09 HELLO macrocounty
-		2018/07/10 14:28:09 HELLO timezone
-		2018/07/10 14:28:09 HELLO county
-		2018/07/10 14:28:09 HELLO macrohood
-		2018/07/10 14:28:09 HELLO campus
-		2018/07/10 14:28:09 HELLO localadmin
-		2018/07/10 14:28:09 HELLO empire
-		2018/07/10 14:28:09 GO /usr/local/data/dist/empire
-		2018/07/10 14:28:09 GO /usr/local/data/dist/empire
-		2018/07/10 14:28:09 GO /usr/local/data/dist/empire
-		2018/07/10 14:28:09 GO /usr/local/data/dist/empire
-		...
-
-	*/
-
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 	bundle_ch := make(chan string) // make me an Index thingy, yeah?
@@ -110,7 +79,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 
 	bundles := make([]string, 0)
 	var build_err error
-	
+
 	remaining := len(metafiles)
 
 	for remaining > 0 {
@@ -122,7 +91,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 			remaining -= 1
 		case e := <-err_ch:
 			build_err = e
-			break				  
+			break
 		default:
 			// pass
 		}
