@@ -4,7 +4,6 @@ import (
 	"context"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	golog "log"
 	"path/filepath"
 	"strings"
 )
@@ -13,16 +12,11 @@ import (
 
 func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles []string, source string) ([]string, error) {
 
-	golog.Println("BUNDLE FROM", source)
-	golog.Println("BUNDLE WITH", metafiles)
-
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 	bundle_ch := make(chan string) // make me an Index thingy, yeah?
 
 	for _, path := range metafiles {
-
-		golog.Println("HELLO", path)
 
 		go func(dsn string, metafile string, done_ch chan bool, bundle_ch chan string, err_ch chan error) {
 
@@ -63,9 +57,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					return
 				}
 
-				golog.Println("GO", bundle_path)
 				err = b.BundleMetafileFromSQLite(ctx, dsn, path)
-				golog.Println("WHAT", bundle_path, err)
 
 				if err != nil {
 					err_ch <- err
