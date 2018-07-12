@@ -62,20 +62,14 @@ func NewBundle(options *BundleOptions) (*Bundle, error) {
 	return &b, nil
 }
 
-// require context.Context or just add another function?
-// (20180622/thisisaaronland)
+func (b *Bundle) BundleMetafilesFromSQLite(ctx context.Context, dsn string, metafiles ...string) error {
 
-func (b *Bundle) BundleMetafilesFromSQLite(dsn string, metafiles ...string) error {
-
-	done_ch := make(chan bool)
 	err_ch := make(chan error)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	done_ch := make(chan bool)
 
 	for _, path := range metafiles {
 
-		go func(b *Bundle, dsn string, metafile string, done_ch chan bool, err_ch chan error) {
+		go func(b *Bundle, ctx context.Context, dsn string, path string) {
 
 			defer func() {
 				done_ch <- true
@@ -86,6 +80,7 @@ func (b *Bundle) BundleMetafilesFromSQLite(dsn string, metafiles ...string) erro
 			case <-ctx.Done():
 				return
 			default:
+
 				err := b.BundleMetafileFromSQLite(ctx, dsn, path)
 
 				if err != nil {
@@ -93,7 +88,7 @@ func (b *Bundle) BundleMetafilesFromSQLite(dsn string, metafiles ...string) erro
 				}
 			}
 
-		}(b, dsn, path, done_ch, err_ch)
+		}(b, ctx, dsn, path)
 	}
 
 	remaining := len(metafiles)
@@ -114,12 +109,6 @@ func (b *Bundle) BundleMetafilesFromSQLite(dsn string, metafiles ...string) erro
 }
 
 func (b *Bundle) BundleMetafileFromSQLite(ctx context.Context, dsn string, metafile string) error {
-
-	/*
-		     	defer func() {
-				b.Options.Logger.Status("Finished processing %s", metafile)
-			}()
-	*/
 
 	db, err := database.NewDB(dsn)
 
@@ -157,6 +146,9 @@ func (b *Bundle) BundleMetafileFromSQLite(ctx context.Context, dsn string, metaf
 	if err != nil {
 		return err
 	}
+
+	bundle_path := b.Options.Destination
+	data_path := filepath.Join(bundle_path, "data")
 
 	// this is necessary so we can break out of the select block which is
 	// wrapped in a for block... good times (20180622/thisisaaronland)
@@ -211,7 +203,7 @@ func (b *Bundle) BundleMetafileFromSQLite(ctx context.Context, dsn string, metaf
 
 			fh := strings.NewReader(body)
 
-			abs_path, err := b.ensurePathForID(b.Options.Destination, id)
+			abs_path, err := b.ensurePathForID(data_path, id)
 
 			if err != nil {
 				return nil
@@ -230,7 +222,7 @@ func (b *Bundle) BundleMetafileFromSQLite(ctx context.Context, dsn string, metaf
 	}
 
 	fname := filepath.Base(abs_metafile)
-	cp_metafile := filepath.Join(b.Options.Destination, fname)
+	cp_metafile := filepath.Join(bundle_path, fname)
 
 	in, err := os.Open(abs_metafile)
 
@@ -285,34 +277,10 @@ func (b *Bundle) BundleMetafile(metafile string) error {
 func (b *Bundle) Bundle(to_index ...string) error {
 
 	opts := b.Options
-	root := opts.Destination
 	mode := opts.Mode
 
-	data_root := filepath.Join(root, "data")
-
-	info, err := os.Stat(data_root)
-
-	if err != nil {
-
-		if !os.IsNotExist(err) {
-			return err
-		}
-
-		// MkdirAll ? (20180620/thisisaaronland)
-		err = os.Mkdir(data_root, 0755)
-
-		if err != nil {
-			return err
-		}
-
-		root = data_root
-
-	} else {
-
-		if !info.IsDir() {
-			return errors.New("...")
-		}
-	}
+	bundle_path := b.Options.Destination
+	data_path := filepath.Join(bundle_path, "data")
 
 	var meta_writer *csv.DictWriter
 	var meta_fh *atomicfile.File
@@ -345,7 +313,7 @@ func (b *Bundle) Bundle(to_index ...string) error {
 
 		id := whosonfirst.Id(f)
 
-		abs_path, err := b.ensurePathForID(root, id)
+		abs_path, err := b.ensurePathForID(data_path, id)
 
 		if err != nil {
 			return nil
@@ -379,11 +347,10 @@ func (b *Bundle) Bundle(to_index ...string) error {
 
 				sort.Strings(fieldnames)
 
-				dest := b.Options.Destination
-				dest_fname := filepath.Base(dest)
+				dest_fname := filepath.Base(bundle_path)
 
 				meta_fname := fmt.Sprintf("%s-latest.csv", dest_fname)
-				meta_path := filepath.Join(dest, meta_fname)
+				meta_path := filepath.Join(bundle_path, meta_fname)
 
 				fh, err := atomicfile.New(meta_path, 0644)
 
