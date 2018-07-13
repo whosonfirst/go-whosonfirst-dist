@@ -103,6 +103,10 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 		if opts.LocalCheckout || opts.LocalSQLite {
 			local_repo = opts.Repo
 		} else {
+
+			// SOMETHING SOMETHING throw an error if local_repo exists or remove?
+		  	// (20181013/thisisaaronland)
+			
 			repo, err := git.CloneRepo(ctx, opts)
 
 			if err != nil {
@@ -265,6 +269,11 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 		case <-ctx.Done():
 			return
 		default:
+
+			// SOMETHING SOMETHING throw an error if local_bundlefiles exist or remove?
+			// That presumes knowing what they are called first and/or moving this check
+			// in to fs.BuildBundle...			   
+		  	// (20181013/thisisaaronland)
 
 			bundlefiles, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
