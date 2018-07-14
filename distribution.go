@@ -1,6 +1,37 @@
 package distribution
 
+import (
+       "time"
+)
+
 type Inventory []Item
+
+type Distribution interface {
+     Path() string
+     LastUpdate() *time.Time
+     Type() string	// major/minor
+     
+     Repo() string
+     Commit() string
+
+     // can be derived from Path()
+     Name() string
+
+     // can be derived from Path() + os.Stat
+     Size() int64
+     LastModified() *time.Time
+
+     // umn....
+     
+     NameCompressed() string     
+     SizeCompressed() int64
+     Sha256Compressed() string
+}
+
+type DistributionType interface {
+     Major() string
+     Minor() string
+}
 
 type Item struct {
 

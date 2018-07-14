@@ -14,6 +14,26 @@ import (
 	"time"
 )
 
+type SQLiteDistribution {
+     distribution.Distribution
+     type string	// distribution.DatabaseDistributionType
+     path string
+     count int64
+     lastupdate int64
+}
+
+func (d *SQLiteDistribution) Type() string {
+     return d.type 
+}
+
+func (d *SQLiteDistribution) Path() string {
+     return d.path
+}
+
+func (d *SQLiteDistribution) Count() int64 {
+     return d.count
+}
+
 // PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
 func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (*distribution.Item, error) {
@@ -129,6 +149,10 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		lastmod := info.ModTime()
 		
 		item := distribution.Item {
+			// things we need want
+			// path: dsn,
+			// major: "sqlite",
+			// minor: "common",
 			Name: fname,
 			NameCompressed: "",
 			Count: count,
