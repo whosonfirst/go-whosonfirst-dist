@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-func BuildDistributions(opts *options.BuildOptions, repos []string) error {
+func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*distribution.Item, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -33,17 +33,21 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) error {
 		}()
 	}
 
+	item_ch := make(chan *distribution.Item)
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
-
+	
 	for _, repo := range repos {
 
 		local_opts := opts.Clone()
 		local_opts.Repo = repo
 
-		go BuildDistribution(ctx, local_opts, done_ch, err_ch)
+		go BuildDistribution(ctx, local_opts, item_ch, done_ch, err_ch)
 	}
 
+	var build_err error
+	
+	build_items := make([]*distribution.Item, 0)
 	count := len(repos)
 
 	for count > 0 {
@@ -51,26 +55,31 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) error {
 		select {
 		case <-done_ch:
 			count--
+		case i := <- item_ch:
+		     build_items = append(build_item, i)
 		case err := <-err_ch:
 
-			if opts.Strict {
-				// remember we're defer cancel() -ing above
-				return err
-			}
-
 			opts.Logger.Error("%v", err)
+			build_err = err
+
+			// remember we're defer cancel() -ing above
+				
+			if opts.Strict {
+				break
+			}
 
 		default:
 			// pass
 		}
 	}
 
-	return nil
+	return build_items, build_err
 }
 
-func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch chan bool, err_ch chan error) {
+func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch chan *distribution.Item, done_ch chan bool, err_ch chan error) {
 
 	if opts.Timings {
+	
 		t1 := time.Now()
 
 		defer func() {
@@ -91,6 +100,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 	var local_metafiles []string
 	var local_bundlefiles []string
 
+	build_items := make([]*distribution.Item, 0)
+	
 	// do we need to work with a remote (or local) Git checkout and if so
 	// where is it?
 
@@ -124,7 +135,6 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 			}()
 
 			local_repo = repo
-
 		}
 	}
 
@@ -286,7 +296,9 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, done_ch 
 
 			opts.Logger.Status("made bundle %s", local_bundlefiles)
 		}
-
 	}
 
+	for _, i := range build_items {
+	       item_ch <- i
+	}
 }

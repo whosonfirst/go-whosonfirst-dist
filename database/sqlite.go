@@ -16,7 +16,7 @@ import (
 
 // PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
-func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (string, error) {
+func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (*distribution.Item, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
 	return BuildSQLiteCommon(ctx, local_repo, opts)
@@ -24,15 +24,17 @@ func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOpti
 
 // PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
-func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (string, error) {
+func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (*distribution.Item, error) {
 
+     
 	select {
 
 	case <-ctx.Done():
-		return "", nil
+		return nil, nil
 	default:
 
 		if opts.Timings {
+		
 			t1 := time.Now()
 
 			defer func() {
@@ -52,7 +54,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		db, err := database.NewDBWithDriver("sqlite3", dsn)
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		defer db.Close()
@@ -60,19 +62,19 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		err = db.LiveHardDieFast()
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		to_index, err := tables.CommonTablesWithDatabase(db)
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		idx.Timings = opts.Timings
@@ -81,8 +83,62 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		err = idx.IndexPaths("repo", []string{local_repo})
 
 		if err != nil {
-			return "", err
+			return nil, err
+		}
 
+		t, err := tables.NewGeoJSONTable()
+
+		if err != nil {
+			return nil, err
+		}
+
+		conn, err := db.Conn()
+
+		if err != nil {
+			return nil, err
+		}
+
+		var count int
+		var lastupdate int
+		
+		sql := fmt.Sprintf("SELECT COUNT(id) FROM %s", t.Name())
+		row := conn.QueryRow(sql)
+
+		err = row.Scan(&count)
+
+		if err != nil {
+			return nil, err
+		}
+
+		sql = fmt.Sprintf("SELECT MAX(lastmodified) FROM %s", t.Name())
+		row = conn.QueryRow(sql)
+
+		err = row.Scan(&lastupdate)
+
+		if err != nil {
+			return nil, err
+		}
+
+		info, err := os.Stat(dsn)
+
+		if err != nil {
+		   return nil, err
+		}
+
+		fsize := info.Size()
+		lastmod := info.ModTime()
+		
+		item := distribution.Item {
+			Name: fname,
+			NameCompressed: "",
+			Count: count,
+			Size: fsize,
+ 			SizeCompressed: 0,
+			Sha256Compressed: "",
+			LastUpdate: lastupdate,
+			LastModified: lastmod,
+			Repo: opts.Repo,
+			Commit: "",
 		}
 
 		// compress stuff here or later? if we do it here then by the time we
@@ -95,7 +151,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		// and assume the function is private and pass it a laundry list of things
 		// to do whatever we need... (20180613/thisisaaronland)
 
-		return dsn, nil
+		return &item, nil
 	}
 }
 
