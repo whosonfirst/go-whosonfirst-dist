@@ -60,6 +60,11 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 		return nil, err
 	}
 
+	// at some point we'll wire all the stats stuff in to meta.BuildFromIndex
+	// itself (or equivalent) so we don't have to do a second pass but in the
+	// interest of just getting things working we'll suffer to penalty of reading
+	// all the CSV files again... (20180715/thisisaaronland)
+	
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 	stats_ch := make(chan *meta_stats.Stats)
