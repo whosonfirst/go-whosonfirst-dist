@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/facebookgo/atomicfile"
+	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
 	"github.com/whosonfirst/go-whosonfirst-dist/fs"
@@ -18,7 +19,7 @@ import (
 	"time"
 )
 
-func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*distribution.Item, error) {
+func BuildDistributions(opts *options.BuildOptions, repos []string) ([]distribution.Distribution, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -33,21 +34,21 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*distribu
 		}()
 	}
 
-	item_ch := make(chan *distribution.Item)
+	dist_ch := make(chan distribution.Distribution)
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
-	
+
 	for _, repo := range repos {
 
 		local_opts := opts.Clone()
 		local_opts.Repo = repo
 
-		go BuildDistribution(ctx, local_opts, item_ch, done_ch, err_ch)
+		go BuildDistribution(ctx, local_opts, dist_ch, done_ch, err_ch)
 	}
 
 	var build_err error
-	
-	build_items := make([]*distribution.Item, 0)
+
+	build_items := make([]distribution.Distribution, 0)
 	count := len(repos)
 
 	for count > 0 {
@@ -55,15 +56,15 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*distribu
 		select {
 		case <-done_ch:
 			count--
-		case i := <- item_ch:
-		     build_items = append(build_item, i)
+		case d := <-dist_ch:
+			build_items = append(build_item, d)
 		case err := <-err_ch:
 
 			opts.Logger.Error("%v", err)
 			build_err = err
 
 			// remember we're defer cancel() -ing above
-				
+
 			if opts.Strict {
 				break
 			}
@@ -76,10 +77,10 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*distribu
 	return build_items, build_err
 }
 
-func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch chan *distribution.Item, done_ch chan bool, err_ch chan error) {
+func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch chan distribution.Distribution, done_ch chan bool, err_ch chan error) {
 
 	if opts.Timings {
-	
+
 		t1 := time.Now()
 
 		defer func() {
@@ -100,8 +101,10 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch 
 	var local_metafiles []string
 	var local_bundlefiles []string
 
-	build_items := make([]*distribution.Item, 0)
-	
+	var dist_sqlite distribution.Distribution
+
+	build_items := make([]distribution.Distribution, 0)
+
 	// do we need to work with a remote (or local) Git checkout and if so
 	// where is it?
 
@@ -116,8 +119,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch 
 		} else {
 
 			// SOMETHING SOMETHING throw an error if local_repo exists or remove?
-		  	// (20181013/thisisaaronland)
-			
+			// (20181013/thisisaaronland)
+
 			repo, err := git.CloneRepo(ctx, opts)
 
 			if err != nil {
@@ -211,14 +214,17 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch 
 
 			} else {
 
-				dsn, err := database.BuildSQLite(ctx, local_repo, opts)
+				d, err := database.BuildSQLite(ctx, local_repo, opts)
 
 				if err != nil {
 					err_ch <- err
 					return
 				}
 
-				local_sqlite = dsn
+				// should we do this now?
+				dist_ch <- d
+
+				local_sqlite = d.Path()
 			}
 
 			opts.Logger.Status("local sqlite is %s", local_sqlite)
@@ -282,8 +288,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch 
 
 			// SOMETHING SOMETHING throw an error if local_bundlefiles exist or remove?
 			// That presumes knowing what they are called first and/or moving this check
-			// in to fs.BuildBundle...			   
-		  	// (20181013/thisisaaronland)
+			// in to fs.BuildBundle...
+			// (20181013/thisisaaronland)
 
 			bundlefiles, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
@@ -299,6 +305,6 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, item_ch 
 	}
 
 	for _, i := range build_items {
-	       item_ch <- i
+		item_ch <- i
 	}
 }

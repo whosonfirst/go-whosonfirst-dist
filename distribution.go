@@ -7,28 +7,13 @@ import (
 type Inventory []Item
 
 type Distribution interface {
+     Type() DistributionType
      Path() string
-     LastUpdate() *time.Time
-     Type() string	// major/minor
-     
-     Repo() string
-     Commit() string
-
-     // can be derived from Path()
-     Name() string
-
-     // can be derived from Path() + os.Stat
-     Size() int64
-     LastModified() *time.Time
-
-     // umn....
-     
-     NameCompressed() string     
-     SizeCompressed() int64
-     Sha256Compressed() string
+     LastUpdate() time.Time
 }
 
 type DistributionType interface {
+     Class() string
      Major() string
      Minor() string
 }

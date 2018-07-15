@@ -9,34 +9,35 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	_ "log"
-	"os"
 	"path/filepath"
 	"time"
 )
 
-type SQLiteDistribution {
-     distribution.Distribution
-     type string	// distribution.DatabaseDistributionType
-     path string
-     count int64
-     lastupdate int64
+type SQLiteDistribution struct {
+	distribution.Distribution
+	kind       distribution.DistributionType
+	path       string
+	count      int64
+	lastupdate int64
 }
 
-func (d *SQLiteDistribution) Type() string {
-     return d.type 
+func (d *SQLiteDistribution) Type() distribution.DistributionType {
+	return d.kind
 }
 
 func (d *SQLiteDistribution) Path() string {
-     return d.path
+	return d.path
 }
 
 func (d *SQLiteDistribution) Count() int64 {
-     return d.count
+	return d.count
 }
 
-// PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
+func (d *SQLiteDistribution) LastUpdate() time.Time {
+	return time.Unix(d.lastupdate, 0)
+}
 
-func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (*distribution.Item, error) {
+func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (distribution.Distribution, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
 	return BuildSQLiteCommon(ctx, local_repo, opts)
@@ -44,9 +45,8 @@ func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOpti
 
 // PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
-func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (*distribution.Item, error) {
+func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (distribution.Distribution, error) {
 
-     
 	select {
 
 	case <-ctx.Done():
@@ -54,7 +54,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 	default:
 
 		if opts.Timings {
-		
+
 			t1 := time.Now()
 
 			defer func() {
@@ -120,7 +120,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 
 		var count int
 		var lastupdate int
-		
+
 		sql := fmt.Sprintf("SELECT COUNT(id) FROM %s", t.Name())
 		row := conn.QueryRow(sql)
 
@@ -139,111 +139,19 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 			return nil, err
 		}
 
-		info, err := os.Stat(dsn)
+		k, err := NewSQLiteDistributionType("common")
 
 		if err != nil {
-		   return nil, err
+			return nil, err
 		}
 
-		fsize := info.Size()
-		lastmod := info.ModTime()
-		
-		item := distribution.Item {
-			// things we need want
-			// path: dsn,
-			// major: "sqlite",
-			// minor: "common",
-			Name: fname,
-			NameCompressed: "",
-			Count: count,
-			Size: fsize,
- 			SizeCompressed: 0,
-			Sha256Compressed: "",
-			LastUpdate: lastupdate,
-			LastModified: lastmod,
-			Repo: opts.Repo,
-			Commit: "",
+		d := SQLiteDistribution{
+			kind:       k,
+			path:       dsn,
+			count:      int64(count),
+			lastupdate: int64(lastupdate),
 		}
 
-		// compress stuff here or later? if we do it here then by the time we
-		// call NewDistributionItemFromDB - see notes after this - then we'll
-		// have all the stuff we need to build a distribution.Item thingy...
-		// (20180613/thisisaaronland)
-
-		// ideally we could just return NewDistributionItemFromDB(dsn) but I am
-		// not sure about open/closed database handles - maybe we just don't care
-		// and assume the function is private and pass it a laundry list of things
-		// to do whatever we need... (20180613/thisisaaronland)
-
-		return &item, nil
+		return &d, nil
 	}
-}
-
-func NewDistributionItemFromDB(path string) (*distribution.Item, error) {
-
-	info, err := os.Stat(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	size := info.Size()
-	tm_lastmod := info.ModTime()
-
-	db, err := database.NewDBWithDriver("sqlite3", path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer db.Close()
-
-	conn, err := db.Conn()
-
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := tables.NewGeoJSONTable()
-
-	if err != nil {
-		return nil, err
-	}
-
-	var lastupdate int64
-	var count int64
-
-	sql_lastupdate := fmt.Sprintf("SELECT MAX(lastmodified) FROM %s", t.Name())
-	sql_count := fmt.Sprintf("SELECT COUNT(id) FROM %s", t.Name())
-
-	row_lastupdate := conn.QueryRow(sql_lastupdate)
-	err = row_lastupdate.Scan(&lastupdate)
-
-	if err != nil {
-		return nil, err
-	}
-
-	tm_lastupdate := time.Unix(lastupdate, 0)
-
-	row_count := conn.QueryRow(sql_count)
-	err = row_count.Scan(&count)
-
-	if err != nil {
-		return nil, err
-	}
-
-	name := filepath.Base(path)
-
-	i := distribution.Item{
-		Name:             name,
-		Count:            count,
-		Size:             size,
-		LastModified:     tm_lastmod.Format(time.RFC3339),
-		LastUpdate:       tm_lastupdate.Format(time.RFC3339),
-		NameCompressed:   "XX",
-		Sha256Compressed: "XX",
-		SizeCompressed:   -1,
-	}
-
-	return &i, nil
 }
