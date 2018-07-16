@@ -168,6 +168,6 @@ func main() {
 	}
 
 	logger.Status("distributions %s", dists)
-	
+
 	os.Exit(0)
 }

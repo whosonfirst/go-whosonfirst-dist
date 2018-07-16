@@ -291,14 +291,22 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 			// in to fs.BuildBundle...
 			// (20181013/thisisaaronland)
 
-			bundlefiles, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
+			bundle_dist, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
 			if err != nil {
 				err_ch <- err
 				return
 			}
 
-			local_bundlefiles = bundlefiles
+			if len(bundle_dist) == 0 {
+				err_ch <- errors.New("No metafiles produced")
+				return
+			}
+
+			for _, d := range bundle_dist {
+				dist_ch <- d
+				local_bundlefiles = append(local_bundlefiles, d.Path())
+			}
 
 			opts.Logger.Status("made bundle %s", local_bundlefiles)
 		}

@@ -3,22 +3,46 @@ package fs
 import (
 	"context"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
+	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
-// PLEASE MAKE ME RETURN A LIST OF distribution.Item THINGIES... (20180611/thisisaaronland)
+type BundleDistribution struct {
+	dist.Distribution
+	kind       dist.DistributionType
+	path       string
+	count      int64
+	lastupdate int64
+}
 
-func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles []string, source string) ([]string, error) {
+func (d *BundleDistribution) Type() dist.DistributionType {
+	return d.kind
+}
+
+func (d *BundleDistribution) Path() string {
+	return d.path
+}
+
+func (d *BundleDistribution) Count() int64 {
+	return d.count
+}
+
+func (d *BundleDistribution) LastUpdate() time.Time {
+	return time.Unix(d.lastupdate, 0)
+}
+
+func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles []string, source string) ([]dist.Distribution, error) {
 
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
-	bundle_ch := make(chan string) // make me an Index thingy, yeah?
+	dist_ch := make(chan dist.Distribution)
 
 	for _, path := range metafiles {
 
-		go func(dsn string, metafile string, done_ch chan bool, bundle_ch chan string, err_ch chan error) {
+		go func(dsn string, metafile string, dist_ch chan dist.Distribution, done_ch chan bool, err_ch chan error) {
 
 			defer func() {
 				done_ch <- true
@@ -61,15 +85,30 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 
 				if err != nil {
 					err_ch <- err
+					return
 				}
 
-				bundle_ch <- bundle_path
+				k, err := NewBundleDistributionType(fname)
+
+				if err != nil {
+					err_ch <- err
+					return
+				}
+
+				d := BundleDistribution{
+					kind:       k,
+					path:       bundle_path,
+					count:      -1,
+					lastupdate: -1,
+				}
+
+				dist_ch <- &d
 			}
 
-		}(source, path, done_ch, bundle_ch, err_ch)
+		}(source, path, dist_ch, done_ch, err_ch)
 	}
 
-	bundles := make([]string, 0)
+	build_items := make([]dist.Distribution, 0)
 	var build_err error
 
 	remaining := len(metafiles)
@@ -77,10 +116,10 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 	for remaining > 0 {
 
 		select {
-		case b := <-bundle_ch:
-			bundles = append(bundles, b)
 		case <-done_ch:
 			remaining -= 1
+		case d := <-dist_ch:
+			build_items = append(build_items, d)
 		case e := <-err_ch:
 			build_err = e
 			break
@@ -89,5 +128,5 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 		}
 	}
 
-	return bundles, build_err
+	return build_items, build_err
 }
