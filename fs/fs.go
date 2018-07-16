@@ -23,7 +23,7 @@ func (t *FSDistributionType) Minor() string {
 	return t.minor
 }
 
-func NewFSDistributionType(major string, minor string) (distribution.DistributionType, error) {
+func NewFSDistributionType(major string, minor string) (dist.DistributionType, error) {
 
 	major = strings.ToLower(major)
 
@@ -38,7 +38,7 @@ func NewFSDistributionType(major string, minor string) (distribution.Distributio
 	return nil, errors.New("Invalid or unsupported major type")
 }
 
-func NewBundleDistributionType(minor string) (distribution.DistributionType, error) {
+func NewBundleDistributionType(minor string) (dist.DistributionType, error) {
 
 	minor = strings.ToLower(minor)
 

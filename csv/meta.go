@@ -14,14 +14,14 @@ import (
 )
 
 type MetaDistribution struct {
-	distribution.Distribution
-	kind       distribution.DistributionType
+	dist.Distribution
+	kind       dist.DistributionType
 	path       string
 	count      int64
 	lastupdate int64
 }
 
-func (d *MetaDistribution) Type() distribution.DistributionType {
+func (d *MetaDistribution) Type() dist.DistributionType {
 	return d.kind
 }
 
@@ -37,9 +37,9 @@ func (d *MetaDistribution) LastUpdate() time.Time {
 	return time.Unix(d.lastupdate, 0)
 }
 
-// func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, d distribution.Distribution) ([]distribution.Distribution, error) {
+// func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, d dist.Distribution) ([]dist.Distribution, error) {
 
-func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]distribution.Distribution, error) {
+func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]dist.Distribution, error) {
 
 	meta_opts, err := meta_options.DefaultBuildOptions()
 
@@ -64,7 +64,7 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 	// itself (or equivalent) so we don't have to do a second pass but in the
 	// interest of just getting things working we'll suffer to penalty of reading
 	// all the CSV files again... (20180715/thisisaaronland)
-	
+
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 	stats_ch := make(chan *meta_stats.Stats)
@@ -106,7 +106,7 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 		}
 	}
 
-	dist_items := make([]distribution.Distribution, len(metafiles))
+	dist_items := make([]dist.Distribution, len(metafiles))
 
 	for i, path := range metafiles {
 

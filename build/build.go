@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func BuildDistributions(opts *options.BuildOptions, repos []string) ([]distribution.Distribution, error) {
+func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Distribution, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -34,7 +34,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]distribut
 		}()
 	}
 
-	dist_ch := make(chan distribution.Distribution)
+	dist_ch := make(chan dist.Distribution)
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 
@@ -48,7 +48,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]distribut
 
 	var build_err error
 
-	build_items := make([]distribution.Distribution, 0)
+	build_items := make([]dist.Distribution, 0)
 	count := len(repos)
 
 	for count > 0 {
@@ -57,7 +57,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]distribut
 		case <-done_ch:
 			count--
 		case d := <-dist_ch:
-			build_items = append(build_item, d)
+			build_items = append(build_items, d)
 		case err := <-err_ch:
 
 			opts.Logger.Error("%v", err)
@@ -77,7 +77,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]distribut
 	return build_items, build_err
 }
 
-func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch chan distribution.Distribution, done_ch chan bool, err_ch chan error) {
+func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch chan dist.Distribution, done_ch chan bool, err_ch chan error) {
 
 	if opts.Timings {
 
@@ -100,10 +100,6 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 	var local_sqlite string
 	var local_metafiles []string
 	var local_bundlefiles []string
-
-	var dist_sqlite distribution.Distribution
-
-	build_items := make([]distribution.Distribution, 0)
 
 	// do we need to work with a remote (or local) Git checkout and if so
 	// where is it?
@@ -261,19 +257,23 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 			return
 		default:
 
-			metafiles, err := csv.BuildMetaFiles(ctx, opts, mode, source)
+			d_many, err := csv.BuildMetaFiles(ctx, opts, mode, source)
 
 			if err != nil {
 				err_ch <- err
 				return
 			}
 
-			if len(metafiles) == 0 {
+			if len(d_many) == 0 {
 				err_ch <- errors.New("No metafiles produced")
 				return
 			}
 
-			local_metafiles = metafiles
+			for _, d := range d_many {
+				dist_ch <- d
+				local_metafiles = append(local_metafiles, d.Path())
+			}
+
 			opts.Logger.Status("built metafiles %s", local_metafiles)
 		}
 	}
@@ -304,7 +304,4 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		}
 	}
 
-	for _, i := range build_items {
-		item_ch <- i
-	}
 }

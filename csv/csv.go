@@ -23,7 +23,7 @@ func (t *CSVDistributionType) Minor() string {
 	return t.minor
 }
 
-func NewCSVDistributionType(major string, minor string) (distribution.DistributionType, error) {
+func NewCSVDistributionType(major string, minor string) (dist.DistributionType, error) {
 
 	major = strings.ToLower(major)
 
@@ -38,7 +38,7 @@ func NewCSVDistributionType(major string, minor string) (distribution.Distributi
 	return nil, errors.New("Invalid or unsupported major type")
 }
 
-func NewMetaDistributionType(minor string) (distribution.DistributionType, error) {
+func NewMetaDistributionType(minor string) (dist.DistributionType, error) {
 
 	minor = strings.ToLower(minor)
 

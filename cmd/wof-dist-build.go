@@ -161,11 +161,13 @@ func main() {
 
 	repos := flag.Args()
 
-	err = build.BuildDistributions(opts, repos)
+	dists, err := build.BuildDistributions(opts, repos)
 
 	if err != nil {
 		logger.Fatal("Failed to build distributions because %s", err)
 	}
 
+	logger.Status("distributions %s", dists)
+	
 	os.Exit(0)
 }

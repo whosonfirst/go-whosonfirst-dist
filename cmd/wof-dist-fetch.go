@@ -36,8 +36,7 @@ func (r *RegexpFlag) Set(value string) error {
 	return nil
 }
 
-func RetrieveInventory(url string) (*distribution.Inventory, error) {
-
+func RetrieveInventory(url string) (*dist.Inventory, error) {
 	rsp, err := http.Get(url)
 
 	if err != nil {
@@ -52,7 +51,7 @@ func RetrieveInventory(url string) (*distribution.Inventory, error) {
 		return nil, err
 	}
 
-	var inv distribution.Inventory
+	var inv dist.Inventory
 
 	err = json.Unmarshal(body, &inv)
 
@@ -63,7 +62,7 @@ func RetrieveInventory(url string) (*distribution.Inventory, error) {
 	return &inv, nil
 }
 
-func FetchItem(ctx context.Context, item distribution.Item, source *url.URL, dest string, error_ch chan error, done_ch chan bool) {
+func FetchItem(ctx context.Context, item dist.Item, source *url.URL, dest string, error_ch chan error, done_ch chan bool) {
 
 	defer func() {
 		done_ch <- true
@@ -151,7 +150,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	to_fetch := make([]distribution.Item, 0)
+	to_fetch := make([]dist.Item, 0)
 
 	for _, item := range *inv {
 

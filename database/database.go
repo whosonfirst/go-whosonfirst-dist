@@ -23,7 +23,7 @@ func (t *DatabaseDistributionType) Minor() string {
 	return t.minor
 }
 
-func NewDatabaseDistributionType(major string, minor string) (distribution.DistributionType, error) {
+func NewDatabaseDistributionType(major string, minor string) (dist.DistributionType, error) {
 
 	major = strings.ToLower(major)
 
@@ -38,7 +38,7 @@ func NewDatabaseDistributionType(major string, minor string) (distribution.Distr
 	return nil, errors.New("Invalid or unsupported major type")
 }
 
-func NewSQLiteDistributionType(minor string) (distribution.DistributionType, error) {
+func NewSQLiteDistributionType(minor string) (dist.DistributionType, error) {
 
 	minor = strings.ToLower(minor)
 

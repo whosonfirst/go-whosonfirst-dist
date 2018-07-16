@@ -14,14 +14,14 @@ import (
 )
 
 type SQLiteDistribution struct {
-	distribution.Distribution
-	kind       distribution.DistributionType
+	dist.Distribution
+	kind       dist.DistributionType
 	path       string
 	count      int64
 	lastupdate int64
 }
 
-func (d *SQLiteDistribution) Type() distribution.DistributionType {
+func (d *SQLiteDistribution) Type() dist.DistributionType {
 	return d.kind
 }
 
@@ -37,7 +37,7 @@ func (d *SQLiteDistribution) LastUpdate() time.Time {
 	return time.Unix(d.lastupdate, 0)
 }
 
-func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (distribution.Distribution, error) {
+func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
 	return BuildSQLiteCommon(ctx, local_repo, opts)
@@ -45,7 +45,7 @@ func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOpti
 
 // PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
-func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (distribution.Distribution, error) {
+func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
 
 	select {
 
