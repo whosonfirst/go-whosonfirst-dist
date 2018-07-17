@@ -1,14 +1,17 @@
 package dist
 
 import (
+       "fmt"
+       "os"
        "time"
 )
 
-type Inventory []Item
+// for internal use
 
 type Distribution interface {
      Type() DistributionType
      Path() string
+     Count() int64
      LastUpdate() time.Time
 }
 
@@ -18,13 +21,13 @@ type DistributionType interface {
      Minor() string
 }
 
-type Item struct {
+// for external publication
 
-        // something something something a private (absolute) path
-	// attribute that we can use internally but not expose when
-	// this is serialized and published (20180613/thisisaaronland)
-	
+type Inventory []Item
+
+type Item struct {
 	Name             string `json:"name"`
+	Type		 string `json:"type"`
 	NameCompressed   string `json:"name_compressed"`
 	Count            int64  `json:"count"`
 	Size             int64  `json:"size"`
@@ -38,4 +41,47 @@ type Item struct {
 
 func (i *Item) String() string {
      return i.Name
+}
+
+func NewItemFromDistribution(d Distribution) (*Item, error) {
+
+     info, err := os.Stat(d.Path())
+
+     if err != nil{
+     	return nil, err
+     }
+
+     fname := info.Name()
+     fsize := info.Size()
+     lastmod := info.ModTime()
+
+     count := d.Count()
+     lastupdate := d.LastUpdate()
+
+     str_lastmod := lastmod.Format(time.RFC3339)
+     str_lastupdate := lastupdate.Format(time.RFC3339)
+
+     t := d.Type()
+     
+     str_type := fmt.Sprintf("x-urn:whosonfirst:%s:%s#%s", t.Class(), t.Major(), t.Minor())
+     
+     i := Item {
+     	Name: fname,
+	Type: str_type,
+	
+	Size: fsize,
+	Count: count,
+
+	LastUpdate: str_lastupdate,
+	LastModified: str_lastmod,
+	
+	Repo: "",
+	Commit: "",
+	
+	NameCompressed: "",
+	SizeCompressed: -1,
+	Sha256Compressed: "",
+     }
+
+     return &i, nil
 }

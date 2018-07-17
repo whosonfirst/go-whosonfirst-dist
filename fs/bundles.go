@@ -5,6 +5,7 @@ import (
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
 	"path/filepath"
 	"strings"
 	"time"
@@ -81,7 +82,19 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					return
 				}
 
-				err = b.BundleMetafileFromSQLite(ctx, dsn, path)
+				err = b.BundleMetafileFromSQLite(ctx, dsn, abs_path)
+
+				if err != nil {
+					err_ch <- err
+					return
+				}
+
+				// see this... yeah - it's not yet clear to me where to
+				// to generate stats in the various DoThisFromThat packages
+				// or how to return them so we're just (re) crunching meta
+				// files for now... (20180717/thisisaaronland)
+
+				stats, err := meta_stats.Compile(abs_path)
 
 				if err != nil {
 					err_ch <- err
@@ -98,8 +111,8 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 				d := BundleDistribution{
 					kind:       k,
 					path:       bundle_path,
-					count:      -1,
-					lastupdate: -1,
+					count:      stats.Count,
+					lastupdate: stats.LastUpdate,
 				}
 
 				dist_ch <- &d

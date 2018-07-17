@@ -3,6 +3,7 @@ package build
 import (
 	_ "compress/bzip2"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	_ "github.com/facebookgo/atomicfile"
@@ -13,6 +14,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	_ "io"
+	"log"
 	_ "net/http"
 	"os"
 	"path/filepath"
@@ -57,7 +59,18 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 		case <-done_ch:
 			count--
 		case d := <-dist_ch:
+
 			build_items = append(build_items, d)
+
+			// this is debugging - not get used to it
+
+			i, _ := dist.NewItemFromDistribution(d)
+			b, _ := json.Marshal(i)
+
+			log.Println("DIST")
+			log.Println(string(b))
+			log.Println("--")
+
 		case err := <-err_ch:
 
 			opts.Logger.Error("%v", err)
