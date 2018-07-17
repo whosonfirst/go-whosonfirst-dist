@@ -25,6 +25,9 @@ type DistributionType interface {
 
 type Inventory []Item
 
+// all of this (the Item stuff) is still wet paint and will almost
+// certainly change (20180717/thisisaaronland)
+
 type Item struct {
 	Name             string `json:"name"`
 	Type		 string `json:"type"`
