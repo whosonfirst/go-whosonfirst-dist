@@ -1,21 +1,17 @@
 package build
 
 import (
-	_ "compress/bzip2"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	_ "github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
 	"github.com/whosonfirst/go-whosonfirst-dist/fs"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	_ "io"
 	"log"
-	_ "net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -59,18 +55,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 		case <-done_ch:
 			count--
 		case d := <-dist_ch:
-
 			build_items = append(build_items, d)
-
-			// this is debugging - not get used to it
-
-			i, _ := dist.NewItemFromDistribution(d)
-			b, _ := json.Marshal(i)
-
-			log.Println("DIST")
-			log.Println(string(b))
-			log.Println("--")
-
 		case err := <-err_ch:
 
 			opts.Logger.Error("%v", err)
@@ -81,6 +66,59 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 			if opts.Strict {
 				break
 			}
+
+		default:
+			// pass
+		}
+	}
+
+	item_ch := make(chan *dist.Item)
+
+	for _, d := range build_items {
+
+		go func(d dist.Distribution, item_ch chan *dist.Item, done_ch chan bool, err_ch chan error) {
+
+			defer func() {
+				done_ch <- true
+			}()
+
+			c, err := d.Compress()
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			log.Println("COMPRESSED", c.Path(), c.Hash())
+
+			i, err := dist.NewItemFromDistribution(d, c)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			item_ch <- i
+
+		}(d, item_ch, done_ch, err_ch)
+	}
+
+	items := make([]*dist.Item, 0)
+	remaining := len(build_items)
+
+	for remaining > 0 {
+
+		select {
+
+		case <-done_ch:
+			remaining -= 1
+		case e := <-err_ch:
+			log.Println("ERROR", e)
+		case i := <-item_ch:
+			items = append(items, i)
+
+			b, _ := json.Marshal(i)
+			log.Println(string(b))
 
 		default:
 			// pass

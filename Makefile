@@ -49,6 +49,7 @@ vendor-deps: rmdeps deps
 	rm -rf src
 
 fmt:
+	go fmt *.go
 	go fmt build/*.go
 	go fmt cmd/*.go
 	go fmt compress/*.go
