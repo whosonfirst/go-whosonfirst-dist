@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
@@ -35,6 +36,35 @@ func (d *SQLiteDistribution) Count() int64 {
 
 func (d *SQLiteDistribution) LastUpdate() time.Time {
 	return time.Unix(d.lastupdate, 0)
+}
+
+type SQLiteCompressedDistribution struct {
+	path string
+	hash string
+}
+
+func (c *SQLiteCompressedDistribution) Path() string {
+	return c.path
+}
+
+func (c *SQLiteCompressedDistribution) Hash() string {
+	return c.hash
+}
+
+func (d *SQLiteDistribution) Compress() (dist.CompressedDistribution, error) {
+
+	path, sha, err := utils.CompressFile(d.path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c := SQLiteCompressedDistribution{
+		path: path,
+		hash: sha,
+	}
+
+	return &c, nil
 }
 
 func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {

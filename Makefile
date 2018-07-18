@@ -7,11 +7,13 @@ prep:
 self:   prep rmdeps
 	if test -d src/github.com/whosonfirst/go-whosonfirst-dist; then rm -rf src/github.com/whosonfirst/go-whosonfirst-dist; fi
 	mkdir -p src/github.com/whosonfirst/go-whosonfirst-dist
-	cp -r fs src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r build src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r compress src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r csv src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r database src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r fs src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r git src/github.com/whosonfirst/go-whosonfirst-dist/
+	cp -r hash src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r options src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp -r utils src/github.com/whosonfirst/go-whosonfirst-dist/
 	cp *.go src/github.com/whosonfirst/go-whosonfirst-dist
@@ -48,11 +50,13 @@ vendor-deps: rmdeps deps
 
 fmt:
 	go fmt build/*.go
-	go fmt fs/*.go
 	go fmt cmd/*.go
-	go fmt database/*.go
+	go fmt compress/*.go
 	go fmt csv/*.go
+	go fmt database/*.go
+	go fmt fs/*.go
 	go fmt git/*.go
+	go fmt hash/*.go
 	go fmt options/*.go
 	go fmt utils/*.go
 

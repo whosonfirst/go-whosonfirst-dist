@@ -2,6 +2,7 @@ package fs
 
 import (
 	"context"
+	"errors"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
@@ -33,6 +34,10 @@ func (d *BundleDistribution) Count() int64 {
 
 func (d *BundleDistribution) LastUpdate() time.Time {
 	return time.Unix(d.lastupdate, 0)
+}
+
+func (d *BundleDistribution) Compress() (dist.CompressedDistribution, error) {
+	return nil, errors.New("Please write me")
 }
 
 func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles []string, source string) ([]dist.Distribution, error) {

@@ -37,7 +37,9 @@ func (d *MetaDistribution) LastUpdate() time.Time {
 	return time.Unix(d.lastupdate, 0)
 }
 
-// func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, d dist.Distribution) ([]dist.Distribution, error) {
+func (d *MetaDistribution) Compress() (dist.CompressedDistribution, error) {
+	return nil, errors.New("Please write me")
+}
 
 func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]dist.Distribution, error) {
 

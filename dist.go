@@ -13,12 +13,20 @@ type Distribution interface {
      Path() string
      Count() int64
      LastUpdate() time.Time
+
+     Compress() (CompressedDistribution, error)
 }
 
 type DistributionType interface {
      Class() string
      Major() string
      Minor() string
+}
+
+type CompressedDistribution interface {
+     Path() string
+     Hash() string
+     // something something something Type() ?
 }
 
 // for external publication
