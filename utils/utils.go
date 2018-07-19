@@ -29,6 +29,27 @@ func CompressFile(source string) (string, string, error) {
 	return path_compressed, hashed, nil
 }
 
+func CompressDirectory(source string) (string, string, error) {
+
+	opts := compress.DefaultCompressOptions()
+	root := filepath.Dir(source)
+
+	path_compressed, err := compress.CompressDirectory(source, root, opts)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	hashed, err := hash.HashFile(path_compressed)
+
+	if err != nil {
+		os.Remove(path_compressed)
+		return "", "", err
+	}
+
+	return path_compressed, hashed, nil
+}
+
 // because os.Rename can't across devices on Linux...
 // (20180604/thisisaaronland)
 

@@ -2,10 +2,10 @@ package fs
 
 import (
 	"context"
-	"errors"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
 	"path/filepath"
 	"strings"
@@ -37,7 +37,32 @@ func (d *BundleDistribution) LastUpdate() time.Time {
 }
 
 func (d *BundleDistribution) Compress() (dist.CompressedDistribution, error) {
-	return nil, errors.New("Please write me")
+
+	path, sha, err := utils.CompressDirectory(d.path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c := BundleCompressedDistribution{
+		path: path,
+		hash: sha,
+	}
+
+	return &c, nil
+}
+
+type BundleCompressedDistribution struct {
+	path string
+	hash string
+}
+
+func (c *BundleCompressedDistribution) Path() string {
+	return c.path
+}
+
+func (c *BundleCompressedDistribution) Hash() string {
+	return c.hash
 }
 
 func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles []string, source string) ([]dist.Distribution, error) {

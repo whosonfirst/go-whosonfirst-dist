@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
 	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
@@ -38,7 +39,32 @@ func (d *MetaDistribution) LastUpdate() time.Time {
 }
 
 func (d *MetaDistribution) Compress() (dist.CompressedDistribution, error) {
-	return nil, errors.New("Please write me")
+
+	path, sha, err := utils.CompressFile(d.path)
+
+	if err != nil {
+		return nil, err
+	}
+
+	c := MetaCompressedDistribution{
+		path: path,
+		hash: sha,
+	}
+
+	return &c, nil
+}
+
+type MetaCompressedDistribution struct {
+	path string
+	hash string
+}
+
+func (c *MetaCompressedDistribution) Path() string {
+	return c.path
+}
+
+func (c *MetaCompressedDistribution) Hash() string {
+	return c.hash
 }
 
 func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]dist.Distribution, error) {

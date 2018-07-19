@@ -38,19 +38,6 @@ func (d *SQLiteDistribution) LastUpdate() time.Time {
 	return time.Unix(d.lastupdate, 0)
 }
 
-type SQLiteCompressedDistribution struct {
-	path string
-	hash string
-}
-
-func (c *SQLiteCompressedDistribution) Path() string {
-	return c.path
-}
-
-func (c *SQLiteCompressedDistribution) Hash() string {
-	return c.hash
-}
-
 func (d *SQLiteDistribution) Compress() (dist.CompressedDistribution, error) {
 
 	path, sha, err := utils.CompressFile(d.path)
@@ -67,13 +54,24 @@ func (d *SQLiteDistribution) Compress() (dist.CompressedDistribution, error) {
 	return &c, nil
 }
 
+type SQLiteCompressedDistribution struct {
+	path string
+	hash string
+}
+
+func (c *SQLiteCompressedDistribution) Path() string {
+	return c.path
+}
+
+func (c *SQLiteCompressedDistribution) Hash() string {
+	return c.hash
+}
+
 func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
 	return BuildSQLiteCommon(ctx, local_repo, opts)
 }
-
-// PLEASE MAKE ME RETURN A distribution.Item thingy... (20180611/thisisaaronland)
 
 func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
 

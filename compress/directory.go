@@ -10,13 +10,15 @@ import (
 	"strings"
 )
 
-func CompressBundle(source string, chroot string, opts *CompressOptions) (string, error) {
+func CompressDirectory(source string, chroot string, opts *CompressOptions) (string, error) {
 
-	dest, err := CompressedBundlePath(source)
+	abs_source, err := filepath.Abs(source)
 
 	if err != nil {
-		return "", nil
+		return "", err
 	}
+
+	dest := fmt.Sprintf("%s.tar.bz2", abs_source)
 
 	abs_chroot, err := filepath.Abs(chroot)
 
@@ -64,17 +66,5 @@ func CompressBundle(source string, chroot string, opts *CompressOptions) (string
 		}
 	}
 
-	return dest, nil
-}
-
-func CompressedBundlePath(source string) (string, error) {
-
-	abs_source, err := filepath.Abs(source)
-
-	if err != nil {
-		return "", err
-	}
-
-	dest := fmt.Sprintf("%s.tar.bz2", abs_source)
 	return dest, nil
 }
