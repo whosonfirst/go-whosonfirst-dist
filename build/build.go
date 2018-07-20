@@ -2,7 +2,7 @@ package build
 
 import (
 	"context"
-	"encoding/json"
+	_ "encoding/json"
 	"errors"
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist"
@@ -11,13 +11,14 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/fs"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	"log"
+	_ "log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
-func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Distribution, error) {
+func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Item, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -60,27 +61,33 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 
 			opts.Logger.Error("%v", err)
 			build_err = err
-
-			// remember we're defer cancel() -ing above
-
-			if opts.Strict {
-				break
-			}
+			break
 
 		default:
 			// pass
 		}
 	}
 
+	if build_err != nil {
+		return nil, build_err
+	}
+
 	item_ch := make(chan *dist.Item)
 
 	for _, d := range build_items {
 
-		go func(d dist.Distribution, item_ch chan *dist.Item, done_ch chan bool, err_ch chan error) {
+		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, done_ch chan bool, err_ch chan error) {
 
 			defer func() {
 				done_ch <- true
 			}()
+
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				// pass
+			}
 
 			c, err := d.Compress()
 
@@ -88,8 +95,6 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 				err_ch <- err
 				return
 			}
-
-			log.Println("COMPRESSED", c.Path(), c.Hash())
 
 			i, err := dist.NewItemFromDistribution(d, c)
 
@@ -100,7 +105,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 
 			item_ch <- i
 
-		}(d, item_ch, done_ch, err_ch)
+		}(ctx, d, item_ch, done_ch, err_ch)
 	}
 
 	items := make([]*dist.Item, 0)
@@ -113,19 +118,20 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]dist.Dist
 		case <-done_ch:
 			remaining -= 1
 		case e := <-err_ch:
-			log.Println("ERROR", e)
+			build_err = e
+			break
 		case i := <-item_ch:
 			items = append(items, i)
-
-			b, _ := json.Marshal(i)
-			log.Println(string(b))
-
 		default:
 			// pass
 		}
 	}
 
-	return build_items, build_err
+	if build_err != nil {
+		return nil, build_err
+	}
+
+	return items, nil
 }
 
 func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch chan dist.Distribution, done_ch chan bool, err_ch chan error) {
@@ -140,17 +146,74 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		}()
 	}
 
-	defer func() {
-		done_ch <- true
-	}()
-
-	// eventually these will all be replaced by distibution Item and/or
-	// distribution.Inventory thingies... (20180613/thisisaaronland)
-
-	var local_repo string
+	var local_checkout string
 	var local_sqlite string
 	var local_metafiles []string
 	var local_bundlefiles []string
+
+	defer func() {
+
+		// we're just going to do a WaitGroup since all we'll do
+		// with errors is report them (20180720/thisisaaronland)
+
+		wg := new(sync.WaitGroup)
+
+		rm_files := func(wg *sync.WaitGroup, files ...string) {
+
+			wg.Add(1)
+			defer wg.Done()
+
+			for _, path := range files {
+
+				opts.Logger.Status("remove %s", path)
+
+				err := os.Remove(path)
+
+				if err != nil {
+					opts.Logger.Warning("Failed to remove '%s' : %s", path, err)
+				}
+			}
+		}
+
+		rm_dirs := func(wg *sync.WaitGroup, dirs ...string) {
+
+			wg.Add(1)
+			defer wg.Done()
+
+			for _, path := range dirs {
+
+				opts.Logger.Status("remove directory %s", path)
+
+				err := os.RemoveAll(path)
+
+				if err != nil {
+					opts.Logger.Warning("Failed to remove directory '%s' : %s", path, err)
+				}
+			}
+		}
+
+		if !opts.PreserveCheckout && local_checkout != "" {
+			go rm_dirs(wg, local_checkout)
+		}
+
+		/*
+			if !opts.PreserveSQLite && local_sqlite != "" {
+				go rm_files(wg, local_sqlite)
+			}
+		*/
+
+		if !opts.PreserveMeta && len(local_metafiles) > 0 {
+			go rm_files(wg, local_metafiles...)
+		}
+
+		if !opts.PreserveBundle && len(local_bundlefiles) >= 0 {
+			go rm_dirs(wg, local_bundlefiles...)
+		}
+
+		wg.Wait()
+
+		done_ch <- true
+	}()
 
 	// do we need to work with a remote (or local) Git checkout and if so
 	// where is it?
@@ -160,35 +223,27 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 	case <-ctx.Done():
 		return
 	default:
-
-		if opts.LocalCheckout || opts.LocalSQLite {
-			local_repo = opts.Repo
-		} else {
-
-			// SOMETHING SOMETHING throw an error if local_repo exists or remove?
-			// (20181013/thisisaaronland)
-
-			repo, err := git.CloneRepo(ctx, opts)
-
-			if err != nil {
-				err_ch <- err
-				return
-			}
-
-			defer func() {
-
-				if opts.PreserveCheckout {
-					opts.Logger.Info("local checkout left in place at %s", repo)
-				} else {
-					os.RemoveAll(repo)
-				}
-			}()
-
-			local_repo = repo
-		}
+		// pass
 	}
 
-	opts.Logger.Status("local_repo is %s", local_repo)
+	if opts.LocalCheckout || opts.LocalSQLite {
+		local_checkout = opts.Repo
+	} else {
+
+		// SOMETHING SOMETHING throw an error if local_checkout exists or remove?
+		// (20181013/thisisaaronland)
+
+		repo, err := git.CloneRepo(ctx, opts)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		local_checkout = repo
+	}
+
+	opts.Logger.Status("local_checkout is %s", local_checkout)
 
 	// if opts.RemoteSQLite then fetch from dist.whosonfirst.org (and uncompressed) and
 	// store in opts.Workdir here... (20180704/thisisaaronland)
@@ -247,35 +302,37 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		case <-ctx.Done():
 			return
 		default:
+			// pass
+		}
 
-			// PLEASE FIX ME
-			// 1. use go-whosonfirst-repo
-			// 2. reconcile me with the code in database/sqlite.go
-			//    which should also do (1)
-			// (20180620/thisisaaronland)
+		// PLEASE FIX ME
+		// 1. use go-whosonfirst-repo
+		// 2. reconcile me with the code in database/sqlite.go
+		//    which should also do (1)
+		// (20180620/thisisaaronland)
 
-			if opts.LocalSQLite {
+		if opts.LocalSQLite {
 
-				fname := fmt.Sprintf("%s-latest.db", opts.Repo)
-				local_sqlite = filepath.Join(opts.Workdir, fname)
+			fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+			local_sqlite = filepath.Join(opts.Workdir, fname)
 
-			} else {
+		} else {
 
-				d, err := database.BuildSQLite(ctx, local_repo, opts)
+			d, err := database.BuildSQLite(ctx, local_checkout, opts)
 
-				if err != nil {
-					err_ch <- err
-					return
-				}
-
-				// should we do this now?
-				dist_ch <- d
-
-				local_sqlite = d.Path()
+			if err != nil {
+				err_ch <- err
+				return
 			}
 
-			opts.Logger.Status("local sqlite is %s", local_sqlite)
+			// should we do this now?
+			dist_ch <- d
+
+			local_sqlite = d.Path()
 		}
+
+		opts.Logger.Status("local sqlite is %s", local_sqlite)
+
 	}
 
 	_, err := os.Stat(local_sqlite)
@@ -293,7 +350,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 	if opts.Meta {
 
 		mode := "repo"
-		source := local_repo
+		source := local_checkout
 
 		if opts.SQLite {
 			mode = "sqlite"
@@ -307,26 +364,28 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		case <-ctx.Done():
 			return
 		default:
-
-			d_many, err := csv.BuildMetaFiles(ctx, opts, mode, source)
-
-			if err != nil {
-				err_ch <- err
-				return
-			}
-
-			if len(d_many) == 0 {
-				err_ch <- errors.New("No metafiles produced")
-				return
-			}
-
-			for _, d := range d_many {
-				dist_ch <- d
-				local_metafiles = append(local_metafiles, d.Path())
-			}
-
-			opts.Logger.Status("built metafiles %s", local_metafiles)
+			// pass
 		}
+
+		d_many, err := csv.BuildMetaFiles(ctx, opts, mode, source)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		if len(d_many) == 0 {
+			err_ch <- errors.New("No metafiles produced")
+			return
+		}
+
+		for _, d := range d_many {
+			dist_ch <- d
+			local_metafiles = append(local_metafiles, d.Path())
+		}
+
+		opts.Logger.Status("built metafiles %s", local_metafiles)
+
 	}
 
 	if opts.Bundle {
@@ -336,31 +395,32 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		case <-ctx.Done():
 			return
 		default:
-
-			// SOMETHING SOMETHING throw an error if local_bundlefiles exist or remove?
-			// That presumes knowing what they are called first and/or moving this check
-			// in to fs.BuildBundle...
-			// (20181013/thisisaaronland)
-
-			bundle_dist, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
-
-			if err != nil {
-				err_ch <- err
-				return
-			}
-
-			if len(bundle_dist) == 0 {
-				err_ch <- errors.New("No metafiles produced")
-				return
-			}
-
-			for _, d := range bundle_dist {
-				dist_ch <- d
-				local_bundlefiles = append(local_bundlefiles, d.Path())
-			}
-
-			opts.Logger.Status("made bundle %s", local_bundlefiles)
+			// pass
 		}
+
+		// SOMETHING SOMETHING throw an error if local_bundlefiles exist or remove?
+		// That presumes knowing what they are called first and/or moving this check
+		// in to fs.BuildBundle...
+		// (20181013/thisisaaronland)
+
+		bundle_dist, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		if len(bundle_dist) == 0 {
+			err_ch <- errors.New("No metafiles produced")
+			return
+		}
+
+		for _, d := range bundle_dist {
+			dist_ch <- d
+			local_bundlefiles = append(local_bundlefiles, d.Path())
+		}
+
+		opts.Logger.Status("made bundle %s", local_bundlefiles)
 	}
 
 }

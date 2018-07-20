@@ -5,7 +5,9 @@ package main
 // AND WHATEVER THE NEXT THING IS (20180112/thisisaaronland)
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist/build"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-log"
@@ -161,11 +163,18 @@ func main() {
 
 	repos := flag.Args()
 
-	_, err = build.BuildDistributions(opts, repos)
+	items, err := build.BuildDistributions(opts, repos)
 
 	if err != nil {
 		logger.Fatal("Failed to build distributions because %s", err)
 	}
 
+	b, err := json.Marshal(items)
+
+	if err != nil {
+		logger.Fatal("Failed to parse inventory because %s", err)
+	}
+
+	fmt.Println(string(b))
 	os.Exit(0)
 }

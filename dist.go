@@ -31,7 +31,7 @@ type CompressedDistribution interface {
 
 // for external publication
 
-type Inventory []Item
+type Inventory []*Item
 
 // all of this (the Item stuff) is still wet paint and will almost
 // certainly change (20180717/thisisaaronland)

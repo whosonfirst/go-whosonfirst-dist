@@ -62,7 +62,7 @@ func RetrieveInventory(url string) (*dist.Inventory, error) {
 	return &inv, nil
 }
 
-func FetchItem(ctx context.Context, item dist.Item, source *url.URL, dest string, error_ch chan error, done_ch chan bool) {
+func FetchItem(ctx context.Context, item *dist.Item, source *url.URL, dest string, error_ch chan error, done_ch chan bool) {
 
 	defer func() {
 		done_ch <- true
@@ -72,47 +72,48 @@ func FetchItem(ctx context.Context, item dist.Item, source *url.URL, dest string
 	case <-ctx.Done():
 		return
 	default:
-
-		source.Path = filepath.Join(source.Path, item.NameCompressed)
-		remote := source.String()
-
-		local := filepath.Join(dest, item.Name) // note the uncompressed name since we're going to decompress on the fly
-
-		rsp, err := http.Get(remote)
-
-		if err != nil {
-			error_ch <- err
-			return
-		}
-
-		if rsp.StatusCode != 200 {
-			err := fmt.Sprintf("%s returned HTTP error %s", remote, rsp.Status)
-			error_ch <- errors.New(err)
-			return
-		}
-
-		defer rsp.Body.Close()
-
-		bz_reader := bzip2.NewReader(rsp.Body)
-
-		fh, err := os.OpenFile(local, os.O_RDWR|os.O_CREATE, 0644)
-
-		if err != nil {
-			error_ch <- err
-			return
-		}
-
-		defer fh.Close()
-
-		b, err := io.Copy(fh, bz_reader)
-
-		if err != nil {
-			error_ch <- err
-			return
-		}
-
-		log.Printf("WROTE %s (%d bytes)\n", local, b)
+		// pass
 	}
+
+	source.Path = filepath.Join(source.Path, item.NameCompressed)
+	remote := source.String()
+
+	local := filepath.Join(dest, item.Name) // note the uncompressed name since we're going to decompress on the fly
+
+	rsp, err := http.Get(remote)
+
+	if err != nil {
+		error_ch <- err
+		return
+	}
+
+	if rsp.StatusCode != 200 {
+		err := fmt.Sprintf("%s returned HTTP error %s", remote, rsp.Status)
+		error_ch <- errors.New(err)
+		return
+	}
+
+	defer rsp.Body.Close()
+
+	bz_reader := bzip2.NewReader(rsp.Body)
+
+	fh, err := os.OpenFile(local, os.O_RDWR|os.O_CREATE, 0644)
+
+	if err != nil {
+		error_ch <- err
+		return
+	}
+
+	defer fh.Close()
+
+	b, err := io.Copy(fh, bz_reader)
+
+	if err != nil {
+		error_ch <- err
+		return
+	}
+
+	log.Printf("WROTE %s (%d bytes)\n", local, b)
 }
 
 func main() {
@@ -150,7 +151,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	to_fetch := make([]dist.Item, 0)
+	to_fetch := make([]*dist.Item, 0)
 
 	for _, item := range *inv {
 
