@@ -1,10 +1,7 @@
 package main
 
-// THIS IS WET PAINT AND WILL/MIGHT/SHOULD-PROBABLY BE MOVED IN TO ITS OWN
-// go-whosonfirst-distributions PACKAGE SO WE CAN REUSE CODE TO BUILD BUNDLES
-// AND WHATEVER THE NEXT THING IS (20180112/thisisaaronland)
-
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -14,6 +11,7 @@ import (
 	"io"
 	_ "log"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -163,18 +161,45 @@ func main() {
 
 	repos := flag.Args()
 
-	items, err := build.BuildDistributions(opts, repos)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	distributions, err := build.BuildDistributionsForRepos(ctx, opts, repos...)
 
 	if err != nil {
 		logger.Fatal("Failed to build distributions because %s", err)
 	}
+	
+	for repo, items := range distributions {
 
-	b, err := json.Marshal(items)
+		fname := fmt.Sprintf("%s-inventory.json", repo)
+		path := filepath.Join(opts.Workdir, fname)
 
-	if err != nil {
-		logger.Fatal("Failed to parse inventory because %s", err)
+		b, err := json.Marshal(items)
+
+		if err != nil {
+		   	logger.Warning("Failed to encode %s, %s", path, err)
+			continue
+		}
+
+		fh, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+
+		if err != nil {
+		   	logger.Warning("Failed to open %s for writing, %s", path, err)
+			continue
+		}
+
+		_, err = fh.Write(b)
+
+		if err != nil {
+		   	logger.Warning("Failed to write %s, %s", path, err)
+			continue
+		}
+
+		fh.Close()
+
+		logger.Status("Wrote inventory %s", path)
 	}
-
-	fmt.Println(string(b))
+	
 	os.Exit(0)
 }

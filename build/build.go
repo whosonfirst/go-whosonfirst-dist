@@ -2,7 +2,6 @@ package build
 
 import (
 	"context"
-	_ "encoding/json"
 	"errors"
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist"
@@ -11,17 +10,14 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/fs"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
-	_ "log"
 	"os"
 	"path/filepath"
+	"strings"		
 	"sync"
 	"time"
 )
 
-func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Item, error) {
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions, repos ...string) (map[string][]*dist.Item, error) {
 
 	if opts.Timings {
 
@@ -29,11 +25,16 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Ite
 
 		defer func() {
 			t2 := time.Since(t1)
-			opts.Logger.Status("time to build all %v\n", t2)
+			opts.Logger.Status("time to build distributions for %d repos %v", len(repos), t2)
 		}()
 	}
 
-	dist_ch := make(chan dist.Distribution)
+	type BuildItem struct {
+		Repo  string
+		Items []*dist.Item
+	}
+
+	build_ch := make(chan BuildItem)
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 
@@ -42,39 +43,166 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Ite
 		local_opts := opts.Clone()
 		local_opts.Repo = repo
 
-		go BuildDistribution(ctx, local_opts, dist_ch, done_ch, err_ch)
+		go func(ctx context.Context, repo string, build_ch chan BuildItem, done_ch chan bool, err_ch chan error) {
+
+			defer func() {
+				done_ch <- true
+			}()
+
+			local_opts := opts.Clone()
+			local_opts.Repo = repo
+
+			items, err := BuildDistributions(ctx, local_opts)
+
+			if err != nil {
+				err_ch <- err
+				return
+			}
+
+			b := BuildItem{
+				Repo:  repo,
+				Items: items,
+			}
+
+			build_ch <- b
+
+		}(ctx, repo, build_ch, done_ch, err_ch)
 	}
 
-	var build_err error
+	items := make(map[string][]*dist.Item)
+	var err error
 
-	build_items := make([]dist.Distribution, 0)
-	count := len(repos)
+	remaining := len(repos)
 
-	for count > 0 {
+	for remaining > 0 {
 
 		select {
 		case <-done_ch:
-			count--
-		case d := <-dist_ch:
-			build_items = append(build_items, d)
-		case err := <-err_ch:
-
-			opts.Logger.Error("%v", err)
-			build_err = err
+			remaining--
+		case b := <-build_ch:
+			items[b.Repo] = b.Items
+		case e := <-err_ch:
+			err = e
 			break
-
 		default:
 			// pass
 		}
 	}
 
-	if build_err != nil {
-		return nil, build_err
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dist.Item, error) {
+
+	distributions := make([]dist.Distribution, 0) // uncompressed and private
+	items := make([]*dist.Item, 0)                // compressed and public
+
+	if opts.Timings {
+
+		t1 := time.Now()
+
+		defer func() {
+			t2 := time.Since(t1)
+			opts.Logger.Status("time to build COMPRESSED distributions for %s %v", opts.Repo, t2)
+		}()
+	}
+
+	defer func() {
+
+		if opts.Timings {
+
+			t1 := time.Now()
+
+			defer func() {
+				t2 := time.Since(t1)
+				opts.Logger.Status("time to remove uncompressed files for %s %v", opts.Repo, t2)
+			}()
+		}
+
+		rm := func(path string) {
+
+			opts.Logger.Status("remove uncompressed file %s", path)
+
+			info, err := os.Stat(path)
+
+			if os.IsNotExist(err) {
+				return
+			}
+
+			if err != nil {
+				opts.Logger.Warning("Failed to stat path '%s' : %s", path, err)
+				return
+			}
+
+			if info.IsDir() {
+				err = os.RemoveAll(path)
+			} else {
+				err = os.Remove(path)
+			}
+
+			if err != nil {
+				opts.Logger.Warning("Failed to remove '%s' : %s", path, err)
+			}
+		}
+
+		wg := new(sync.WaitGroup)
+
+		for _, d := range distributions {
+
+			t := d.Type()
+
+			switch t.Class() {
+
+			case "csv":
+
+				if t.Major() == "meta" && opts.PreserveMeta {
+					continue
+				}
+
+			case "database":
+
+				if t.Major() == "sqlite" && opts.PreserveSQLite {
+					continue
+				}
+
+			case "fs":
+
+				if t.Major() == "bundle" && opts.PreserveBundle {
+					continue
+				}
+
+			default:
+				// pass
+			}
+
+			wg.Add(1)
+
+			go func(path string, wg *sync.WaitGroup) {
+
+				defer wg.Done()
+				rm(path)
+
+			}(d.Path(), wg)
+		}
+
+		wg.Wait()
+	}()
+
+	distributions, err := buildDistributionsForRepo(ctx, opts)
+
+	if err != nil {
+		return nil, err
 	}
 
 	item_ch := make(chan *dist.Item)
+	done_ch := make(chan bool)
+	err_ch := make(chan error)
 
-	for _, d := range build_items {
+	for _, d := range distributions {
 
 		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, done_ch chan bool, err_ch chan error) {
 
@@ -108,8 +236,8 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Ite
 		}(ctx, d, item_ch, done_ch, err_ch)
 	}
 
-	items := make([]*dist.Item, 0)
-	remaining := len(build_items)
+	var item_err error
+	remaining := len(distributions)
 
 	for remaining > 0 {
 
@@ -118,7 +246,7 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Ite
 		case <-done_ch:
 			remaining -= 1
 		case e := <-err_ch:
-			build_err = e
+			item_err = e
 			break
 		case i := <-item_ch:
 			items = append(items, i)
@@ -127,14 +255,14 @@ func BuildDistributions(opts *options.BuildOptions, repos []string) ([]*dist.Ite
 		}
 	}
 
-	if build_err != nil {
-		return nil, build_err
+	if item_err != nil {
+		return nil, item_err
 	}
 
 	return items, nil
 }
 
-func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch chan dist.Distribution, done_ch chan bool, err_ch chan error) {
+func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) ([]dist.Distribution, error) {
 
 	if opts.Timings {
 
@@ -142,8 +270,18 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 
 		defer func() {
 			t2 := time.Since(t1)
-			opts.Logger.Status("time to build %s %v\n", opts.Repo, t2)
+			opts.Logger.Status("time to build UNCOMPRESSED distributions for %s %v", opts.Repo, t2)
 		}()
+	}
+
+	distributions := make([]dist.Distribution, 0)
+
+	select {
+
+	case <-ctx.Done():
+		return nil, nil
+	default:
+		// pass
 	}
 
 	var local_checkout string
@@ -151,80 +289,8 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 	var local_metafiles []string
 	var local_bundlefiles []string
 
-	defer func() {
-
-		// we're just going to do a WaitGroup since all we'll do
-		// with errors is report them (20180720/thisisaaronland)
-
-		wg := new(sync.WaitGroup)
-
-		rm_files := func(wg *sync.WaitGroup, files ...string) {
-
-			wg.Add(1)
-			defer wg.Done()
-
-			for _, path := range files {
-
-				opts.Logger.Status("remove %s", path)
-
-				err := os.Remove(path)
-
-				if err != nil {
-					opts.Logger.Warning("Failed to remove '%s' : %s", path, err)
-				}
-			}
-		}
-
-		rm_dirs := func(wg *sync.WaitGroup, dirs ...string) {
-
-			wg.Add(1)
-			defer wg.Done()
-
-			for _, path := range dirs {
-
-				opts.Logger.Status("remove directory %s", path)
-
-				err := os.RemoveAll(path)
-
-				if err != nil {
-					opts.Logger.Warning("Failed to remove directory '%s' : %s", path, err)
-				}
-			}
-		}
-
-		if !opts.PreserveCheckout && local_checkout != "" {
-			go rm_dirs(wg, local_checkout)
-		}
-
-		/*
-			if !opts.PreserveSQLite && local_sqlite != "" {
-				go rm_files(wg, local_sqlite)
-			}
-		*/
-
-		if !opts.PreserveMeta && len(local_metafiles) > 0 {
-			go rm_files(wg, local_metafiles...)
-		}
-
-		if !opts.PreserveBundle && len(local_bundlefiles) >= 0 {
-			go rm_dirs(wg, local_bundlefiles...)
-		}
-
-		wg.Wait()
-
-		done_ch <- true
-	}()
-
 	// do we need to work with a remote (or local) Git checkout and if so
 	// where is it?
-
-	select {
-
-	case <-ctx.Done():
-		return
-	default:
-		// pass
-	}
 
 	if opts.LocalCheckout || opts.LocalSQLite {
 		local_checkout = opts.Repo
@@ -236,11 +302,24 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		repo, err := git.CloneRepo(ctx, opts)
 
 		if err != nil {
-			err_ch <- err
-			return
+			return nil, err
 		}
 
 		local_checkout = repo
+	}
+
+	// I don't love that this is here...
+
+	if !opts.PreserveCheckout {
+
+		defer func() {
+
+			err := os.RemoveAll(local_checkout)
+
+			if err != nil {
+				opts.Logger.Status("failed to remove %s, %s", local_checkout, err)
+			}
+		}()
 	}
 
 	opts.Logger.Status("local_checkout is %s", local_checkout)
@@ -271,24 +350,20 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 			wr, err := atomicfile.New(local_sqlite, 0644)
 
 			if err != nil {
-				err_ch <- err
-				return
+				return nil, err
 			}
 
 			_, err = io.Copy(wr, br)
 
 			if err != nil {
 				wr.Abort()
-
-				err_ch <- err
-				return
+				return nil, err
 			}
 
 			err = wr.Close()
 
 			if err != nil {
-				err_ch <- err
-				return
+				return nil, err
 			}
 
 			logger.Info("Retrieved remote SQLite (%s) and stored as %s", remote_sqlite, local_sqlite)
@@ -300,16 +375,10 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		select {
 
 		case <-ctx.Done():
-			return
+			return nil, nil
 		default:
 			// pass
 		}
-
-		// PLEASE FIX ME
-		// 1. use go-whosonfirst-repo
-		// 2. reconcile me with the code in database/sqlite.go
-		//    which should also do (1)
-		// (20180620/thisisaaronland)
 
 		if opts.LocalSQLite {
 
@@ -321,13 +390,10 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 			d, err := database.BuildSQLite(ctx, local_checkout, opts)
 
 			if err != nil {
-				err_ch <- err
-				return
+				return nil, err
 			}
 
-			// should we do this now?
-			dist_ch <- d
-
+			distributions = append(distributions, d)
 			local_sqlite = d.Path()
 		}
 
@@ -338,8 +404,7 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 	_, err := os.Stat(local_sqlite)
 
 	if err != nil {
-		err_ch <- err
-		return
+		return nil, err
 	}
 
 	// eventually we should be able to do these two operations in parallel
@@ -362,30 +427,31 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		select {
 
 		case <-ctx.Done():
-			return
+			return nil, nil
 		default:
 			// pass
 		}
 
+		ta := time.Now()
+		
 		d_many, err := csv.BuildMetaFiles(ctx, opts, mode, source)
 
+		tb := time.Since(ta)
+		
 		if err != nil {
-			err_ch <- err
-			return
+			return nil, err
 		}
 
 		if len(d_many) == 0 {
-			err_ch <- errors.New("No metafiles produced")
-			return
+			return nil, err
 		}
 
 		for _, d := range d_many {
-			dist_ch <- d
+			distributions = append(distributions, d)
 			local_metafiles = append(local_metafiles, d.Path())
 		}
 
-		opts.Logger.Status("built metafiles %s", local_metafiles)
-
+		opts.Logger.Status("time to build metafiles (%s) %v", strings.Join(local_metafiles, ","), tb)
 	}
 
 	if opts.Bundle {
@@ -393,34 +459,32 @@ func BuildDistribution(ctx context.Context, opts *options.BuildOptions, dist_ch 
 		select {
 
 		case <-ctx.Done():
-			return
+			return nil, nil
 		default:
 			// pass
 		}
 
-		// SOMETHING SOMETHING throw an error if local_bundlefiles exist or remove?
-		// That presumes knowing what they are called first and/or moving this check
-		// in to fs.BuildBundle...
-		// (20181013/thisisaaronland)
-
+		ta := time.Now()
+		
 		bundle_dist, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
+		tb := time.Since(ta)
+		
 		if err != nil {
-			err_ch <- err
-			return
+			return nil, err
 		}
 
 		if len(bundle_dist) == 0 {
-			err_ch <- errors.New("No metafiles produced")
-			return
+			return nil, errors.New("No metafiles produced")
 		}
 
 		for _, d := range bundle_dist {
-			dist_ch <- d
+			distributions = append(distributions, d)
 			local_bundlefiles = append(local_bundlefiles, d.Path())
 		}
 
-		opts.Logger.Status("made bundle %s", local_bundlefiles)
+		opts.Logger.Status("time to build bundles (%s) %v", strings.Join(local_bundlefiles, ","), tb)
 	}
 
+	return distributions, nil
 }
