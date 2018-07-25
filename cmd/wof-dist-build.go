@@ -174,7 +174,7 @@ func main() {
 		}
 
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal("Failed to parse repo '%s', because %s", repo_name, err)
 		}
 
 		repos = append(repos, r)

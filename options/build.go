@@ -43,7 +43,7 @@ func NewBuildOptions() *BuildOptions {
 		Source:           "github.com",
 		Protocol:         "https",
 		Organization:     "whosonfirst-data",
-		Repo:             "whosonfirst-data",
+		Repo:             nil,
 		SQLite:           true,
 		Meta:             false,
 		Bundle:           false,

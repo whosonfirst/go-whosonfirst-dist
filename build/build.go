@@ -3,7 +3,6 @@ package build
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/csv"
 	"github.com/whosonfirst/go-whosonfirst-dist/database"
@@ -380,7 +379,9 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 		if opts.LocalSQLite {
 
-			fname := opts.Repo.SQLiteFilename() // fmt.Sprintf("%s-latest.db", opts.Repo)
+			f_opts := repo.DefaultFilenameOptions()
+			fname := opts.Repo.SQLiteFilename(f_opts) // fmt.Sprintf("%s-latest.db", opts.Repo)
+
 			local_sqlite = filepath.Join(opts.Workdir, fname)
 
 		} else {
