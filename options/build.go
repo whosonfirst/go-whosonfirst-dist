@@ -2,6 +2,7 @@ package options
 
 import (
 	"github.com/whosonfirst/go-whosonfirst-log"
+	"github.com/whosonfirst/go-whosonfirst-repo"
 )
 
 type BuildOptions struct {
@@ -9,7 +10,7 @@ type BuildOptions struct {
 	Protocol     string
 	Source       string
 	Organization string
-	Repo         string
+	Repo         repo.Repo
 	SQLite       bool
 	// these are the new new and will replace "SQLite"
 	// SQLiteCommon     bool

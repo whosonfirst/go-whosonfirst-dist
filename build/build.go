@@ -10,14 +10,15 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/fs"
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	"github.com/whosonfirst/go-whosonfirst-repo"
 	"os"
 	"path/filepath"
-	"strings"		
+	"strings"
 	"sync"
 	"time"
 )
 
-func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions, repos ...string) (map[string][]*dist.Item, error) {
+func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions, repos ...repo.Repo) (map[string][]*dist.Item, error) {
 
 	if opts.Timings {
 
@@ -30,7 +31,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	}
 
 	type BuildItem struct {
-		Repo  string
+		Repo  repo.Repo
 		Items []*dist.Item
 	}
 
@@ -38,19 +39,16 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 
-	for _, repo := range repos {
+	for _, r := range repos {
 
-		local_opts := opts.Clone()
-		local_opts.Repo = repo
-
-		go func(ctx context.Context, repo string, build_ch chan BuildItem, done_ch chan bool, err_ch chan error) {
+		go func(ctx context.Context, r repo.Repo, build_ch chan BuildItem, done_ch chan bool, err_ch chan error) {
 
 			defer func() {
 				done_ch <- true
 			}()
 
 			local_opts := opts.Clone()
-			local_opts.Repo = repo
+			local_opts.Repo = r
 
 			items, err := BuildDistributions(ctx, local_opts)
 
@@ -60,13 +58,13 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 			}
 
 			b := BuildItem{
-				Repo:  repo,
+				Repo:  r,
 				Items: items,
 			}
 
 			build_ch <- b
 
-		}(ctx, repo, build_ch, done_ch, err_ch)
+		}(ctx, r, build_ch, done_ch, err_ch)
 	}
 
 	items := make(map[string][]*dist.Item)
@@ -80,7 +78,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 		case <-done_ch:
 			remaining--
 		case b := <-build_ch:
-			items[b.Repo] = b.Items
+			items[b.Repo.Name()] = b.Items
 		case e := <-err_ch:
 			err = e
 			break
@@ -293,19 +291,19 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	// where is it?
 
 	if opts.LocalCheckout || opts.LocalSQLite {
-		local_checkout = opts.Repo
+		local_checkout = opts.Repo.Name() // FIX ME...
 	} else {
 
 		// SOMETHING SOMETHING throw an error if local_checkout exists or remove?
 		// (20181013/thisisaaronland)
 
-		repo, err := git.CloneRepo(ctx, opts)
+		repo_path, err := git.CloneRepo(ctx, opts)
 
 		if err != nil {
 			return nil, err
 		}
 
-		local_checkout = repo
+		local_checkout = repo_path
 	}
 
 	// I don't love that this is here...
@@ -330,7 +328,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	/*
 		if opts.RemoteSQLite {
 
-			local_fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+			local_fname := opts.Repo.SQLiteFilename()	// fmt.Sprintf("%s-latest.db", opts.Repo)
 			local_sqlite = filepath.Join(opts.Workdir, local_fname)
 
 			remote_fname := fmt.Sprintf("%s.bz2", local_fname)
@@ -382,7 +380,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 		if opts.LocalSQLite {
 
-			fname := fmt.Sprintf("%s-latest.db", opts.Repo)
+			fname := opts.Repo.SQLiteFilename() // fmt.Sprintf("%s-latest.db", opts.Repo)
 			local_sqlite = filepath.Join(opts.Workdir, fname)
 
 		} else {
@@ -433,11 +431,11 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		}
 
 		ta := time.Now()
-		
+
 		d_many, err := csv.BuildMetaFiles(ctx, opts, mode, source)
 
 		tb := time.Since(ta)
-		
+
 		if err != nil {
 			return nil, err
 		}
@@ -465,11 +463,11 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		}
 
 		ta := time.Now()
-		
+
 		bundle_dist, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
 		tb := time.Since(ta)
-		
+
 		if err != nil {
 			return nil, err
 		}

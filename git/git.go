@@ -50,12 +50,14 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 		return "", err
 	}
 
+	repo_name := opts.Repo.Name()
+
 	values := make(map[string]interface{})
 
 	values["protocol"] = opts.Protocol
 	values["source"] = opts.Source
 	values["organization"] = opts.Organization
-	values["repo"] = opts.Repo
+	values["repo"] = repo_name
 
 	remote, err := template.Expand(values)
 
@@ -63,7 +65,7 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 		return "", err
 	}
 
-	local := filepath.Join(opts.Workdir, opts.Repo)
+	local := filepath.Join(opts.Workdir, repo_name)
 
 	// SOMETHING SOMETHING SOMETHING check for presence of git-lfs
 	// (20180604/thisisaaronland)
@@ -80,7 +82,7 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 		return "", err
 	}
 
-	if opts.Cloner != "native" && opts.Repo == "whosonfirst-data" {
+	if opts.Cloner != "native" && repo_name == "whosonfirst-data" {
 
 		err = LFSFetchAndCheckout(local, opts)
 

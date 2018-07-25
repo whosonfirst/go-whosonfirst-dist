@@ -8,6 +8,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/build"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-log"
+	"github.com/whosonfirst/go-whosonfirst-repo"
 	"io"
 	_ "log"
 	"os"
@@ -159,40 +160,58 @@ func main() {
 	opts.Strict = *strict
 	opts.Timings = *timings
 
-	repos := flag.Args()
+	repos := make([]repo.Repo, 0)
+
+	for _, repo_name := range flag.Args() {
+
+		var r repo.Repo
+		var err error
+
+		if opts.LocalCheckout {
+			r, err = repo.NewDataRepoFromPath(repo_name)
+		} else {
+			r, err = repo.NewDataRepoFromString(repo_name)
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		repos = append(repos, r)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	distributions, err := build.BuildDistributionsForRepos(ctx, opts, repos...)
+	distribution_items, err := build.BuildDistributionsForRepos(ctx, opts, repos...)
 
 	if err != nil {
 		logger.Fatal("Failed to build distributions because %s", err)
 	}
-	
-	for repo, items := range distributions {
 
-		fname := fmt.Sprintf("%s-inventory.json", repo)
+	for repo_name, items := range distribution_items {
+
+		fname := fmt.Sprintf("%s-inventory.json", repo_name)
 		path := filepath.Join(opts.Workdir, fname)
 
 		b, err := json.Marshal(items)
 
 		if err != nil {
-		   	logger.Warning("Failed to encode %s, %s", path, err)
+			logger.Warning("Failed to encode %s, %s", path, err)
 			continue
 		}
 
 		fh, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
 
 		if err != nil {
-		   	logger.Warning("Failed to open %s for writing, %s", path, err)
+			logger.Warning("Failed to open %s for writing, %s", path, err)
 			continue
 		}
 
 		_, err = fh.Write(b)
 
 		if err != nil {
-		   	logger.Warning("Failed to write %s, %s", path, err)
+			logger.Warning("Failed to write %s, %s", path, err)
 			continue
 		}
 
@@ -200,6 +219,6 @@ func main() {
 
 		logger.Status("Wrote inventory %s", path)
 	}
-	
+
 	os.Exit(0)
 }

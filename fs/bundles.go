@@ -7,6 +7,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
+	"github.com/whosonfirst/go-whosonfirst-repo"	
 	"path/filepath"
 	"strings"
 	"time"
@@ -92,12 +93,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					return
 				}
 
-				// please make this less bad... (20180710/thisisaaronland)
-
-				fname := filepath.Base(abs_path)
-				ext := filepath.Ext(fname)
-				fname = strings.Replace(fname, ext, "", -1)
-
+				fname := opts.Repo.BundleFilename()
 				bundle_path := filepath.Join(dist_opts.Workdir, fname)
 
 				bundle_opts := wof_bundles.DefaultBundleOptions()
