@@ -122,9 +122,9 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		f_opts := repo.DefaultFilenameOptions()
+		f_repo := whosonfirst.Repo(f)
 
-		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f), f_opts)
+		r, err := repo.NewDataRepoFromString(f_repo)
 
 		if err != nil {
 			return err
@@ -144,9 +144,6 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			}
 
 			sort.Strings(fieldnames)
-
-			// HOW DOES THIS SQUARE WITH target ABOVE?
-			// (20180531/thisisaaronland)
 
 			repo_opts := repo.DefaultFilenameOptions()
 			repo_opts.Placetype = placetype

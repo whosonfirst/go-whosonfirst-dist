@@ -85,7 +85,7 @@ func Compile(path string) (*Stats, error) {
 	}
 
 	s := newStats(path)
-	
+
 	for {
 		row, err := reader.Read()
 
