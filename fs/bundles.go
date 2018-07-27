@@ -3,6 +3,7 @@ package fs
 import (
 	"context"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
+	"github.com/whosonfirst/go-whosonfirst-crawl"	
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"

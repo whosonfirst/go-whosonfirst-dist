@@ -34,6 +34,7 @@ deps:
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-sqlite src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-index src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-log src/github.com/whosonfirst/
+	mv src/github.com/whosonfirst/go-whosonfirst-index/vendor/github.com/whosonfirst/go-whosonfirst-crawl src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/facebookgo src/github.com/
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-index
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-log
