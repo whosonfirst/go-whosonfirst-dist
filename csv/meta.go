@@ -9,8 +9,7 @@ import (
 	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
 	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
-	_ "github.com/whosonfirst/go-whosonfirst-repo"
-	_ "log"
+	"os"
 	"strings"
 	"time"
 )
@@ -20,6 +19,7 @@ type MetaDistribution struct {
 	kind       dist.DistributionType
 	path       string
 	count      int64
+	size       int64
 	lastupdate int64
 }
 
@@ -33,6 +33,10 @@ func (d *MetaDistribution) Path() string {
 
 func (d *MetaDistribution) Count() int64 {
 	return d.count
+}
+
+func (d *MetaDistribution) Size() int64 {
+	return d.size
 }
 
 func (d *MetaDistribution) LastUpdate() time.Time {
@@ -152,9 +156,18 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 			return nil, err
 		}
 
+		info, err := os.Stat(path)
+
+		if err != nil {
+			return nil, err
+		}
+
+		size := info.Size()
+
 		d := MetaDistribution{
 			kind:       k,
 			path:       path,
+			size:	    size,
 			count:      stats.Count,
 			lastupdate: stats.LastUpdate,
 		}

@@ -3,13 +3,16 @@ package fs
 import (
 	"context"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
-	"github.com/whosonfirst/go-whosonfirst-crawl"	
+	"github.com/whosonfirst/go-whosonfirst-crawl"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
-	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
 	"github.com/whosonfirst/go-whosonfirst-repo"
+	"log"
+	"math"
+	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -18,6 +21,7 @@ type BundleDistribution struct {
 	kind       dist.DistributionType
 	path       string
 	count      int64
+	size       int64
 	lastupdate int64
 }
 
@@ -31,6 +35,10 @@ func (d *BundleDistribution) Path() string {
 
 func (d *BundleDistribution) Count() int64 {
 	return d.count
+}
+
+func (d *BundleDistribution) Size() int64 {
+	return d.size
 }
 
 func (d *BundleDistribution) LastUpdate() time.Time {
@@ -117,12 +125,39 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					return
 				}
 
-				// see this... yeah - it's not yet clear to me where to
-				// to generate stats in the various DoThisFromThat packages
-				// or how to return them so we're just (re) crunching meta
-				// files for now... (20180717/thisisaaronland)
+				// hrrrrrmmmmm...
+				data_path := filepath.Join(bundle_path, "data")
 
-				stats, err := meta_stats.Compile(abs_path)
+				var size int64
+				var count int64
+				var lastupdate int64
+
+				lastupdate = 0
+
+				mu := new(sync.RWMutex)
+				
+				cb := func(path string, info os.FileInfo) error {
+
+					if info.IsDir() {
+						return nil
+					}
+
+					mu.Lock()
+					defer mu.Unlock()
+
+					count += 1
+					size += info.Size()
+
+					mtime := info.ModTime()
+					ts := mtime.Unix()
+
+					lastupdate = int64(math.Max(float64(lastupdate), float64(ts)))
+
+					return nil
+				}
+				
+				cr := crawl.NewCrawler(data_path)
+				err = cr.Crawl(cb)
 
 				if err != nil {
 					err_ch <- err
@@ -139,8 +174,9 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 				d := BundleDistribution{
 					kind:       k,
 					path:       bundle_path,
-					count:      stats.Count,
-					lastupdate: stats.LastUpdate,
+					count:      count,
+					size:       size,
+					lastupdate: lastupdate,
 				}
 
 				dist_ch <- &d

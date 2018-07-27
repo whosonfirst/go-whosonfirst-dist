@@ -12,6 +12,7 @@ type Distribution interface {
 	Type() DistributionType
 	Path() string
 	Count() int64
+	Size() int64
 	LastUpdate() time.Time
 
 	Compress() (CompressedDistribution, error)
@@ -69,13 +70,14 @@ func NewItemFromDistribution(d Distribution, c CompressedDistribution) (*Item, e
 	}
 
 	fname := info.Name()
-	fsize := info.Size()
 	lastmod := info.ModTime()
 
 	fname_compressed := info_compressed.Name()
 	fsize_compressed := info_compressed.Size()
 	hash_compressed := c.Hash()
 
+	fsize := d.Size()
+	
 	count := d.Count()
 	lastupdate := d.LastUpdate()
 

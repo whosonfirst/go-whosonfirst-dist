@@ -10,7 +10,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
-	_ "log"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -20,6 +20,7 @@ type SQLiteDistribution struct {
 	kind       dist.DistributionType
 	path       string
 	count      int64
+	size       int64
 	lastupdate int64
 }
 
@@ -33,6 +34,10 @@ func (d *SQLiteDistribution) Path() string {
 
 func (d *SQLiteDistribution) Count() int64 {
 	return d.count
+}
+
+func (d *SQLiteDistribution) Size() int64 {
+	return d.size
 }
 
 func (d *SQLiteDistribution) LastUpdate() time.Time {
@@ -171,10 +176,19 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 			return nil, err
 		}
 
+		info, err := os.Stat(dsn)
+
+		if err != nil {
+			return nil, err
+		}
+
+		size := info.Size()
+
 		d := SQLiteDistribution{
 			kind:       k,
 			path:       dsn,
 			count:      int64(count),
+			size:       size,
 			lastupdate: int64(lastupdate),
 		}
 
