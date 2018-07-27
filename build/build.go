@@ -12,6 +12,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -199,11 +200,29 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 
+	count_cpu := runtime.NumCPU()
+	throttle_ch := make(chan bool, count_cpu)
+
+	for i := 0; i < count_cpu; i++ {
+		throttle_ch <- true
+	}
+
 	for _, d := range distributions {
 
-		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, done_ch chan bool, err_ch chan error) {
+		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, throttle_ch chan bool, done_ch chan bool, err_ch chan error) {
+
+			if opts.Timings {
+
+				t1 := time.Now()
+
+				defer func() {
+					t2 := time.Since(t1)
+					opts.Logger.Status("time to compress %s %v", d.Path(), t2)
+				}()
+			}
 
 			defer func() {
+				throttle_ch <- true
 				done_ch <- true
 			}()
 
@@ -212,6 +231,16 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 				return
 			default:
 				// pass
+			}
+
+			ta := time.Now()
+
+			<-throttle_ch
+
+			if opts.Timings {
+
+				tb := time.Since(tb)
+				opts.Logger.Status("time to wait to start compressing %s %v", d.Path(), tb)
 			}
 
 			c, err := d.Compress()
@@ -230,7 +259,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 			item_ch <- i
 
-		}(ctx, d, item_ch, done_ch, err_ch)
+		}(ctx, d, item_ch, throttle_ch, done_ch, err_ch)
 	}
 
 	var item_err error

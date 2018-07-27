@@ -2,14 +2,14 @@ package fs
 
 import (
 	"context"
+	"github.com/tidwall/gjson"
 	wof_bundles "github.com/whosonfirst/go-whosonfirst-bundles"
 	"github.com/whosonfirst/go-whosonfirst-crawl"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	"github.com/whosonfirst/go-whosonfirst-repo"
-	"log"
-	"math"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -125,8 +125,12 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					return
 				}
 
-				// hrrrrrmmmmm...
-				data_path := filepath.Join(bundle_path, "data")
+				// see this? it's massively inefficient - we are double counting
+				// everything and we are doing so knowingly for now in the service
+				// of a) understanding what kinds of data we need to return for
+				// any given distribution and b) because I haven't really figured
+				// out how/where/what to store-and-return this data as part of a
+				// more generalized indexing process (20180727/thisisaaronland)
 
 				var size int64
 				var count int64
@@ -135,27 +139,69 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 				lastupdate = 0
 
 				mu := new(sync.RWMutex)
-				
+
 				cb := func(path string, info os.FileInfo) error {
 
 					if info.IsDir() {
 						return nil
 					}
 
+					inc_size := int64(0)
+					inc_count := int64(0)
+					inc_lastupdate := int64(0)
+
+					inc_size = info.Size()
+
+					if !info.IsDir() {
+
+						// this is salt in the wound having to re-read every file but
+						// if we just relied on info.ModTime() we'd get incorrect results
+						// since the file itself has just been created (out of the sqlite
+						// database) above... (20180727/thisisaaronland)
+
+						fh, err := os.Open(path)
+
+						if err != nil {
+							return err
+						}
+
+						b, err := ioutil.ReadAll(fh)
+
+						if err != nil {
+							return err
+						}
+
+						rsp := gjson.GetBytes(b, "properties.wof:lastmodified")
+
+						if rsp.Exists() {
+							inc_count = 1
+
+							/*
+									wrong...
+
+								        {
+								          "type": "x-urn:whosonfirst:fs:bundle#whosonfirst-data-constituency-us-latest",
+								          "last_updated": "336459-09-15T16:12:09Z",
+									}
+							*/
+
+							inc_lastupdate = rsp.Int()
+						}
+					}
+
 					mu.Lock()
 					defer mu.Unlock()
 
-					count += 1
-					size += info.Size()
-
-					mtime := info.ModTime()
-					ts := mtime.Unix()
-
-					lastupdate = int64(math.Max(float64(lastupdate), float64(ts)))
+					size += inc_size
+					count += inc_count
+					lastupdate += inc_lastupdate
 
 					return nil
 				}
-				
+
+				// hrrrrrmmmmm... is there a better way to derive this?
+				data_path := filepath.Join(bundle_path, "data")
+
 				cr := crawl.NewCrawler(data_path)
 				err = cr.Crawl(cb)
 
@@ -163,6 +209,8 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					err_ch <- err
 					return
 				}
+
+				// end of sub-optimal double-counting...
 
 				k, err := NewBundleDistributionType(fname)
 

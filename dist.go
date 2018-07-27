@@ -77,7 +77,7 @@ func NewItemFromDistribution(d Distribution, c CompressedDistribution) (*Item, e
 	hash_compressed := c.Hash()
 
 	fsize := d.Size()
-	
+
 	count := d.Count()
 	lastupdate := d.LastUpdate()
 

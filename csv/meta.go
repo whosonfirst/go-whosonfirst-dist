@@ -167,7 +167,7 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 		d := MetaDistribution{
 			kind:       k,
 			path:       path,
-			size:	    size,
+			size:       size,
 			count:      stats.Count,
 			lastupdate: stats.LastUpdate,
 		}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/tidwall/pretty"
 	"github.com/whosonfirst/go-whosonfirst-dist/build"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-log"
@@ -208,7 +209,7 @@ func main() {
 			continue
 		}
 
-		_, err = fh.Write(b)
+		_, err = fh.Write(pretty.Pretty(b))
 
 		if err != nil {
 			logger.Warning("Failed to write %s, %s", path, err)
