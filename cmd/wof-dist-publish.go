@@ -79,7 +79,15 @@ func PublishItem(item *dist.Item, opts *PublishOptions) error {
 	n := item.NameCompressed
 	t := item.Type
 
-	suffix := fmt.Sprintf("-%d.", item.LastUpdate)
+	lu, err := time.Parse(time.RFC3339, item.LastUpdate)
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("ITEM", n, item.LastUpdate)
+
+	suffix := fmt.Sprintf("-%d.", lu.Unix())
 	n_ts := strings.Replace(n, "-latest.", suffix, -1)
 
 	// what is NewDistributionTypeFromString(t) ...
@@ -105,8 +113,8 @@ func PublishItem(item *dist.Item, opts *PublishOptions) error {
 	dest_ts := filepath.Join(prefix, n_ts)
 	dest_latest := filepath.Join(prefix, n)
 
-	inv_ts := fmt.Sprintf(dest_ts, ".json")
-	inv_latest := fmt.Sprintf(dest_latest, ".json")
+	inv_ts := dest_ts + ".json"
+	inv_latest := dest_latest + ".json"
 
 	i, err := json.Marshal(item)
 
