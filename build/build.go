@@ -238,8 +238,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 			<-throttle_ch
 
 			if opts.Timings {
-
-				tb := time.Since(tb)
+				tb := time.Since(ta)
 				opts.Logger.Status("time to wait to start compressing %s %v", d.Path(), tb)
 			}
 

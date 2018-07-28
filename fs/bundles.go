@@ -10,6 +10,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"io/ioutil"
+	"math"
 	"os"
 	"path/filepath"
 	"sync"
@@ -175,16 +176,6 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 
 						if rsp.Exists() {
 							inc_count = 1
-
-							/*
-									wrong...
-
-								        {
-								          "type": "x-urn:whosonfirst:fs:bundle#whosonfirst-data-constituency-us-latest",
-								          "last_updated": "336459-09-15T16:12:09Z",
-									}
-							*/
-
 							inc_lastupdate = rsp.Int()
 						}
 					}
@@ -194,7 +185,8 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 
 					size += inc_size
 					count += inc_count
-					lastupdate += inc_lastupdate
+					
+					lastupdate = int64(math.Max(float64(lastupdate), float64(inc_lastupdate)))
 
 					return nil
 				}
