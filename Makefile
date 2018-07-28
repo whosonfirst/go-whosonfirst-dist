@@ -67,4 +67,5 @@ fmt:
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build.go
+	@GOPATH=$(GOPATH) go build -o bin/wof-dist-publish cmd/wof-dist-publish.go
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-fetch cmd/wof-dist-fetch.go
