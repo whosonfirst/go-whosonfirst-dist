@@ -190,6 +190,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 		wg.Wait()
 	}()
 
+	// WE NEED TO TRACK OPEN FILES WHEN BUILDING BUNDLES...
 	distributions, err := buildDistributionsForRepo(ctx, opts)
 
 	if err != nil {
