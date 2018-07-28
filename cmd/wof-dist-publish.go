@@ -41,7 +41,7 @@ func PublishInventory(inv *dist.Inventory, opts *PublishOptions) error {
 
 		wg.Add(1)
 
-		go func() {
+		go func(item *dist.Item) {
 
 			defer wg.Done()
 			err := PublishItem(item, opts)
@@ -50,7 +50,7 @@ func PublishInventory(inv *dist.Inventory, opts *PublishOptions) error {
 				log.Printf("Failed to publish %s %s\n", item.Name, err)
 			}
 
-		}()
+		}(item)
 	}
 
 	wg.Wait()
@@ -84,8 +84,6 @@ func PublishItem(item *dist.Item, opts *PublishOptions) error {
 	if err != nil {
 		return err
 	}
-
-	log.Println("ITEM", n, item.LastUpdate)
 
 	suffix := fmt.Sprintf("-%d.", lu.Unix())
 	n_ts := strings.Replace(n, "-latest.", suffix, -1)
