@@ -15,14 +15,14 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
-	golog "log"
+	// golog "log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
+	// "time"
 )
 
 type BundleOptions struct {
@@ -243,6 +243,8 @@ func (b *Bundle) BundleMetafileFromSQLite(ctx context.Context, dsn string, metaf
 		return err
 	}
 
+	defer in.Close()
+	
 	err = b.cloneFH(in, cp_metafile)
 
 	if err != nil {
@@ -278,6 +280,8 @@ func (b *Bundle) BundleMetafile(metafile string) error {
 		return err
 	}
 
+	defer in.Close()
+	
 	err = b.cloneFH(in, cp_metafile)
 
 	if err != nil {
@@ -446,11 +450,11 @@ func (b *Bundle) ensurePathForID(root string, id int64) (string, error) {
 
 func (b *Bundle) cloneFH(in io.Reader, out_path string) error {
 
-     t1 := time.Now()
+     	// t1 := time.Now()
      
         <- b.throttle
 
-	golog.Printf("time to wait to write %s %v\n", out_path, time.Since(t1))
+	// golog.Printf("time to wait to write %s %v\n", out_path, time.Since(t1))
 	
 	defer func() {
 	      b.throttle <- true
