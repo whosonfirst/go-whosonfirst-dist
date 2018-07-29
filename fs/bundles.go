@@ -185,7 +185,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 
 					size += inc_size
 					count += inc_count
-					
+
 					lastupdate = int64(math.Max(float64(lastupdate), float64(inc_lastupdate)))
 
 					return nil
