@@ -166,6 +166,8 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 							return err
 						}
 
+						defer fh.Close()
+						
 						b, err := ioutil.ReadAll(fh)
 
 						if err != nil {
