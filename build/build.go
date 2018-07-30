@@ -222,11 +222,6 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 				}()
 			}
 
-			defer func() {
-				throttle_ch <- true
-				done_ch <- true
-			}()
-
 			select {
 			case <-ctx.Done():
 				return
@@ -237,6 +232,11 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 			ta := time.Now()
 
 			<-throttle_ch
+
+			defer func() {
+				throttle_ch <- true
+				done_ch <- true
+			}()
 
 			if opts.Timings {
 				tb := time.Since(ta)
