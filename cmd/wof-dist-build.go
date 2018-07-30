@@ -18,7 +18,9 @@ import (
 
 func main() {
 
-	build_sqlite := flag.Bool("build-sqlite", true, "Build a (common) SQLite distribution for a repo")
+	opts := options.NewBuildOptions()
+
+	build_sqlite := flag.Bool("build-sqlite", opts.SQLite, "Build a (common) SQLite distribution for a repo")
 
 	// THESE WILL BE THE NEW-NEW AND THE -build-sqlite FLAG WILL BE DEPRECATED
 	// (20180611/thisisaaronland)
@@ -30,37 +32,39 @@ func main() {
 		build_sqlite_all := flag.Bool("build-sqlite-all", true, "...")
 	*/
 
-	build_meta := flag.Bool("build-meta", false, "Build meta files for a repo")
-	build_bundle := flag.Bool("build-bundle", false, "Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)")
+	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo")
+	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)")
 	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
-	compress_sqlite := flag.Bool("compress-sqlite", true, "...")
-	compress_meta := flag.Bool("compress-meta", true, "...")
-	compress_bundle := flag.Bool("compress-bundle", true, "...")
+	compress_sqlite := flag.Bool("compress-sqlite", opts.CompressSQLite, "...")
+	compress_meta := flag.Bool("compress-meta", opts.CompressMeta, "...")
+	compress_bundle := flag.Bool("compress-bundle", opts.CompressBundle, "...")
 	compress_all := flag.Bool("compress-all", true, "...")
 
-	preserve_checkout := flag.Bool("preserve-checkout", false, "Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.")
-	preserve_sqlite := flag.Bool("preserve-sqlite", false, "...")
-	preserve_meta := flag.Bool("preserve-meta", false, "...")
-	preserve_bundle := flag.Bool("preserve-bundle", false, "...")
+	compress_max_cpus := flag.Int("compress-max-cpus", opts.CompressMaxCPUs, "Number of concurrent processes to use when compressing distribution items.")
+
+	preserve_checkout := flag.Bool("preserve-checkout", opts.PreserveCheckout, "Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.")
+	preserve_sqlite := flag.Bool("preserve-sqlite", opts.PreserveSQLite, "...")
+	preserve_meta := flag.Bool("preserve-meta", opts.PreserveMeta, "...")
+	preserve_bundle := flag.Bool("preserve-bundle", opts.PreserveBundle, "...")
 	preserve_all := flag.Bool("preserve-all", false, "...")
 
-	clone := flag.String("git-clone", "native", "Indicate how to clone a repo, using either a native Git binary or the go-git implementation")
-	proto := flag.String("git-protocol", "https", "Fetch repos using this protocol")
-	source := flag.String("git-source", "github.com", "Fetch repos from this endpoint")
-	org := flag.String("git-organization", "whosonfirst-data", "Fetch repos from the user (or organization)")
+	clone := flag.String("git-clone", opts.Cloner, "Indicate how to clone a repo, using either a native Git binary or the go-git implementation")
+	proto := flag.String("git-protocol", opts.Protocol, "Fetch repos using this protocol")
+	source := flag.String("git-source", opts.Source, "Fetch repos from this endpoint")
+	org := flag.String("git-organization", opts.Organization, "Fetch repos from the user (or organization)")
 
-	local_checkout := flag.Bool("local-checkout", false, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
-	local_sqlite := flag.Bool("local-sqlite", false, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
+	local_checkout := flag.Bool("local-checkout", opts.LocalCheckout, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
+	local_sqlite := flag.Bool("local-sqlite", opts.LocalSQLite, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
 
 	// PLEASE MAKE ME WORK, YEAH... (20180704/thisisaaronland)
 	// remote_sqlite := flag.Bool("remote-sqlite", false, "Do not build a new SQLite database but use a pre-existing database that is stored (on dist.whosonfirst.org for now)")
 
-	strict := flag.Bool("strict", false, "...")
-	timings := flag.Bool("timings", false, "Display timings during the build process")
+	strict := flag.Bool("strict", opts.Strict, "...")
+	timings := flag.Bool("timings", opts.Timings, "Display timings during the build process")
 	verbose := flag.Bool("verbose", false, "Be chatty")
 
-	workdir := flag.String("workdir", "", "Where to store temporary and final build files. If empty the code will attempt to use the current working directory.")
+	workdir := flag.String("workdir", opts.Workdir, "Where to store temporary and final build files. If empty the code will attempt to use the current working directory.")
 
 	flag.Parse()
 
@@ -132,7 +136,6 @@ func main() {
 		logger.Fatal("-workdir is not actually a directory")
 	}
 
-	opts := options.NewBuildOptions()
 	opts.Logger = logger
 
 	opts.Cloner = *clone
@@ -152,6 +155,7 @@ func main() {
 	opts.CompressSQLite = *compress_sqlite
 	opts.CompressMeta = *compress_meta
 	opts.CompressBundle = *compress_bundle
+	opts.CompressMaxCPUs = *compress_max_cpus
 
 	opts.PreserveCheckout = *preserve_checkout
 	opts.PreserveSQLite = *preserve_sqlite

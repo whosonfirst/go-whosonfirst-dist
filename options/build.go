@@ -3,6 +3,7 @@ package options
 import (
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-repo"
+	"runtime"
 )
 
 type BuildOptions struct {
@@ -29,6 +30,7 @@ type BuildOptions struct {
 	CompressSQLite   bool
 	CompressMeta     bool
 	CompressBundle   bool
+	CompressMaxCPUs  int
 
 	Timings bool
 	Strict  bool
@@ -37,6 +39,8 @@ type BuildOptions struct {
 func NewBuildOptions() *BuildOptions {
 
 	logger := log.SimpleWOFLogger()
+
+	max_cpus := int(float64(runtime.NumCPU()) / 2.0)
 
 	opts := BuildOptions{
 		Cloner:           "native",
@@ -58,6 +62,7 @@ func NewBuildOptions() *BuildOptions {
 		CompressSQLite:   true,
 		CompressMeta:     true,
 		CompressBundle:   true,
+		CompressMaxCPUs:  max_cpus,
 		Timings:          false,
 		Strict:           false,
 	}
@@ -81,6 +86,13 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		LocalCheckout:    opts.LocalCheckout,
 		LocalSQLite:      opts.LocalSQLite,
 		PreserveCheckout: opts.PreserveCheckout,
+		PreserveSQLite:   opts.PreserveSQLite,
+		PreserveMeta:     opts.PreserveMeta,
+		PreserveBundle:   opts.PreserveBundle,
+		CompressSQLite:   opts.CompressSQLite,
+		CompressMeta:     opts.CompressMeta,
+		CompressBundle:   opts.CompressBundle,
+		CompressMaxCPUs:  opts.CompressMaxCPUs,
 		Timings:          opts.Timings,
 		Strict:           opts.Strict,
 	}

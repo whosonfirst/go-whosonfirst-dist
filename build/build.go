@@ -12,7 +12,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -201,13 +200,12 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	err_ch := make(chan error)
 
 	// something something something size of the file/directory?
-	
-	count_cpu := runtime.NumCPU()
-	count_cpu = 1
 
-	throttle_ch := make(chan bool, count_cpu)
+	count_throttle := opts.CompressMaxCPUs
 
-	for i := 0; i < count_cpu; i++ {
+	throttle_ch := make(chan bool, count_throttle)
+
+	for i := 0; i < count_throttle; i++ {
 		throttle_ch <- true
 	}
 
