@@ -112,7 +112,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 				bundle_opts.Destination = bundle_path
 				bundle_opts.Logger = dist_opts.Logger
 				// bundle_opts.MaxFileHandles = 200
-				
+
 				b, err := wof_bundles.NewBundle(bundle_opts)
 
 				if err != nil {
@@ -168,7 +168,7 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 						}
 
 						defer fh.Close()
-						
+
 						b, err := ioutil.ReadAll(fh)
 
 						if err != nil {

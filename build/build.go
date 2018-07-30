@@ -190,7 +190,6 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 		wg.Wait()
 	}()
 
-	// WE NEED TO TRACK OPEN FILES WHEN BUILDING BUNDLES...
 	distributions, err := buildDistributionsForRepo(ctx, opts)
 
 	if err != nil {
@@ -201,7 +200,11 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 
+	// something something something size of the file/directory?
+	
 	count_cpu := runtime.NumCPU()
+	count_cpu = 1
+
 	throttle_ch := make(chan bool, count_cpu)
 
 	for i := 0; i < count_cpu; i++ {
@@ -211,6 +214,13 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	for _, d := range distributions {
 
 		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, throttle_ch chan bool, done_ch chan bool, err_ch chan error) {
+
+			defer func() {
+				opts.Logger.Status("All done compressing %s", d.Path())
+				done_ch <- true
+			}()
+
+			opts.Logger.Status("register function to compress %s", d.Path())
 
 			if opts.Timings {
 
@@ -233,15 +243,15 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 			<-throttle_ch
 
-			defer func() {
-				throttle_ch <- true
-				done_ch <- true
-			}()
-
 			if opts.Timings {
 				tb := time.Since(ta)
 				opts.Logger.Status("time to wait to start compressing %s %v", d.Path(), tb)
 			}
+
+			defer func() {
+				opts.Logger.Status("All done compressing %s (throttle)", d.Path())
+				throttle_ch <- true
+			}()
 
 			c, err := d.Compress()
 
