@@ -173,7 +173,8 @@ func main() {
 		var err error
 
 		if opts.LocalCheckout {
-			r, err = repo.NewDataRepoFromPath(repo_name)
+			opts := repo.DefaultFilenameOptions()
+			r, err = repo.NewDataRepoFromPath(repo_name, opts)
 		} else {
 			r, err = repo.NewDataRepoFromString(repo_name)
 		}

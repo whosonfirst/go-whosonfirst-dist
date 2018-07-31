@@ -48,7 +48,7 @@ func DefaultFilenameOptions() *FilenameOptions {
 	return &o
 }
 
-func NewDataRepoFromPath(path string) (*DataRepo, error) {
+func NewDataRepoFromPath(path string, opts *FilenameOptions) (*DataRepo, error) {
 
 	abs_path, err := filepath.Abs(path)
 
@@ -56,9 +56,29 @@ func NewDataRepoFromPath(path string) (*DataRepo, error) {
 		return nil, err
 	}
 
+	if opts.Extension != "" && strings.HasSuffix(abs_path, opts.Extension) {
+		abs_path = strings.Replace(abs_path, opts.Extension, "", -1)
+	}
+
 	repo := filepath.Base(abs_path)
 
 	return NewDataRepoFromString(repo)
+}
+
+func NewDataRepoFromMetafile(path string) (*DataRepo, error) {
+
+	opts := DefaultFilenameOptions()
+	opts.Extension = ".csv"
+
+	return NewDataRepoFromPath(path, opts)
+}
+
+func NewDataRepoFromSQLitefile(path string) (*DataRepo, error) {
+
+	opts := DefaultFilenameOptions()
+	opts.Extension = ".db"
+
+	return NewDataRepoFromPath(path, opts)
 }
 
 func NewDataRepoFromString(repo string) (*DataRepo, error) {

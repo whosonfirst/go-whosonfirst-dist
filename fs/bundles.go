@@ -102,8 +102,26 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 					return
 				}
 
+				// see what's going on here? we're deriving the bundle name _from_ the
+				// name of the metafile - it is entirely possible that we don't want to
+				// do this / I mean it makes sense in the context of building bundles
+				// for a (repo) distribution but maybe what we really want to do is define
+				// the name of the bundle outside the scope of this function / on the
+				// other hand it quickly becomes a twisty maze of possibility soup so
+				// in the meantime just be aware that we are creating a new bundle directory
+				// for each metafile... (20180731/thisisaaronland)
+
+				r, err := repo.NewDataRepoFromMetafile(abs_path)
+
+				if err != nil {
+					err_ch <- err
+					return
+				}
+
+				// fname := dist_opts.Repo.BundleFilename(f_opts)		// the old old
+
 				f_opts := repo.DefaultFilenameOptions()
-				fname := dist_opts.Repo.BundleFilename(f_opts)
+				fname := r.BundleFilename(f_opts) // the new new
 
 				bundle_path := filepath.Join(dist_opts.Workdir, fname)
 

@@ -502,9 +502,12 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 		ta := time.Now()
 
+		// see notes in fs/bundles.go about meta/bundle filenames (20180731/thisisaaronland)
+
 		bundle_dist, err := fs.BuildBundle(ctx, opts, local_metafiles, local_sqlite)
 
 		tb := time.Since(ta)
+		opts.Logger.Status("time to build bundles (%s) %v", strings.Join(local_bundlefiles, ","), tb)
 
 		if err != nil {
 			return nil, err
@@ -518,8 +521,6 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			distributions = append(distributions, d)
 			local_bundlefiles = append(local_bundlefiles, d.Path())
 		}
-
-		opts.Logger.Status("time to build bundles (%s) %v", strings.Join(local_bundlefiles, ","), tb)
 	}
 
 	return distributions, nil
