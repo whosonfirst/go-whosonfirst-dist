@@ -60,6 +60,15 @@ func NewDataRepoFromPath(path string, opts *FilenameOptions) (*DataRepo, error) 
 		abs_path = strings.Replace(abs_path, opts.Extension, "", -1)
 	}
 
+	if opts.Suffix != "" {
+
+		fq_suffix := fmt.Sprintf("-%s", opts.Suffix)
+
+		if strings.HasSuffix(abs_path, fq_suffix) {
+			abs_path = strings.Replace(abs_path, fq_suffix, "", -1)
+		}
+	}
+
 	repo := filepath.Base(abs_path)
 
 	return NewDataRepoFromString(repo)
