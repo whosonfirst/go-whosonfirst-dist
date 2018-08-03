@@ -46,7 +46,7 @@ type Item struct {
 	SizeCompressed   int64  `json:"size_compressed"`
 	Sha256Compressed string `json:"sha256_compressed"`
 	LastUpdate       string `json:"last_updated"`
-	LastModified     string `json:"lastmodified"`
+	LastModified     string `json:"last_modified"`
 	Repo             string `json:"repo,omitempty"`
 	Commit           string `json:"commit,omitempty"`
 }
