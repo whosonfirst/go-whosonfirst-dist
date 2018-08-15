@@ -327,7 +327,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	// where is it?
 
 	if opts.LocalCheckout || opts.LocalSQLite {
-		local_checkout = opts.Repo.Name() // FIX ME...
+		local_checkout = filepath.Join(opts.Workdir, opts.Repo.Name())
 	} else {
 
 		// SOMETHING SOMETHING throw an error if local_checkout exists or remove?
