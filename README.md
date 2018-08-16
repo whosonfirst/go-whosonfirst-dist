@@ -158,4 +158,6 @@ This tool is not very smart about checking whether a given distribution _needs_ 
 
 * https://dist.whosonfirst.org
 * https://github.com/whosonfirst/go-whosonfirst-dist-publish
+* https://git-scm.com/
+* https://git-lfs.github.com/
 * https://github.com/src-d/go-git
