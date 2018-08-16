@@ -16,7 +16,13 @@ You will need to manually install the [Git LFS](https://git-lfs.github.com/) dep
 
 ## Important
 
-This is work in progress. It's probably not worth trying to use yet unless you're me.
+This is work in progress. It seems to work, though. Until it doesn't. It still needs to be properly documented.
+
+## Git
+
+This package depends on there being a platform-specific `git` and `git-lfs` binaries present on the system where this is running. There is a branch of the code that uses the `go-git` package for cloning repositories but some Who's On First repos still require `lfs` support (hello `whosonfirst-data`...) It seems like that should be possible in `go-git` but if it is I haven't figured it out.
+
+Ultimately I'd like to build everything on top of `go-git` because then we would have a proper pure-Go distribution tool which means we could build platform-native binaries with no extra depedencies. Today, everything depends on Git. 
 
 ## What is a "distribution".
 
@@ -150,5 +156,6 @@ This tool is not very smart about checking whether a given distribution _needs_ 
 
 ## See also
 
-* https://whosonfirst.mapzen.com/sqlite
-* https://sqlite.org/
+* https://dist.whosonfirst.org
+* https://github.com/whosonfirst/go-whosonfirst-dist-publish
+* https://github.com/src-d/go-git
