@@ -358,6 +358,10 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 	opts.Logger.Status("local_checkout is %s", local_checkout)
 
+	commit_hash, err := git.CommitHash(local_checkout)
+
+	opts.Logger.Status("commit hash is %s", commit_hash)
+
 	// if opts.RemoteSQLite then fetch from dist.whosonfirst.org (and uncompressed) and
 	// store in opts.Workdir here... (20180704/thisisaaronland)
 
@@ -437,7 +441,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 	}
 
-	_, err := os.Stat(local_sqlite)
+	_, err = os.Stat(local_sqlite)
 
 	if err != nil {
 		return nil, err

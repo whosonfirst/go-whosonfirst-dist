@@ -11,6 +11,7 @@ import (
 
 type Cloner interface {
 	Clone(context.Context, string, string) error
+	// Hash(something) (string, error)
 }
 
 func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
@@ -75,9 +76,6 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 
 	local := filepath.Join(opts.Workdir, repo_name)
 
-	// SOMETHING SOMETHING SOMETHING check for presence of git-lfs
-	// (20180604/thisisaaronland)
-
 	cl, err := NewClonerFromOptions(opts)
 
 	if err != nil {
@@ -91,4 +89,16 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 	}
 
 	return local, nil
+}
+
+func CommitHash(path string) (string, error) {
+
+     // git log --pretty=format:'%H' -n 1
+
+     // https://godoc.org/gopkg.in/src-d/go-git.v4#Repository.Head
+     // https://godoc.org/gopkg.in/src-d/go-git.v4#Repository.Log
+     // https://godoc.org/gopkg.in/src-d/go-git.v4/plumbing/object#CommitIter
+     // https://godoc.org/gopkg.in/src-d/go-git.v4/plumbing/object#Commit
+     
+     return "", nil
 }
