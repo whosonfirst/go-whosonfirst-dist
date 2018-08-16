@@ -49,7 +49,7 @@ func main() {
 	preserve_bundle := flag.Bool("preserve-bundle", opts.PreserveBundle, "...")
 	preserve_all := flag.Bool("preserve-all", false, "...")
 
-	clone := flag.String("git-clone", opts.Cloner, "Indicate how to clone a repo, using either a native Git binary or the go-git implementation")
+	clone := flag.String("git-clone", opts.Cloner, "Indicate how to clone a repo, using either a native Git binary or the go-git implementation. Currently only the native Git binary is supported.")
 	proto := flag.String("git-protocol", opts.Protocol, "Fetch repos using this protocol")
 	source := flag.String("git-source", opts.Source, "Fetch repos from this endpoint")
 	org := flag.String("git-organization", opts.Organization, "Fetch repos from the user (or organization)")
