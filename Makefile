@@ -24,6 +24,8 @@ rmdeps:
 
 build:	fmt bin
 
+# see notes in git/git.go - this adds a non-trivial set of dependencies
+# so we're excluding it for now (20180816/thisisaaronland)
 # @GOPATH=$(GOPATH) go get -u "gopkg.in/src-d/go-git.v4/..."
 
 deps:

@@ -20,6 +20,16 @@ func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
 
 	switch opts.Cloner {
 
+	// the thinking here is that one of two things will happen soon:
+	// either the go-git package will support LFS directly or WOF
+	// will finish the work to standardize on a default file size that
+	// doesn't require LFS - if the latter but not the former happens
+	// first then we'll still need to use go-git and shell out to `git lfs`
+	// when we are processing large files/repos (hello, NZ) but at least
+	// we will have a pure-Go (no shell/exec nonsense) tool for building
+	// distributions - today it still requires that there be a git binary
+	// (201080816/thisisaaronland)
+
 	case "native":
 		cl, err = NewNativeCloner()
 	default:
