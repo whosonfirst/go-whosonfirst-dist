@@ -22,8 +22,6 @@ func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
 
 	case "native":
 		cl, err = NewNativeCloner()
-	case "golang":
-		cl, err = NewGolangCloner()
 	default:
 		err = errors.New("Invalid cloner")
 	}
@@ -80,16 +78,6 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 
 	if err != nil {
 		return "", err
-	}
-
-	if opts.Cloner != "native" && repo_name == "whosonfirst-data" {
-
-		err = LFSFetchAndCheckout(local, opts)
-
-		if err != nil {
-			return "", err
-		}
-
 	}
 
 	return local, nil

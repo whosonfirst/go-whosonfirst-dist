@@ -24,8 +24,9 @@ rmdeps:
 
 build:	fmt bin
 
+# @GOPATH=$(GOPATH) go get -u "gopkg.in/src-d/go-git.v4/..."
+
 deps:
-	@GOPATH=$(GOPATH) go get -u "gopkg.in/src-d/go-git.v4/..."
 	@GOPATH=$(GOPATH) go get -u "github.com/jtacoma/uritemplates"
 	@GOPATH=$(GOPATH) go get -u "github.com/tidwall/pretty"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-meta"
