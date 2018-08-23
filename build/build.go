@@ -366,7 +366,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 	commit_hash, err := gt.CommitHash(local_checkout)
 
-	opts.Logger.Status("commit hash is %s", commit_hash)
+	opts.Logger.Status("commit hash is %s (%s)", commit_hash, err)
 
 	// if opts.RemoteSQLite then fetch from dist.whosonfirst.org (and uncompressed) and
 	// store in opts.Workdir here... (20180704/thisisaaronland)

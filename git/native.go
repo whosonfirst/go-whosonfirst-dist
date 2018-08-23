@@ -3,6 +3,7 @@ package git
 import (
 	"context"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -41,8 +42,7 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 		}
 
 		cmd := exec.Command(gt.git, git_args...)
-
-		log.Println(gt.git, strings.Join(git_args, " "))
+		// log.Println(gt.git, strings.Join(git_args, " "))
 
 		_, err := cmd.Output()
 
@@ -52,19 +52,32 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 
 func (gt *NativeGitTool) CommitHash(path string) (string, error) {
 
-	// git log --pretty=format:'%H' -n 1
+     	cwd, err := os.Getwd()
 
+	if err != nil {
+		return "",err
+	}
+
+	err = os.Chdir(path)
+
+	if err != nil {
+		return "",err
+	}
+
+	defer func() {
+	      os.Chdir(cwd)
+	}()
+	
 	git_args := []string{
 		"log",
-		"pretty=format:'%H'",
+		"--pretty=format:'%H'",
 		"-n",
 		"1",
 	}
 
 	cmd := exec.Command(gt.git, git_args...)
-
-	log.Println(gt.git, strings.Join(git_args, " "))
+	// log.Println(gt.git, strings.Join(git_args, " "))
+	
 	hash, err := cmd.Output()
-
 	return string(hash), err
 }
