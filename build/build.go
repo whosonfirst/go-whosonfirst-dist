@@ -323,6 +323,12 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	var local_metafiles []string
 	var local_bundlefiles []string
 
+	gt, err := git.NewGitToolFromOptions(opts)
+
+	if err != nil {
+		return nil, err
+	}
+
 	// do we need to work with a remote (or local) Git checkout and if so
 	// where is it?
 
@@ -333,7 +339,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		// SOMETHING SOMETHING throw an error if local_checkout exists or remove?
 		// (20181013/thisisaaronland)
 
-		repo_path, err := git.CloneRepo(ctx, opts)
+		repo_path, err := git.CloneRepo(ctx, gt, opts)
 
 		if err != nil {
 			return nil, err
@@ -358,7 +364,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 	opts.Logger.Status("local_checkout is %s", local_checkout)
 
-	commit_hash, err := git.CommitHash(local_checkout)
+	commit_hash, err := gt.CommitHash(local_checkout)
 
 	opts.Logger.Status("commit hash is %s", commit_hash)
 

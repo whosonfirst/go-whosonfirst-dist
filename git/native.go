@@ -7,23 +7,23 @@ import (
 	"strings"
 )
 
-type NativeCloner struct {
-	Cloner
+type NativeGitTool struct {
+	GitTool
 	git string
 }
 
-func NewNativeCloner() (Cloner, error) {
+func NewNativeGitTool() (GitTool, error) {
 
 	// check that git binary is present here...
 
-	cl := NativeCloner{
+	gt := NativeGitTool{
 		git: "git",
 	}
 
-	return &cl, nil
+	return &gt, nil
 }
 
-func (cl *NativeCloner) Clone(ctx context.Context, remote string, local string) error {
+func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string) error {
 
 	select {
 
@@ -40,12 +40,31 @@ func (cl *NativeCloner) Clone(ctx context.Context, remote string, local string) 
 			local,
 		}
 
-		cmd := exec.Command(cl.git, git_args...)
+		cmd := exec.Command(gt.git, git_args...)
 
-		log.Println(cl.git, strings.Join(git_args, " "))
+		log.Println(gt.git, strings.Join(git_args, " "))
 
 		_, err := cmd.Output()
 
 		return err
 	}
+}
+
+func (gt *NativeGitTool) CommitHash(path string) (string, error) {
+
+	// git log --pretty=format:'%H' -n 1
+
+	git_args := []string{
+		"log",
+		"pretty=format:'%H'",
+		"-n",
+		"1",
+	}
+
+	cmd := exec.Command(gt.git, git_args...)
+
+	log.Println(gt.git, strings.Join(git_args, " "))
+	hash, err := cmd.Output()
+
+	return string(hash), err
 }

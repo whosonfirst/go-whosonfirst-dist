@@ -6,20 +6,19 @@ import (
 	"github.com/jtacoma/uritemplates"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
-type Cloner interface {
+type GitTool interface {
 	Clone(context.Context, string, string) error
-	// Hash(something) (string, error)
+	CommitHash(string) (string, error)
 }
 
-func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
+func NewGitToolFromOptions(opts *options.BuildOptions) (GitTool, error) {
 
-	var cl Cloner
+	var g GitTool
 	var err error
-
-	switch opts.Cloner {
 
 	// the thinking here is that one of two things will happen soon:
 	// either the go-git package will support LFS directly or WOF
@@ -31,16 +30,18 @@ func NewClonerFromOptions(opts *options.BuildOptions) (Cloner, error) {
 	// distributions - today it still requires that there be a git binary
 	// (201080816/thisisaaronland)
 
-	case "native":
-		cl, err = NewNativeCloner()
+	switch strings.ToUpper(opts.Cloner) { // it's called Cloner because I haven't updated all that stuff yet (20180823/thisisaaronland)
+
+	case "NATIVE":
+		g, err = NewNativeGitTool()
 	default:
-		err = errors.New("Invalid cloner")
+		err = errors.New("Invalid Git tool")
 	}
 
-	return cl, err
+	return g, err
 }
 
-func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) {
+func CloneRepo(ctx context.Context, g GitTool, opts *options.BuildOptions) (string, error) {
 
 	if opts.Timings {
 		t1 := time.Now()
@@ -76,29 +77,11 @@ func CloneRepo(ctx context.Context, opts *options.BuildOptions) (string, error) 
 
 	local := filepath.Join(opts.Workdir, repo_name)
 
-	cl, err := NewClonerFromOptions(opts)
-
-	if err != nil {
-		return "", err
-	}
-
-	err = cl.Clone(ctx, remote, local)
+	err = g.Clone(ctx, remote, local)
 
 	if err != nil {
 		return "", err
 	}
 
 	return local, nil
-}
-
-func CommitHash(path string) (string, error) {
-
-     // git log --pretty=format:'%H' -n 1
-
-     // https://godoc.org/gopkg.in/src-d/go-git.v4#Repository.Head
-     // https://godoc.org/gopkg.in/src-d/go-git.v4#Repository.Log
-     // https://godoc.org/gopkg.in/src-d/go-git.v4/plumbing/object#CommitIter
-     // https://godoc.org/gopkg.in/src-d/go-git.v4/plumbing/object#Commit
-     
-     return "", nil
 }
