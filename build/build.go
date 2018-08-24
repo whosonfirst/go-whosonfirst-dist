@@ -189,7 +189,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 		wg.Wait()
 	}()
 
-	distributions, commit_hash, err := buildDistributionsForRepo(ctx, opts)
+	distributions, meta, err := buildDistributionsForRepo(ctx, opts)
 
 	if err != nil {
 		return nil, err
@@ -258,7 +258,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 				return
 			}
 
-			i, err := dist.NewItemFromDistribution(d, c, commit_hash)
+			i, err := dist.NewItemFromDistribution(d, c, meta)
 
 			if err != nil {
 				err_ch <- err
@@ -296,9 +296,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	return items, nil
 }
 
-// THIS RESPONSE SIGNATURE WILL PROBABLY CHANGE TO RETURN []dist.Distribution, dist.MetaData, error...
-
-func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) ([]dist.Distribution, string, error) {
+func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) ([]dist.Distribution, *dist.MetaData, error) {
 
 	if opts.Timings {
 
@@ -315,7 +313,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	select {
 
 	case <-ctx.Done():
-		return nil, "", nil
+		return nil, nil, nil
 	default:
 		// pass
 	}
@@ -328,7 +326,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	gt, err := git.NewGitToolFromOptions(opts)
 
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 
 	// do we need to work with a remote (or local) Git checkout and if so
@@ -344,7 +342,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		repo_path, err := git.CloneRepo(ctx, gt, opts)
 
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
 
 		local_checkout = repo_path
@@ -401,20 +399,20 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			wr, err := atomicfile.New(local_sqlite, 0644)
 
 			if err != nil {
-				return nil, "", err
+				return nil, nil, err
 			}
 
 			_, err = io.Copy(wr, br)
 
 			if err != nil {
 				wr.Abort()
-				return nil, "", err
+				return nil, nil, err
 			}
 
 			err = wr.Close()
 
 			if err != nil {
-				return nil, "", err
+				return nil, nil, err
 			}
 
 			logger.Info("Retrieved remote SQLite (%s) and stored as %s", remote_sqlite, local_sqlite)
@@ -426,7 +424,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		select {
 
 		case <-ctx.Done():
-			return nil, "", nil
+			return nil, nil, nil
 		default:
 			// pass
 		}
@@ -443,7 +441,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			d, err := database.BuildSQLite(ctx, local_checkout, opts)
 
 			if err != nil {
-				return nil, "", err
+				return nil, nil, err
 			}
 
 			distributions = append(distributions, d)
@@ -457,7 +455,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	_, err = os.Stat(local_sqlite)
 
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 
 	// eventually we should be able to do these two operations in parallel
@@ -480,7 +478,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		select {
 
 		case <-ctx.Done():
-			return nil, "", nil
+			return nil, nil, nil
 		default:
 			// pass
 		}
@@ -492,11 +490,11 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		tb := time.Since(ta)
 
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
 
 		if len(d_many) == 0 {
-			return nil, "", err
+			return nil, nil, err
 		}
 
 		for _, d := range d_many {
@@ -512,7 +510,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		select {
 
 		case <-ctx.Done():
-			return nil, "", nil
+			return nil, nil, nil
 		default:
 			// pass
 		}
@@ -527,11 +525,11 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		opts.Logger.Status("time to build bundles (%s) %v", strings.Join(local_bundlefiles, ","), tb)
 
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
 
 		if len(bundle_dist) == 0 {
-			return nil, "", errors.New("No metafiles produced")
+			return nil, nil, errors.New("No metafiles produced")
 		}
 
 		for _, d := range bundle_dist {
@@ -540,5 +538,10 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		}
 	}
 
-	return distributions, commit_hash, nil
+	meta := &dist.MetaData{
+		CommitHash: commit_hash,
+		Repo:       opts.Repo.Name(),
+	}
+
+	return distributions, meta, nil
 }

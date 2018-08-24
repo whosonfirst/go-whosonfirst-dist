@@ -30,6 +30,11 @@ type CompressedDistribution interface {
 	// something something something Type() ?
 }
 
+type MetaData struct {
+	Repo       string
+	CommitHash string
+}
+
 // for external publication
 
 type Inventory []*Item
@@ -55,7 +60,7 @@ func (i *Item) String() string {
 	return i.Name
 }
 
-func NewItemFromDistribution(d Distribution, c CompressedDistribution, commit_hash string) (*Item, error) {
+func NewItemFromDistribution(d Distribution, c CompressedDistribution, m *MetaData) (*Item, error) {
 
 	info, err := os.Stat(d.Path())
 
@@ -98,8 +103,8 @@ func NewItemFromDistribution(d Distribution, c CompressedDistribution, commit_ha
 		LastUpdate:   str_lastupdate,
 		LastModified: str_lastmod,
 
-		Repo:   "",
-		Commit: commit_hash,
+		Repo:   m.Repo,
+		Commit: m.CommitHash,
 
 		NameCompressed:   fname_compressed,
 		SizeCompressed:   fsize_compressed,
