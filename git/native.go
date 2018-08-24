@@ -10,7 +10,8 @@ import (
 
 type NativeGitTool struct {
 	GitTool
-	git string
+	git   string
+	Debug bool
 }
 
 func NewNativeGitTool() (GitTool, error) {
@@ -18,7 +19,8 @@ func NewNativeGitTool() (GitTool, error) {
 	// check that git binary is present here...
 
 	gt := NativeGitTool{
-		git: "git",
+		git:   "git",
+		Debug: false,
 	}
 
 	return &gt, nil
@@ -42,7 +44,10 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 		}
 
 		cmd := exec.Command(gt.git, git_args...)
-		// log.Println(gt.git, strings.Join(git_args, " "))
+
+		if gt.Debug {
+			log.Println(gt.git, strings.Join(git_args, " "))
+		}
 
 		_, err := cmd.Output()
 
@@ -52,32 +57,35 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 
 func (gt *NativeGitTool) CommitHash(path string) (string, error) {
 
-     	cwd, err := os.Getwd()
+	cwd, err := os.Getwd()
 
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
 	err = os.Chdir(path)
 
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
 	defer func() {
-	      os.Chdir(cwd)
+		os.Chdir(cwd)
 	}()
-	
+
 	git_args := []string{
 		"log",
-		"--pretty=format:'%H'",
+		"--pretty=format:%H",
 		"-n",
 		"1",
 	}
 
 	cmd := exec.Command(gt.git, git_args...)
-	// log.Println(gt.git, strings.Join(git_args, " "))
-	
+
+	if gt.Debug {
+		log.Println(gt.git, strings.Join(git_args, " "))
+	}
+
 	hash, err := cmd.Output()
 	return string(hash), err
 }

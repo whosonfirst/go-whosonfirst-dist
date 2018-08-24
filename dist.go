@@ -55,7 +55,7 @@ func (i *Item) String() string {
 	return i.Name
 }
 
-func NewItemFromDistribution(d Distribution, c CompressedDistribution) (*Item, error) {
+func NewItemFromDistribution(d Distribution, c CompressedDistribution, commit_hash string) (*Item, error) {
 
 	info, err := os.Stat(d.Path())
 
@@ -99,7 +99,7 @@ func NewItemFromDistribution(d Distribution, c CompressedDistribution) (*Item, e
 		LastModified: str_lastmod,
 
 		Repo:   "",
-		Commit: "",
+		Commit: commit_hash,
 
 		NameCompressed:   fname_compressed,
 		SizeCompressed:   fsize_compressed,
