@@ -42,6 +42,10 @@ func NewBuildOptions() *BuildOptions {
 
 	max_cpus := int(float64(runtime.NumCPU()) / 2.0)
 
+	if max_cpus < 1 {
+		max_cpus = 1
+	}
+
 	opts := BuildOptions{
 		Cloner:           "native",
 		Source:           "github.com",
