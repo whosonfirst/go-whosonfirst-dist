@@ -69,5 +69,6 @@ fmt:
 	go fmt utils/*.go
 
 bin: 	self
+	rm -rf bin/*
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build.go
 	@GOPATH=$(GOPATH) go build -o bin/wof-dist-fetch cmd/wof-dist-fetch.go
