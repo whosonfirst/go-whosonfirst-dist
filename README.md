@@ -79,7 +79,7 @@ Build one or more distribution files for a repository. _This is code that is act
 ./bin/wof-dist-build -h
 Usage of ./bin/wof-dist-build:
   -build-bundle
-	Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)
+	Build a bundle distribution for a repo.
   -build-meta
 	Build meta files for a repo (default true)
   -build-sqlite

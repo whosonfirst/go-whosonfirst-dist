@@ -33,7 +33,7 @@ func main() {
 	*/
 
 	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo")
-	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo (this flag is enabled but will fail because the code hasn't been implemented)")
+	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo.")
 	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
 	compress_sqlite := flag.Bool("compress-sqlite", opts.CompressSQLite, "...")
