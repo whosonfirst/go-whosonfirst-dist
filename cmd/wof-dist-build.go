@@ -191,18 +191,18 @@ func main() {
 
 	/*
 
-	why isn't this triggering a fatal error?
-	(20181120/thisisaronland)
-	
-	17:12:56.057646 [wof-dist-build] STATUS time to index geojson (797797) : 1m44.498260642s
-	17:12:56.057658 [wof-dist-build] STATUS time to index spr (797797) : 13m8.030653553s
-	17:12:56.057671 [wof-dist-build] STATUS time to index all (797797) : 49m0.145189371s
-	error: Failed to parse tag
-	17:13:07.565161 [wof-dist-build] STATUS local sqlite is /usr/local/data/dist/whosonfirst-data-latest.db
-	17:47:19.212743 [wof-dist-build] STATUS time to build UNCOMPRESSED distributions for whosonfirst-data 2h12m22.305771409s
+		why isn't this triggering a fatal error?
+		(20181120/thisisaronland)
+
+		17:12:56.057646 [wof-dist-build] STATUS time to index geojson (797797) : 1m44.498260642s
+		17:12:56.057658 [wof-dist-build] STATUS time to index spr (797797) : 13m8.030653553s
+		17:12:56.057671 [wof-dist-build] STATUS time to index all (797797) : 49m0.145189371s
+		error: Failed to parse tag
+		17:13:07.565161 [wof-dist-build] STATUS local sqlite is /usr/local/data/dist/whosonfirst-data-latest.db
+		17:47:19.212743 [wof-dist-build] STATUS time to build UNCOMPRESSED distributions for whosonfirst-data 2h12m22.305771409s
 
 	*/
-	
+
 	distribution_items, err := build.BuildDistributionsForRepos(ctx, opts, repos...)
 
 	if err != nil {
