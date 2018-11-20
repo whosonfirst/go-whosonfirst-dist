@@ -191,6 +191,8 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	distributions, meta, err := buildDistributionsForRepo(ctx, opts)
 
+	opts.Logger.Status("build for repo: %s", err)
+	
 	if err != nil {
 		return nil, err
 	}
@@ -441,6 +443,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			d, err := database.BuildSQLite(ctx, local_checkout, opts)
 
 			if err != nil {
+			   	opts.Logger.Warning("Failed to build SQLlite %s because %s", local_sqlite, err)
 				return nil, nil, err
 			}
 
