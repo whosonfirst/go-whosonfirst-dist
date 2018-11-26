@@ -51,8 +51,8 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 			items, err := BuildDistributions(ctx, local_opts)
 
-			opts.Logger.Status("build for %s : %s", r, err)
-
+			opts.Logger.Status("build for %s : %v", r.String(), err)
+			
 			if err != nil {
 				err_ch <- err
 				return
@@ -193,7 +193,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	distributions, meta, err := buildDistributionsForRepo(ctx, opts)
 
-	opts.Logger.Status("build for repo: %s", err)
+	opts.Logger.Status("build (buildDistributionsForRepo) for repo: %s", err)
 
 	if err != nil {
 		return nil, err
@@ -433,6 +433,8 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			// pass
 		}
 
+		opts.Logger.Status("MAKE THE SQLITE")
+		
 		if opts.LocalSQLite {
 
 			f_opts := repo.DefaultFilenameOptions()
@@ -449,6 +451,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 				return nil, nil, err
 			}
 
+			opts.Logger.Status("seriously wtf...%v %v", d, err)
 			distributions = append(distributions, d)
 			local_sqlite = d.Path()
 		}
