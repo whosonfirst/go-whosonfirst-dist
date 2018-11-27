@@ -193,9 +193,8 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	distributions, meta, err := buildDistributionsForRepo(ctx, opts)
 
-	opts.Logger.Status("build (buildDistributionsForRepo) for repo: %s", err)
-
 	if err != nil {
+		opts.Logger.Warning("build (buildDistributionsForRepo) for repo %s failed: %s", opts.Repo, err)
 		return nil, err
 	}
 
@@ -433,8 +432,6 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			// pass
 		}
 
-		opts.Logger.Status("MAKE THE SQLITE")
-		
 		if opts.LocalSQLite {
 
 			f_opts := repo.DefaultFilenameOptions()
@@ -451,13 +448,17 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 				return nil, nil, err
 			}
 
-			opts.Logger.Status("seriously wtf...%v %v", d, err)
+			// I don't necessarily believe this is being reported correctly but I
+			// haven't been able to track down the errant reporting...
+			// (20181127/thisisaaronland)
+			
+			opts.Logger.Status("Built %s without any reported errors", local_sqlite)
+			
 			distributions = append(distributions, d)
 			local_sqlite = d.Path()
 		}
 
 		opts.Logger.Status("local sqlite is %s", local_sqlite)
-
 	}
 
 	_, err = os.Stat(local_sqlite)
