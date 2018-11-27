@@ -82,116 +82,131 @@ func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOpti
 func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
 
 	select {
-
 	case <-ctx.Done():
 		return nil, nil
 	default:
-
-		if opts.Timings {
-
-			t1 := time.Now()
-
-			defer func() {
-				t2 := time.Since(t1)
-				opts.Logger.Info("time to generate (common) sqlite tables %v", t2)
-			}()
-		}
-
-		f_opts := repo.DefaultFilenameOptions()
-		fname := opts.Repo.SQLiteFilename(f_opts)
-
-		dsn := filepath.Join(opts.Workdir, fname)
-
-		db, err := database.NewDBWithDriver("sqlite3", dsn)
-
-		if err != nil {
-			return nil, err
-		}
-
-		defer db.Close()
-
-		err = db.LiveHardDieFast()
-
-		if err != nil {
-			return nil, err
-		}
-
-		to_index, err := tables.CommonTablesWithDatabase(db)
-
-		if err != nil {
-			return nil, err
-		}
-
-		idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
-
-		if err != nil {
-			return nil, err
-		}
-
-		idx.Timings = opts.Timings
-		idx.Logger = opts.Logger
-
-		err = idx.IndexPaths("repo", []string{local_repo})
-
-		if err != nil {
-			return nil, err
-		}
-
-		t, err := tables.NewGeoJSONTable()
-
-		if err != nil {
-			return nil, err
-		}
-
-		conn, err := db.Conn()
-
-		if err != nil {
-			return nil, err
-		}
-
-		var count int
-		var lastupdate int
-
-		sql := fmt.Sprintf("SELECT COUNT(id) FROM %s", t.Name())
-		row := conn.QueryRow(sql)
-
-		err = row.Scan(&count)
-
-		if err != nil {
-			return nil, err
-		}
-
-		sql = fmt.Sprintf("SELECT MAX(lastmodified) FROM %s", t.Name())
-		row = conn.QueryRow(sql)
-
-		err = row.Scan(&lastupdate)
-
-		if err != nil {
-			return nil, err
-		}
-
-		k, err := NewSQLiteDistributionType("common")
-
-		if err != nil {
-			return nil, err
-		}
-
-		info, err := os.Stat(dsn)
-
-		if err != nil {
-			return nil, err
-		}
-
-		size := info.Size()
-
-		d := SQLiteDistribution{
-			kind:       k,
-			path:       dsn,
-			count:      int64(count),
-			size:       size,
-			lastupdate: int64(lastupdate),
-		}
-
-		return &d, nil
+		// pass
 	}
+
+	if opts.Timings {
+
+		t1 := time.Now()
+
+		defer func() {
+			t2 := time.Since(t1)
+			opts.Logger.Info("time to generate (common) sqlite tables %v", t2)
+		}()
+	}
+
+	f_opts := repo.DefaultFilenameOptions()
+	fname := opts.Repo.SQLiteFilename(f_opts)
+
+	dsn := filepath.Join(opts.Workdir, fname)
+
+	db, err := database.NewDBWithDriver("sqlite3", dsn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+
+	err = db.LiveHardDieFast()
+
+	if err != nil {
+		return nil, err
+	}
+
+	to_index, err := tables.CommonTablesWithDatabase(db)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// this is not a plain-vanilla go-whosonfirst-index indexer or
+	// rather it is but with a few extra steps: this generates a
+	// go-wof-index-sqlite indexer callback that skips non-primary records
+	// and tries to load the feature in question returning a feature
+	// (or an error) - that callback is then passed to a function
+	// that creates a go-whosonfirst-sqlite-index indexer whose constructor
+	// creates a go-whosonfirst-index callback (that wraps the callback
+	// it's just been passed) - it's confusing I know but basically what's
+	// happening is that the go-whosonfirst-sqlite is a generic sqlite
+	// thingy that only knows about sqlite.Table thingies (the to_index var above)
+	// and records (interface{}) that are indexed (by tables) - the go-whosonfirst-sqlite-features
+	// callback takes the normal go-whosonfirst-index filehandle (io.Reader)
+	// and converts it in to a record (interface{}) that can be indexed.
+	// computers, right... (20181127/thisisaaronland)
+	
+	idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
+
+	if err != nil {
+		return nil, err
+	}
+
+	idx.Timings = opts.Timings
+	idx.Logger = opts.Logger
+
+	err = idx.IndexPaths("repo", []string{local_repo})
+
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := tables.NewGeoJSONTable()
+
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err := db.Conn()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var count int
+	var lastupdate int
+
+	sql := fmt.Sprintf("SELECT COUNT(id) FROM %s", t.Name())
+	row := conn.QueryRow(sql)
+
+	err = row.Scan(&count)
+
+	if err != nil {
+		return nil, err
+	}
+
+	sql = fmt.Sprintf("SELECT MAX(lastmodified) FROM %s", t.Name())
+	row = conn.QueryRow(sql)
+
+	err = row.Scan(&lastupdate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	k, err := NewSQLiteDistributionType("common")
+
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := os.Stat(dsn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	size := info.Size()
+
+	d := SQLiteDistribution{
+		kind:       k,
+		path:       dsn,
+		count:      int64(count),
+		size:       size,
+		lastupdate: int64(lastupdate),
+	}
+
+	return &d, nil
 }

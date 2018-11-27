@@ -52,7 +52,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 			items, err := BuildDistributions(ctx, local_opts)
 
 			opts.Logger.Status("build for %s : %v", r.String(), err)
-			
+
 			if err != nil {
 				err_ch <- err
 				return
@@ -451,9 +451,9 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 			// I don't necessarily believe this is being reported correctly but I
 			// haven't been able to track down the errant reporting...
 			// (20181127/thisisaaronland)
-			
+
 			opts.Logger.Status("Built %s without any reported errors", local_sqlite)
-			
+
 			distributions = append(distributions, d)
 			local_sqlite = d.Path()
 		}
