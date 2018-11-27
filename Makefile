@@ -30,6 +30,7 @@ build:	fmt bin
 
 deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/jtacoma/uritemplates"
+	@GOPATH=$(GOPATH) go get -u "github.com/mholt/archiver"
 	@GOPATH=$(GOPATH) go get -u "github.com/tidwall/pretty"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-meta"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-sqlite-features"

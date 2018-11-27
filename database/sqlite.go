@@ -137,7 +137,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 	// callback takes the normal go-whosonfirst-index filehandle (io.Reader)
 	// and converts it in to a record (interface{}) that can be indexed.
 	// computers, right... (20181127/thisisaaronland)
-	
+
 	idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
 
 	if err != nil {
