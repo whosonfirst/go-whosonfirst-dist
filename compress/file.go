@@ -27,8 +27,8 @@ func CompressFile(source string, chroot string, opts *CompressOptions) (string, 
 	// (and back) here... tbd (20181127/thisisaaronland)
 
 	arch := archiver.NewTarBz2()
-	
-	err = arch.Archive([]string{ path_source }, path_dest)
+
+	err = arch.Archive([]string{path_source}, path_dest)
 
 	if err != nil {
 		return "", err
