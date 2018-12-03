@@ -3,11 +3,12 @@ package compress
 import (
 	"fmt"
 	"github.com/mholt/archiver"
+	"github.com/whosonfirst/atomicfile"
+	"os"
 	"path/filepath"
 )
 
-// https://godoc.org/github.com/mholt/archiver#TarBz2
-// https://godoc.org/github.com/mholt/archiver#Tar
+// https://godoc.org/github.com/mholt/archiver#Bz2
 
 func CompressFile(source string, chroot string, opts *CompressOptions) (string, error) {
 
@@ -17,18 +18,40 @@ func CompressFile(source string, chroot string, opts *CompressOptions) (string, 
 		return "", err
 	}
 
-	path_dest := fmt.Sprintf("%s.tar.bz2", path_source)
+	path_dest := fmt.Sprintf("%s.bz2", path_source)
 
 	if err != nil {
 		return "", err
 	}
 
-	// it is unclear to me whether we need to do a chroot dance
-	// (and back) here... tbd (20181127/thisisaaronland)
+	in, err := os.Open(path_source)
 
-	arch := archiver.NewTarBz2()
+	if err != nil {
+		return "", err
+	}
 
-	err = arch.Archive([]string{path_source}, path_dest)
+	defer in.Close()
+
+	out, err := atomicfile.New(path_dest, 0644)
+
+	if err != nil {
+		return "", err
+	}
+
+	arch := archiver.NewBz2()
+
+	err = arch.Compress(in, out)
+
+	if err != nil {
+
+		err = out.Abort()
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	err = out.Close()
 
 	if err != nil {
 		return "", err
