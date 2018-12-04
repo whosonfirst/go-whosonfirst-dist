@@ -214,6 +214,16 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	for _, d := range distributions {
 
+		// this appears to be a problem when compressing both the sqlite and bundles
+		// distribution at the same time - specifically out-of-memory errors so we
+		// need to do some testing to see how a) running them in sequence would affect
+		// the overall processing time b) what's needed to be added or tweaked to
+		// generate the bundles (and upload them) after the fact - this wouldn't happen
+		// in this code but rather by modifying the logic and flags in go-whosonfirst-update
+		// to generate and publish but not cleanup the sqlite distribution first and then
+		// to generate and publish the bundles from the (newly created) sqlite distribution
+		// rather than a fresh git checkout... TBD (20181204/thisisaaronland)
+		
 		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, throttle_ch chan bool, done_ch chan bool, err_ch chan error) {
 
 			defer func() {
