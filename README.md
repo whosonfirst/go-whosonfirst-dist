@@ -42,11 +42,11 @@ _These are works in progress. I am still trying to work it out..._
 For example:
 
 ```
-wof-build-dist --build-sqlite --preserve-checkout --workdir /usr/local/dist whosonfirst-data
+wof-dist-build --build-sqlite --preserve-checkout --workdir /usr/local/dist whosonfirst-data
 ```
 
 ```
-wof-build-dist --build-sqlite --local-checkout --compress-all --workdir /usr/local/dist /usr/local/data/dist/whosonfirst-data
+wof-dist-build --build-sqlite --local-checkout --compress-all --workdir /usr/local/dist /usr/local/data/dist/whosonfirst-data
 ```
 
 _`--preserve-checkout` is assumed (and assumed to be true) if `--local-checkout` is true._
@@ -64,7 +64,7 @@ _Please write me._
 * Clean up (remote clone or remote (compressed) SQLite database or local (uncompressed) SQLite database)
 
 ```
-wof-build-dist --build-sqlite=false --build-bundle --local-sqlite --workdir /usr/local/dist whosonfirst-data
+wof-dist-build --build-sqlite=false --build-bundle --local-sqlite --workdir /usr/local/dist whosonfirst-data
 ```
 
 _`--preserve-sqlite` is assumed (and assumed to be true) if `--local-sqlite` is true._
@@ -79,31 +79,51 @@ Build one or more distribution files for a repository. _This is code that is act
 ./bin/wof-dist-build -h
 Usage of ./bin/wof-dist-build:
   -build-bundle
-	Build a bundle distribution for a repo.
+    	Build a bundle distribution for a repo.
   -build-meta
-	Build meta files for a repo (default true)
+    	Build meta files for a repo
   -build-sqlite
-	Build a (common) SQLite distribution for a repo (default true)
+    	Build a (common) SQLite distribution for a repo (default true)
+  -compress-all
+    	... (default true)
+  -compress-bundle
+    	... (default true)
+  -compress-max-cpus int
+    	Number of concurrent processes to use when compressing distribution items. (default 4)
+  -compress-meta
+    	... (default true)
+  -compress-sqlite
+    	... (default true)
   -git-clone string
-    	     Indicate how to clone a repo, using either a native Git binary or the go-git implementation (default "native")
+    	Indicate how to clone a repo, using either a native Git binary or the go-git implementation. Currently only the native Git binary is supported. (default "native")
   -git-organization string
-    		    Fetch repos from the user (or organization) (default "whosonfirst-data")
+    	Fetch repos from the user (or organization) (default "whosonfirst-data")
   -git-protocol string
-    		Fetch repos using this protocol (default "https")
+    	Fetch repos using this protocol (default "https")
   -git-source string
-    	      Fetch repos from this endpoint (default "github.com")
+    	Fetch repos from this endpoint (default "github.com")
   -local-checkout
-	Do not fetch a repo from a remote source but instead use a local checkout on disk
+    	Do not fetch a repo from a remote source but instead use a local checkout on disk
+  -local-sqlite
+    	Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)
+  -preserve-all
+    	...
+  -preserve-bundle
+    	...
   -preserve-checkout
-	Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.
+    	Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.
+  -preserve-meta
+    	...
+  -preserve-sqlite
+    	...
   -strict
-	...
+    	...
   -timings
-	Display timings during the build process
+    	Display timings during the build process
   -verbose
-	Be chatty
+    	Be chatty
   -workdir string
-    	   Where to store temporary and final build files. If empty the code will attempt to use the current working directory.
+    	Where to store temporary and final build files. If empty the code will attempt to use the current working directory.
 ```
 
 For example:
