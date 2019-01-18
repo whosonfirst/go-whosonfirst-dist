@@ -8,6 +8,7 @@ import (
 	"github.com/tidwall/pretty"
 	"github.com/whosonfirst/go-whosonfirst-dist/build"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"io"
@@ -173,15 +174,7 @@ func main() {
 
 	for _, repo_name := range flag.Args() {
 
-		var r repo.Repo
-		var err error
-
-		if opts.LocalCheckout {
-			opts := repo.DefaultFilenameOptions()
-			r, err = repo.NewDataRepoFromPath(repo_name, opts)
-		} else {
-			r, err = repo.NewDataRepoFromString(repo_name)
-		}
+		r, err := utils.NewRepo(repo_name, opts)
 
 		if err != nil {
 			logger.Fatal("Failed to parse repo '%s', because %s", repo_name, err)

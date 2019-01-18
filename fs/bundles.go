@@ -111,10 +111,17 @@ func BuildBundle(ctx context.Context, dist_opts *options.BuildOptions, metafiles
 				// in the meantime just be aware that we are creating a new bundle directory
 				// for each metafile... (20180731/thisisaaronland)
 
-				r, err := repo.NewDataRepoFromMetafile(abs_path)
+				var r repo.Repo
+				var r_err error
 
-				if err != nil {
-					err_ch <- err
+				if dist_opts.CustomRepo {
+					r, r_err = repo.NewCustomRepoFromMetafile(abs_path)
+				} else {
+					r, r_err = repo.NewDataRepoFromMetafile(abs_path)
+				}
+
+				if r_err != nil {
+					err_ch <- r_err
 					return
 				}
 
