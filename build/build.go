@@ -223,7 +223,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 		// to generate and publish but not cleanup the sqlite distribution first and then
 		// to generate and publish the bundles from the (newly created) sqlite distribution
 		// rather than a fresh git checkout... TBD (20181204/thisisaaronland)
-		
+
 		go func(ctx context.Context, d dist.Distribution, item_ch chan *dist.Item, throttle_ch chan bool, done_ch chan bool, err_ch chan error) {
 
 			defer func() {

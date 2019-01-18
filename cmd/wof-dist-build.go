@@ -57,6 +57,8 @@ func main() {
 	local_checkout := flag.Bool("local-checkout", opts.LocalCheckout, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
 	local_sqlite := flag.Bool("local-sqlite", opts.LocalSQLite, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
 
+	custom_repo := flag.Bool("custom-repo", false, "Allow custom repo names")
+
 	// PLEASE MAKE ME WORK, YEAH... (20180704/thisisaaronland)
 	// remote_sqlite := flag.Bool("remote-sqlite", false, "Do not build a new SQLite database but use a pre-existing database that is stored (on dist.whosonfirst.org for now)")
 
@@ -161,6 +163,8 @@ func main() {
 	opts.PreserveSQLite = *preserve_sqlite
 	opts.PreserveMeta = *preserve_meta
 	opts.PreserveBundle = *preserve_bundle
+
+	opts.CustomRepo = *custom_repo
 
 	opts.Strict = *strict
 	opts.Timings = *timings
