@@ -17,6 +17,8 @@ func main() {
 	dated := flag.Bool("dated", false, "Use the current YYYYMMDD date as the suffix for a filename")
 	old_skool := flag.Bool("old-skool", false, "Use old skool 'wof-' prefix when generating filenames")
 
+	custom := flag.Bool("custom", false, "Assume a custom repo name (which doesn't require any strict validation)")
+
 	flag.Parse()
 
 	meta_name := false
@@ -60,10 +62,17 @@ func main() {
 
 	for _, name := range flag.Args() {
 
-		r, err := repo.NewDataRepoFromString(name)
+		var r repo.Repo
+		var r_err error
 
-		if err != nil {
-			log.Fatal(err)
+		if *custom {
+			r, r_err = repo.NewCustomRepoFromString(name)
+		} else {
+			r, r_err = repo.NewDataRepoFromString(name)
+		}
+
+		if r_err != nil {
+			log.Fatal(r_err)
 		}
 
 		if r.String() != name {
