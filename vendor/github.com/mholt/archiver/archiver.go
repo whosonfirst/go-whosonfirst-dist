@@ -157,6 +157,10 @@ type WalkFunc func(f File) error
 // ErrStopWalk signals Walk to break without error.
 var ErrStopWalk = fmt.Errorf("walk stopped")
 
+// ErrFormatNotRecognized is an error that will be
+// returned if the file is not a valid archive format.
+var ErrFormatNotRecognized = fmt.Errorf("format not recognized")
+
 // Compressor compresses to out what it reads from in.
 // It also ensures a compatible or matching file extension.
 type Compressor interface {
@@ -192,21 +196,15 @@ func Archive(sources []string, destination string) error {
 }
 
 // Unarchive unarchives the given archive file into the destination folder.
-// The archive format is selected implicitly based on the file's header.
+// The archive format is selected implicitly.
 func Unarchive(source, destination string) error {
-	f, err := os.Open(source)
+	uaIface, err := ByExtension(source)
 	if err != nil {
 		return err
 	}
-	uaIface, err := ByHeader(f)
-	if err != nil {
-		f.Close()
-		return err
-	}
-	f.Close()
 	u, ok := uaIface.(Unarchiver)
 	if !ok {
-		return fmt.Errorf("format specified by destination filename is not an archive format: %s (%T)", destination, uaIface)
+		return fmt.Errorf("format specified by source filename is not an archive format: %s (%T)", source, uaIface)
 	}
 	return u.Unarchive(source, destination)
 }
@@ -275,8 +273,8 @@ func fileExists(name string) bool {
 	return !os.IsNotExist(err)
 }
 
-func mkdir(dirPath string) error {
-	err := os.MkdirAll(dirPath, 0755)
+func mkdir(dirPath string, dirMode os.FileMode) error {
+	err := os.MkdirAll(dirPath, dirMode)
 	if err != nil {
 		return fmt.Errorf("%s: making directory: %v", dirPath, err)
 	}
@@ -312,12 +310,10 @@ func writeNewSymbolicLink(fpath string, target string) error {
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
-
 	err = os.Symlink(target, fpath)
 	if err != nil {
 		return fmt.Errorf("%s: making symbolic link for: %v", fpath, err)
 	}
-
 	return nil
 }
 
@@ -326,13 +322,15 @@ func writeNewHardLink(fpath string, target string) error {
 	if err != nil {
 		return fmt.Errorf("%s: making directory for file: %v", fpath, err)
 	}
-
 	err = os.Link(target, fpath)
 	if err != nil {
 		return fmt.Errorf("%s: making hard link for: %v", fpath, err)
 	}
-
 	return nil
+}
+
+func isSymlink(fi os.FileInfo) bool {
+	return fi.Mode()&os.ModeSymlink != 0
 }
 
 // within returns true if sub is within or equal to parent.
@@ -455,6 +453,8 @@ func ByExtension(filename string) (interface{}, error) {
 
 // ByHeader returns the unarchiver value that matches the input's
 // file header. It does not affect the current read position.
+// If the file's header is not a recognized archive format, then
+// ErrFormatNotRecognized will be returned.
 func ByHeader(input io.ReadSeeker) (Unarchiver, error) {
 	var matcher Matcher
 	for _, m := range matchers {
@@ -475,7 +475,7 @@ func ByHeader(input io.ReadSeeker) (Unarchiver, error) {
 	case *Rar:
 		return NewRar(), nil
 	}
-	return nil, fmt.Errorf("format unrecognized")
+	return nil, ErrFormatNotRecognized
 }
 
 // extCheckers is a list of the format implementations
