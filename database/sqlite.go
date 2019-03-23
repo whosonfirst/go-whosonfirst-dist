@@ -6,7 +6,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
-	"github.com/whosonfirst/go-whosonfirst-repo"
+	_ "github.com/whosonfirst/go-whosonfirst-repo"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
@@ -73,13 +73,13 @@ func (c *SQLiteCompressedDistribution) Hash() string {
 	return c.hash
 }
 
-func BuildSQLite(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
+func BuildSQLite(ctx context.Context, opts *options.BuildOptions, local_repos ...string) (dist.Distribution, error) {
 
 	// ADD HOOKS FOR -spatial and -search databases... (20180216/thisisaaronland)
-	return BuildSQLiteCommon(ctx, local_repo, opts)
+	return BuildSQLiteCommon(ctx, opts, local_repos...)
 }
 
-func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.BuildOptions) (dist.Distribution, error) {
+func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_repos ...string) (dist.Distribution, error) {
 
 	select {
 	case <-ctx.Done():
@@ -98,8 +98,10 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 		}()
 	}
 
-	f_opts := repo.DefaultFilenameOptions()
-	fname := opts.Repo.SQLiteFilename(f_opts)
+	// f_opts := repo.DefaultFilenameOptions()
+	// fname := opts.Repo.SQLiteFilename(f_opts)
+
+	fname := "whosonfirst-data-sqlite-FIXME"
 
 	dsn := filepath.Join(opts.Workdir, fname)
 
@@ -147,7 +149,7 @@ func BuildSQLiteCommon(ctx context.Context, local_repo string, opts *options.Bui
 	idx.Timings = opts.Timings
 	idx.Logger = opts.Logger
 
-	err = idx.IndexPaths("repo", []string{local_repo})
+	err = idx.IndexPaths("repo", local_repos)
 
 	if err != nil {
 		return nil, err

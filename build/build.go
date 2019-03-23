@@ -30,7 +30,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	}
 
 	type BuildItem struct {
-		Repo  repo.Repo
+		Repo  []repo.Repo
 		Items []*dist.Item
 	}
 
@@ -38,34 +38,47 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
 
-	for _, r := range repos {
+	build_func := func(ctx context.Context, r []repo.Repo) {
 
-		go func(ctx context.Context, r repo.Repo, build_ch chan BuildItem, done_ch chan bool, err_ch chan error) {
+		defer func() {
+			done_ch <- true
+		}()
 
-			defer func() {
-				done_ch <- true
-			}()
+		local_opts := opts.Clone()
+		local_opts.Repos = r
 
-			local_opts := opts.Clone()
-			local_opts.Repo = r
+		items, err := BuildDistributions(ctx, local_opts)
 
-			items, err := BuildDistributions(ctx, local_opts)
+		// FIX ME
+		// opts.Logger.Status("build for %s : %v", r.String(), err)
 
-			opts.Logger.Status("build for %s : %v", r.String(), err)
+		if err != nil {
+			err_ch <- err
+			return
+		}
 
-			if err != nil {
-				err_ch <- err
-				return
-			}
+		b := BuildItem{
+			Repo:  r,
+			Items: items,
+		}
 
-			b := BuildItem{
-				Repo:  r,
-				Items: items,
-			}
+		build_ch <- b
+	}
 
-			build_ch <- b
+	// PLEASE MAKE ME A FLAG SOMEWHERE TO SOMETHING SOMETHING SOMETHING...
+	// this is all part of the work to generate a unified "admin" distibution
+	// from the many whosonfirst-data-COUNTRYCODE repos...
+	// (20190322/thisisaaronland)
 
-		}(ctx, r, build_ch, done_ch, err_ch)
+	combined := false
+
+	if combined {
+		go build_func(ctx, repos)
+	} else {
+
+		for _, r := range repos {
+			go build_func(ctx, []repo.Repo{r})
+		}
 	}
 
 	items := make(map[string][]*dist.Item)
@@ -191,7 +204,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 		wg.Wait()
 	}()
 
-	distributions, meta, err := buildDistributionsForRepo(ctx, opts)
+	distributions, meta, err := buildDistributionsForRepos(ctx, opts)
 
 	if err != nil {
 		opts.Logger.Warning("build (buildDistributionsForRepo) for repo %s failed: %s", opts.Repo, err)
@@ -309,7 +322,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	return items, nil
 }
 
-func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) ([]dist.Distribution, *dist.MetaData, error) {
+func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions) ([]dist.Distribution, *dist.MetaData, error) {
 
 	if opts.Timings {
 
@@ -331,7 +344,8 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 		// pass
 	}
 
-	var local_checkout string
+	var local_checkouts []string
+
 	var local_sqlite string
 	var local_metafiles []string
 	var local_bundlefiles []string
@@ -346,19 +360,20 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	// where is it?
 
 	if opts.LocalCheckout || opts.LocalSQLite {
-		local_checkout = filepath.Join(opts.Workdir, opts.Repo.Name())
+		return errors.New("PLEASE MAKE ME WORK AGAIN...")
+		// local_checkout = filepath.Join(opts.Workdir, opts.Repo.Name())
 	} else {
 
 		// SOMETHING SOMETHING throw an error if local_checkout exists or remove?
 		// (20181013/thisisaaronland)
 
-		repo_path, err := git.CloneRepo(ctx, gt, opts)
+		repo_paths, err := git.CloneRepo(ctx, gt, opts)
 
 		if err != nil {
 			return nil, nil, err
 		}
 
-		local_checkout = repo_path
+		local_checkouts = repo_paths
 	}
 
 	// I don't love that this is here...
@@ -367,68 +382,29 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 		defer func() {
 
-			err := os.RemoveAll(local_checkout)
+			for _, path_checkout := range local_checkouts {
 
-			if err != nil {
-				opts.Logger.Status("failed to remove %s, %s", local_checkout, err)
+				err := os.RemoveAll(path_checkout)
+
+				if err != nil {
+					opts.Logger.Status("failed to remove %s, %s", path_checkout, err)
+				}
 			}
 		}()
 	}
 
-	opts.Logger.Status("local_checkout is %s", local_checkout)
+	opts.Logger.Status("local_checkouts are %s", local_checkouts)
 
-	commit_hash, err := gt.CommitHash(local_checkout)
-
-	if err != nil {
-		opts.Logger.Warning("failed to determine commit hash for %s, %s", local_checkout, err)
-		commit_hash = ""
-	} else {
-		opts.Logger.Status("commit hash is %s (%s)", commit_hash, local_checkout)
-	}
-
-	// if opts.RemoteSQLite then fetch from dist.whosonfirst.org (and uncompressed) and
-	// store in opts.Workdir here... (20180704/thisisaaronland)
+	commit_hash := "FIXME"
 
 	/*
-		if opts.RemoteSQLite {
+		commit_hash, err := gt.CommitHash(local_checkout)
 
-			local_fname := opts.Repo.SQLiteFilename()	// fmt.Sprintf("%s-latest.db", opts.Repo)
-			local_sqlite = filepath.Join(opts.Workdir, local_fname)
-
-			remote_fname := fmt.Sprintf("%s.bz2", local_fname)
-			remote_sqlite := fmt.Sprintf("https://dist.whosonfirst.org/sqlite/%s", remote_fname)
-
-			rsp, err := http.Get(remote_sqlite)
-
-			if err != nil {
-				err_ch <- err
-				return
-			}
-
-			defer rsp.Body.Close()
-
-			br := bzip2.NewReader(rsp.Body)
-
-			wr, err := atomicfile.New(local_sqlite, 0644)
-
-			if err != nil {
-				return nil, nil, err
-			}
-
-			_, err = io.Copy(wr, br)
-
-			if err != nil {
-				wr.Abort()
-				return nil, nil, err
-			}
-
-			err = wr.Close()
-
-			if err != nil {
-				return nil, nil, err
-			}
-
-			logger.Info("Retrieved remote SQLite (%s) and stored as %s", remote_sqlite, local_sqlite)
+		if err != nil {
+			opts.Logger.Warning("failed to determine commit hash for %s, %s", local_checkout, err)
+			commit_hash = ""
+		} else {
+			opts.Logger.Status("commit hash is %s (%s)", commit_hash, local_checkout)
 		}
 	*/
 
@@ -451,7 +427,7 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 
 		} else {
 
-			d, err := database.BuildSQLite(ctx, local_checkout, opts)
+			d, err := database.BuildSQLite(ctx, opts, local_checkouts...)
 
 			if err != nil {
 				opts.Logger.Warning("Failed to build SQLlite %s because %s", local_sqlite, err)
@@ -485,14 +461,14 @@ func buildDistributionsForRepo(ctx context.Context, opts *options.BuildOptions) 
 	if opts.Meta {
 
 		mode := "repo"
-		source := local_checkout
+		sources := local_checkouts
 
 		if opts.SQLite {
 			mode = "sqlite"
 			source = local_sqlite
 		}
 
-		opts.Logger.Status("build metafile from %s (%s)", mode, source)
+		opts.Logger.Status("build metafile from %s (%s)", mode, sources)
 
 		select {
 

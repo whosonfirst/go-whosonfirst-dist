@@ -12,6 +12,7 @@ type BuildOptions struct {
 	Source       string
 	Organization string
 	Repo         repo.Repo
+	Repos        []repo.Repo
 	SQLite       bool
 	// these are the new new and will replace "SQLite"
 	// SQLiteCommon     bool
@@ -52,6 +53,7 @@ func NewBuildOptions() *BuildOptions {
 		Protocol:         "https",
 		Organization:     "whosonfirst-data",
 		Repo:             nil,
+		Repos:            nil,
 		SQLite:           true,
 		Meta:             false,
 		Bundle:           false,

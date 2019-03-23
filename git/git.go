@@ -41,7 +41,7 @@ func NewGitToolFromOptions(opts *options.BuildOptions) (GitTool, error) {
 	return gt, err
 }
 
-func CloneRepo(ctx context.Context, gt GitTool, opts *options.BuildOptions) (string, error) {
+func CloneRepo(ctx context.Context, gt GitTool, opts *options.BuildOptions) ([]string, error) {
 
 	if opts.Timings {
 		t1 := time.Now()
@@ -57,31 +57,41 @@ func CloneRepo(ctx context.Context, gt GitTool, opts *options.BuildOptions) (str
 	template, err := uritemplates.Parse(uri)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	repo_name := opts.Repo.Name()
+	local_paths := make([]string, len(opts.Repos))
 
-	values := make(map[string]interface{})
+	// PLEASE DO THIS IN PARALLEL... (20190322/thisisaaronland)
 
-	values["protocol"] = opts.Protocol
-	values["source"] = opts.Source
-	values["organization"] = opts.Organization
-	values["repo"] = repo_name
+	for _, r := range opts.Repos {
 
-	remote, err := template.Expand(values)
+		repo_name := r.Name()
 
-	if err != nil {
-		return "", err
+		values := make(map[string]interface{})
+
+		values["protocol"] = opts.Protocol
+		values["source"] = opts.Source
+		values["organization"] = opts.Organization
+		values["repo"] = repo_name
+
+		remote, err := template.Expand(values)
+
+		if err != nil {
+			return nil, err
+		}
+
+		local := filepath.Join(opts.Workdir, repo_name)
+
+		err = gt.Clone(ctx, remote, local)
+
+		if err != nil {
+			return nil, err
+		}
+
+		local_paths = append(local_paths, local)
+
 	}
 
-	local := filepath.Join(opts.Workdir, repo_name)
-
-	err = gt.Clone(ctx, remote, local)
-
-	if err != nil {
-		return "", err
-	}
-
-	return local, nil
+	return local_paths, nil
 }

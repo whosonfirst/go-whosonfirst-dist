@@ -72,7 +72,7 @@ func (c *MetaCompressedDistribution) Hash() string {
 	return c.hash
 }
 
-func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, source string) ([]dist.Distribution, error) {
+func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode string, sources ...string) ([]dist.Distribution, error) {
 
 	meta_opts, err := meta_options.DefaultBuildOptions()
 
@@ -87,7 +87,7 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 	// mode := "sqlite"	// d.Mode() ?
 	// source := []string{ d.Path() }
 
-	metafiles, err := meta.BuildFromIndex(meta_opts, mode, []string{source})
+	metafiles, err := meta.BuildFromIndex(meta_opts, mode, sources)
 
 	if err != nil {
 		return nil, err
