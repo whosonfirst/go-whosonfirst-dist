@@ -1,6 +1,3 @@
-CWD=$(shell pwd)
-GOPATH := $(CWD)
-
 vendor-deps:
 	go mod vendor
 
