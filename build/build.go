@@ -124,84 +124,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	}
 
 	defer func() {
-
-		if opts.Timings {
-
-			t1 := time.Now()
-
-			defer func() {
-				t2 := time.Since(t1)
-				opts.Logger.Status("time to remove uncompressed files for %s %v", opts.Repo, t2)
-			}()
-		}
-
-		rm := func(path string) {
-
-			opts.Logger.Status("remove uncompressed file %s", path)
-
-			info, err := os.Stat(path)
-
-			if os.IsNotExist(err) {
-				return
-			}
-
-			if err != nil {
-				opts.Logger.Warning("Failed to stat path '%s' : %s", path, err)
-				return
-			}
-
-			if info.IsDir() {
-				err = os.RemoveAll(path)
-			} else {
-				err = os.Remove(path)
-			}
-
-			if err != nil {
-				opts.Logger.Warning("Failed to remove '%s' : %s", path, err)
-			}
-		}
-
-		wg := new(sync.WaitGroup)
-
-		for _, d := range distributions {
-
-			t := d.Type()
-
-			switch t.Class() {
-
-			case "csv":
-
-				if t.Major() == "meta" && opts.PreserveMeta {
-					continue
-				}
-
-			case "database":
-
-				if t.Major() == "sqlite" && opts.PreserveSQLite {
-					continue
-				}
-
-			case "fs":
-
-				if t.Major() == "bundle" && opts.PreserveBundle {
-					continue
-				}
-
-			default:
-				// pass
-			}
-
-			wg.Add(1)
-
-			go func(path string, wg *sync.WaitGroup) {
-
-				defer wg.Done()
-				rm(path)
-
-			}(d.Path(), wg)
-		}
-
-		wg.Wait()
+		cleanupBuildDistributions(ctx, opts, distributions)
 	}()
 
 	distributions, meta, err := buildDistributionsForRepos(ctx, opts)
@@ -214,8 +137,6 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	item_ch := make(chan *dist.Item)
 	done_ch := make(chan bool)
 	err_ch := make(chan error)
-
-	// something something something size of the file/directory?
 
 	count_throttle := opts.CompressMaxCPUs
 
@@ -465,7 +386,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 		if opts.SQLite {
 			mode = "sqlite"
-			source = local_sqlite
+			sources = []string{ local_sqlite }
 		}
 
 		opts.Logger.Status("build metafile from %s (%s)", mode, sources)
@@ -480,7 +401,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 		ta := time.Now()
 
-		d_many, err := csv.BuildMetaFiles(ctx, opts, mode, source)
+		d_many, err := csv.BuildMetaFiles(ctx, opts, mode, sources...)
 
 		tb := time.Since(ta)
 
@@ -539,4 +460,87 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 	}
 
 	return distributions, meta, nil
+}
+
+func cleanupBuildDistributions(ctx context.Context, opts *options.BuildOptions, distributions []dist.Distribution) error {
+
+	if opts.Timings {
+
+		t1 := time.Now()
+
+		defer func() {
+			t2 := time.Since(t1)
+			opts.Logger.Status("time to remove uncompressed files for %s %v", opts.Repo, t2)
+		}()
+	}
+
+	rm := func(path string) {
+
+		opts.Logger.Status("remove uncompressed file %s", path)
+
+		info, err := os.Stat(path)
+
+		if os.IsNotExist(err) {
+			return
+		}
+
+		if err != nil {
+			opts.Logger.Warning("Failed to stat path '%s' : %s", path, err)
+			return
+		}
+
+		if info.IsDir() {
+			err = os.RemoveAll(path)
+		} else {
+			err = os.Remove(path)
+		}
+
+		if err != nil {
+			opts.Logger.Warning("Failed to remove '%s' : %s", path, err)
+		}
+	}
+
+	wg := new(sync.WaitGroup)
+
+	for _, d := range distributions {
+
+		t := d.Type()
+
+		switch t.Class() {
+
+		case "csv":
+
+			if t.Major() == "meta" && opts.PreserveMeta {
+				continue
+			}
+
+		case "database":
+
+			if t.Major() == "sqlite" && opts.PreserveSQLite {
+				continue
+			}
+
+		case "fs":
+
+			if t.Major() == "bundle" && opts.PreserveBundle {
+				continue
+			}
+
+		default:
+			// pass
+		}
+
+		wg.Add(1)
+
+		go func(path string, wg *sync.WaitGroup) {
+
+			defer wg.Done()
+			rm(path)
+
+		}(d.Path(), wg)
+	}
+
+	wg.Wait()
+
+	return nil
 }

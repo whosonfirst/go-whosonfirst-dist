@@ -58,10 +58,16 @@ vendor-deps: rmdeps deps
 	find vendor -name '.git' -print -type d -exec rm -rf {} +
 	rm -rf src
 
+bin: 	self
+	rm -rf bin/*
+	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build/main.go
+	@GOPATH=$(GOPATH) go build -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
+
 fmt:
 	go fmt *.go
 	go fmt build/*.go
-	go fmt cmd/*.go
+	go fmt cmd/wof-dist-build/*.go
+	go fmt cmd/wof-dist-fetch/*.go
 	go fmt compress/*.go
 	go fmt csv/*.go
 	go fmt database/*.go
@@ -71,7 +77,6 @@ fmt:
 	go fmt options/*.go
 	go fmt utils/*.go
 
-bin: 	self
-	rm -rf bin/*
-	@GOPATH=$(GOPATH) go build -o bin/wof-dist-build cmd/wof-dist-build.go
-	@GOPATH=$(GOPATH) go build -o bin/wof-dist-fetch cmd/wof-dist-fetch.go
+tools:
+	go build -o bin/wof-dist-build cmd/wof-dist-build/main.go
+	go build -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go

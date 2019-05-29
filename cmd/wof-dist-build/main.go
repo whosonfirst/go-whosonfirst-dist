@@ -21,21 +21,10 @@ func main() {
 
 	opts := options.NewBuildOptions()
 
-	build_sqlite := flag.Bool("build-sqlite", opts.SQLite, "Build a (common) SQLite distribution for a repo")
-
-	// THESE WILL BE THE NEW-NEW AND THE -build-sqlite FLAG WILL BE DEPRECATED
-	// (20180611/thisisaaronland)
-
-	/*
-		build_sqlite_common := flag.Bool("build-sqlite-common", true, "...")
-		build_sqlite_spatial := flag.Bool("build-sqlite-spatial", true, "...")
-		build_sqlite_search := flag.Bool("build-sqlite-search", true, "...")
-		build_sqlite_all := flag.Bool("build-sqlite-all", true, "...")
-	*/
+	build_sqlite := flag.Bool("build-sqlite", opts.SQLite, "Build a (common) SQLite distribution for a repo. DEPRECATED - please use -build-sqlite-common.")
 
 	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo")
 	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo.")
-	// build_shapefile := flag.Bool("build-shapefile", true, "...")
 
 	compress_sqlite := flag.Bool("compress-sqlite", opts.CompressSQLite, "...")
 	compress_meta := flag.Bool("compress-meta", opts.CompressMeta, "...")
