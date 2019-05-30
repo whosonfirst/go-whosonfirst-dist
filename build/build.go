@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+// take (n) repos and build (n) or 1 (combined) distributions (represented as dist.Item(s))
+
 func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions, repos ...repo.Repo) (map[string][]*dist.Item, error) {
 
 	if opts.Timings {
@@ -30,7 +32,8 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	}
 
 	type BuildItem struct {
-		Repo  []repo.Repo
+		Key   string
+		Repos []repo.Repo
 		Items []*dist.Item
 	}
 
@@ -49,8 +52,9 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 		items, err := BuildDistributions(ctx, local_opts)
 
-		// FIX ME
-		// opts.Logger.Status("build for %s : %v", r.String(), err)
+		// TBD
+
+		key := "FIX ME"
 
 		if err != nil {
 			err_ch <- err
@@ -58,7 +62,8 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 		}
 
 		b := BuildItem{
-			Repo:  r,
+			Key:   key,
+			Repos: r,
 			Items: items,
 		}
 
@@ -70,9 +75,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	// from the many whosonfirst-data-COUNTRYCODE repos...
 	// (20190322/thisisaaronland)
 
-	combined := false
-
-	if combined {
+	if opts.Combined {
 		go build_func(ctx, repos)
 	} else {
 
@@ -92,7 +95,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 		case <-done_ch:
 			remaining--
 		case b := <-build_ch:
-			items[b.Repo.Name()] = b.Items
+			items[b.Key] = b.Items
 		case e := <-err_ch:
 			err = e
 			break
@@ -107,6 +110,8 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 	return items, nil
 }
+
+// take (n) repos and build 1 (combined) distribution item, compressed and everything
 
 func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dist.Item, error) {
 
@@ -243,6 +248,18 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	return items, nil
 }
 
+/*
+
+take (n) repos and:
+1. grab a fresh checkout/clone
+2. build a SQLite database
+3. optionally build metafiles or build metafiles if building bundles
+4. optionally build bundle folder
+
+return:
+
+*/
+
 func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions) ([]dist.Distribution, *dist.MetaData, error) {
 
 	if opts.Timings {
@@ -281,12 +298,12 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 	// where is it?
 
 	if opts.LocalCheckout || opts.LocalSQLite {
-		return errors.New("PLEASE MAKE ME WORK AGAIN...")
-		// local_checkout = filepath.Join(opts.Workdir, opts.Repo.Name())
-	} else {
 
-		// SOMETHING SOMETHING throw an error if local_checkout exists or remove?
-		// (20181013/thisisaaronland)
+		// TBD
+
+		return nil, nil, errors.New("PLEASE MAKE ME WORK AGAIN...")
+
+	} else {
 
 		repo_paths, err := git.CloneRepo(ctx, gt, opts)
 
@@ -297,24 +314,16 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		local_checkouts = repo_paths
 	}
 
-	// I don't love that this is here...
-
 	if !opts.PreserveCheckout {
-
-		defer func() {
-
-			for _, path_checkout := range local_checkouts {
-
-				err := os.RemoveAll(path_checkout)
-
-				if err != nil {
-					opts.Logger.Status("failed to remove %s, %s", path_checkout, err)
-				}
-			}
-		}()
+		defer removeLocalCheckouts(opts, local_checkouts)
 	}
 
 	opts.Logger.Status("local_checkouts are %s", local_checkouts)
+
+	// TBD
+
+	// what is the commit hash of multiple checkouts - maybe just
+	// concatenate them all... (20190529/thisisaaronland)
 
 	commit_hash := "FIXME"
 
@@ -340,6 +349,8 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		}
 
 		if opts.LocalSQLite {
+
+			// TBD
 
 			f_opts := repo.DefaultFilenameOptions()
 			fname := opts.Repo.SQLiteFilename(f_opts) // fmt.Sprintf("%s-latest.db", opts.Repo)
@@ -386,7 +397,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 		if opts.SQLite {
 			mode = "sqlite"
-			sources = []string{ local_sqlite }
+			sources = []string{local_sqlite}
 		}
 
 		opts.Logger.Status("build metafile from %s (%s)", mode, sources)
@@ -445,7 +456,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		}
 
 		if len(bundle_dist) == 0 {
-			return nil, nil, errors.New("No metafiles produced")
+			return nil, nil, errors.New("No bundles produced")
 		}
 
 		for _, d := range bundle_dist {
@@ -453,6 +464,9 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 			local_bundlefiles = append(local_bundlefiles, d.Path())
 		}
 	}
+
+	// TBD
+	// MetaData.Repo doesn't really make any sense in a combined dist context
 
 	meta := &dist.MetaData{
 		CommitHash: commit_hash,
@@ -541,6 +555,20 @@ func cleanupBuildDistributions(ctx context.Context, opts *options.BuildOptions, 
 	}
 
 	wg.Wait()
+
+	return nil
+}
+
+func removeLocalCheckouts(opts *options.BuildOptions, local_checkouts []string) error {
+
+	for _, path_checkout := range local_checkouts {
+
+		err := os.RemoveAll(path_checkout)
+
+		if err != nil {
+			opts.Logger.Status("failed to remove %s, %s", path_checkout, err)
+		}
+	}
 
 	return nil
 }

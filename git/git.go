@@ -90,7 +90,6 @@ func CloneRepo(ctx context.Context, gt GitTool, opts *options.BuildOptions) ([]s
 		}
 
 		local_paths = append(local_paths, local)
-
 	}
 
 	return local_paths, nil

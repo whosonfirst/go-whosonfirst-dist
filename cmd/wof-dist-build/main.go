@@ -52,6 +52,8 @@ func main() {
 	// PLEASE MAKE ME WORK, YEAH... (20180704/thisisaaronland)
 	// remote_sqlite := flag.Bool("remote-sqlite", false, "Do not build a new SQLite database but use a pre-existing database that is stored (on dist.whosonfirst.org for now)")
 
+	combined := flag.Bool("combined", opts.Combined, "...")
+
 	strict := flag.Bool("strict", opts.Strict, "...")
 	timings := flag.Bool("timings", opts.Timings, "Display timings during the build process")
 	verbose := flag.Bool("verbose", false, "Be chatty")
@@ -140,6 +142,8 @@ func main() {
 	opts.SQLite = *build_sqlite
 	opts.Meta = *build_meta
 	opts.Bundle = *build_bundle
+
+	opts.Combined = *combined
 
 	opts.LocalCheckout = *local_checkout
 	opts.LocalSQLite = *local_sqlite

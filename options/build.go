@@ -33,6 +33,7 @@ type BuildOptions struct {
 	CompressBundle   bool
 	CompressMaxCPUs  int
 	CustomRepo       bool
+	Combined         bool
 	Timings          bool
 	Strict           bool
 }
@@ -72,6 +73,7 @@ func NewBuildOptions() *BuildOptions {
 		CompressMaxCPUs:  max_cpus,
 		Timings:          false,
 		Strict:           false,
+		Combined:         false,
 	}
 
 	return &opts
@@ -103,6 +105,7 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		CustomRepo:       opts.CustomRepo,
 		Timings:          opts.Timings,
 		Strict:           opts.Strict,
+		Combined:         opts.Combined,
 	}
 
 	return &clone
