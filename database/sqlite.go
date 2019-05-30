@@ -123,6 +123,10 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		return nil, err
 	}
 
+	// TBD
+
+	// geojson IndexAltFiles...
+	
 	to_index, err := tables.CommonTablesWithDatabase(db)
 
 	if err != nil {
