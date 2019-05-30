@@ -12,7 +12,7 @@ import (
 
 type GitTool interface {
 	Clone(context.Context, string, string) error
-	CommitHash(string) (string, error)
+	CommitHash(...string) (string, error)
 }
 
 func NewGitToolFromOptions(opts *options.BuildOptions) (GitTool, error) {

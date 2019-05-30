@@ -10,6 +10,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist/git"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-repo"
+	_ "log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,9 +53,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 		items, err := BuildDistributions(ctx, local_opts)
 
-		// TBD
-
-		key := "FIX ME"
+		key := options.DistributionNameFromOptions(opts)
 
 		if err != nil {
 			err_ch <- err
@@ -69,11 +68,6 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 		build_ch <- b
 	}
-
-	// PLEASE MAKE ME A FLAG SOMEWHERE TO SOMETHING SOMETHING SOMETHING...
-	// this is all part of the work to generate a unified "admin" distibution
-	// from the many whosonfirst-data-COUNTRYCODE repos...
-	// (20190322/thisisaaronland)
 
 	if opts.Combined {
 		go build_func(ctx, repos)
@@ -111,7 +105,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	return items, nil
 }
 
-// take (n) repos and build 1 (combined) distribution item, compressed and everything
+// build all the distributions for  (n) repos and then compress each one
 
 func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dist.Item, error) {
 
@@ -132,6 +126,8 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 		cleanupBuildDistributions(ctx, opts, distributions)
 	}()
 
+	// actually building stuff...
+
 	distributions, meta, err := buildDistributionsForRepos(ctx, opts)
 
 	if err != nil {
@@ -150,6 +146,8 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	for i := 0; i < count_throttle; i++ {
 		throttle_ch <- true
 	}
+
+	// actually compressing stuff...
 
 	for _, d := range distributions {
 
@@ -294,12 +292,32 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		return nil, nil, err
 	}
 
-	// do we need to work with a remote (or local) Git checkout and if so
-	// where is it?
+	if opts.LocalCheckout {
 
-	if opts.LocalCheckout || opts.LocalSQLite {
+		for _, r := range opts.Repos {
 
-		// TBD
+			// TBD
+			// do we need/want a custom local checkout directory...
+
+			fname := r.Name()
+			path := filepath.Join(opts.Workdir, fname)
+
+			abs_path, err := filepath.Abs(path)
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			_, err = os.Stat(abs_path)
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			local_checkouts = append(local_checkouts, abs_path)
+		}
+
+	} else if opts.LocalSQLite {
 
 		return nil, nil, errors.New("PLEASE MAKE ME WORK AGAIN...")
 
@@ -320,23 +338,14 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 	opts.Logger.Status("local_checkouts are %s", local_checkouts)
 
-	// TBD
+	commit_hash, err := gt.CommitHash(local_checkouts...)
 
-	// what is the commit hash of multiple checkouts - maybe just
-	// concatenate them all... (20190529/thisisaaronland)
-
-	commit_hash := "FIXME"
-
-	/*
-		commit_hash, err := gt.CommitHash(local_checkout)
-
-		if err != nil {
-			opts.Logger.Warning("failed to determine commit hash for %s, %s", local_checkout, err)
-			commit_hash = ""
-		} else {
-			opts.Logger.Status("commit hash is %s (%s)", commit_hash, local_checkout)
-		}
-	*/
+	if err != nil {
+		opts.Logger.Warning("failed to determine commit hash for %s, %s", local_checkouts, err)
+		commit_hash = ""
+	} else {
+		opts.Logger.Status("commit hash is %s (%s)", commit_hash, local_checkouts)
+	}
 
 	if opts.SQLite {
 
@@ -350,12 +359,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 		if opts.LocalSQLite {
 
-			// TBD
-
-			f_opts := repo.DefaultFilenameOptions()
-			fname := opts.Repo.SQLiteFilename(f_opts) // fmt.Sprintf("%s-latest.db", opts.Repo)
-
-			local_sqlite = filepath.Join(opts.Workdir, fname)
+			return nil, nil, errors.New("Please make me work again")
 
 		} else {
 
@@ -365,10 +369,6 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 				opts.Logger.Warning("Failed to build SQLlite %s because %s", local_sqlite, err)
 				return nil, nil, err
 			}
-
-			// I don't necessarily believe this is being reported correctly but I
-			// haven't been able to track down the errant reporting...
-			// (20181127/thisisaaronland)
 
 			opts.Logger.Status("Built %s without any reported errors", local_sqlite)
 

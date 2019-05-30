@@ -6,7 +6,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
-	_ "github.com/whosonfirst/go-whosonfirst-repo"
+	"github.com/whosonfirst/go-whosonfirst-repo"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
@@ -98,14 +98,16 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		}()
 	}
 
-	// TBD
+	dsn_repo, err := options.DistributionRepoFromOptions(opts)
 
-	// f_opts := repo.DefaultFilenameOptions()
-	// fname := opts.Repo.SQLiteFilename(f_opts)
+	if err != nil {
+		return nil, err
+	}
 
-	fname := "whosonfirst-data-sqlite-FIXME"
+	dsn_opts := repo.DefaultFilenameOptions()
+	dsn_fname := dsn_repo.SQLiteFilename(dsn_opts)
 
-	dsn := filepath.Join(opts.Workdir, fname)
+	dsn := filepath.Join(opts.Workdir, dsn_fname)
 
 	db, err := database.NewDBWithDriver("sqlite3", dsn)
 

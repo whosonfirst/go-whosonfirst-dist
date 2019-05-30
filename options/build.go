@@ -34,6 +34,7 @@ type BuildOptions struct {
 	CompressMaxCPUs  int
 	CustomRepo       bool
 	Combined         bool
+	CombinedName     string
 	Timings          bool
 	Strict           bool
 }
@@ -74,6 +75,7 @@ func NewBuildOptions() *BuildOptions {
 		Timings:          false,
 		Strict:           false,
 		Combined:         false,
+		CombinedName:     "",
 	}
 
 	return &opts
@@ -106,7 +108,23 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		Timings:          opts.Timings,
 		Strict:           opts.Strict,
 		Combined:         opts.Combined,
+		CombinedName:     opts.CombinedName,
 	}
 
 	return &clone
+}
+
+func DistributionNameFromOptions(opts *BuildOptions) string {
+
+	if opts.Combined {
+		return opts.CombinedName
+	}
+
+	return opts.Repo.Name()
+}
+
+func DistributionRepoFromOptions(opts *BuildOptions) (repo.Repo, error) {
+
+	name := DistributionNameFromOptions(opts)
+	return repo.NewCustomRepoFromString(name)
 }

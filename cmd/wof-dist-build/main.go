@@ -21,7 +21,7 @@ func main() {
 
 	opts := options.NewBuildOptions()
 
-	build_sqlite := flag.Bool("build-sqlite", opts.SQLite, "Build a (common) SQLite distribution for a repo. DEPRECATED - please use -build-sqlite-common.")
+	build_sqlite := flag.Bool("build-sqlite", opts.SQLite, "Build a (common) SQLite distribution for a repo.")
 
 	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo")
 	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo.")
@@ -49,10 +49,8 @@ func main() {
 
 	custom_repo := flag.Bool("custom-repo", false, "Allow custom repo names")
 
-	// PLEASE MAKE ME WORK, YEAH... (20180704/thisisaaronland)
-	// remote_sqlite := flag.Bool("remote-sqlite", false, "Do not build a new SQLite database but use a pre-existing database that is stored (on dist.whosonfirst.org for now)")
-
-	combined := flag.Bool("combined", opts.Combined, "...")
+	combined := flag.Bool("combined", opts.Combined, "Create a single combined distribution from multiple repos.")
+	combined_name := flag.String("combined-name", opts.CombinedName, "Distribution name for a single combined distribution from multiple repos.")
 
 	strict := flag.Bool("strict", opts.Strict, "...")
 	timings := flag.Bool("timings", opts.Timings, "Display timings during the build process")
@@ -67,6 +65,10 @@ func main() {
 	if *verbose {
 		stdout := io.Writer(os.Stdout)
 		logger.AddLogger(stdout, "status")
+	}
+
+	if *combined && *combined_name == "" {
+		logger.Fatal("Missing -combined-name flag")
 	}
 
 	if *compress_all {
@@ -144,6 +146,7 @@ func main() {
 	opts.Bundle = *build_bundle
 
 	opts.Combined = *combined
+	opts.CombinedName = *combined_name
 
 	opts.LocalCheckout = *local_checkout
 	opts.LocalSQLite = *local_sqlite

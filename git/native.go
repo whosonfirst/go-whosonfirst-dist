@@ -55,37 +55,96 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 	}
 }
 
-func (gt *NativeGitTool) CommitHash(path string) (string, error) {
+func (gt *NativeGitTool) CommitHash(paths ...string) (string, error) {
 
-	cwd, err := os.Getwd()
-
-	if err != nil {
-		return "", err
+	type HashResponse struct {
+		Index int
+		Hash  string
 	}
 
-	err = os.Chdir(path)
+	done_ch := make(chan bool)
+	err_ch := make(chan error)
+	hash_ch := make(chan HashResponse)
 
-	if err != nil {
-		return "", err
+	hash_path := func(ctx context.Context, path string, idx int) {
+
+		defer func() {
+			done_ch <- true
+		}()
+
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			// pass
+		}
+
+		cwd, err := os.Getwd()
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		err = os.Chdir(path)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		defer func() {
+			os.Chdir(cwd)
+		}()
+
+		git_args := []string{
+			"log",
+			"--pretty=format:%H",
+			"-n",
+			"1",
+		}
+
+		cmd := exec.Command(gt.git, git_args...)
+
+		if gt.Debug {
+			log.Println(gt.git, strings.Join(git_args, " "))
+		}
+
+		hash, err := cmd.Output()
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
+
+		rsp := HashResponse{
+			Index: idx,
+			Hash:  string(hash),
+		}
+
+		hash_ch <- rsp
 	}
 
-	defer func() {
-		os.Chdir(cwd)
-	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	git_args := []string{
-		"log",
-		"--pretty=format:%H",
-		"-n",
-		"1",
+	for idx, path := range paths {
+		go hash_path(ctx, path, idx)
 	}
 
-	cmd := exec.Command(gt.git, git_args...)
+	remaining := len(paths)
+	hashes := make([]string, remaining)
 
-	if gt.Debug {
-		log.Println(gt.git, strings.Join(git_args, " "))
+	for remaining > 0 {
+		select {
+		case <-done_ch:
+			remaining -= 1
+		case err := <-err_ch:
+			return "", err
+		case hash_rsp := <-hash_ch:
+			hashes[hash_rsp.Index] = hash_rsp.Hash
+		}
 	}
 
-	hash, err := cmd.Output()
-	return string(hash), err
+	return strings.Join(hashes, ":"), nil
 }
