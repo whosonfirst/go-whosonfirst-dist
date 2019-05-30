@@ -123,11 +123,19 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		return nil, err
 	}
 
-	// TBD
+	geojson_opts, err := tables.DefaultGeoJSONTableOptions()
 
-	// geojson IndexAltFiles...
-	
-	to_index, err := tables.CommonTablesWithDatabase(db)
+	if err != nil {
+		return nil, err
+	}
+
+	geojson_opts.IndexAltFiles = opts.IndexAltFiles
+
+	table_opts := &tables.CommonTablesOptions{
+		GeoJSON: geojson_opts,
+	}
+
+	to_index, err := tables.CommonTablesWithDatabaseAndOptions(db, table_opts)
 
 	if err != nil {
 		return nil, err

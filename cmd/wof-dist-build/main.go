@@ -49,6 +49,8 @@ func main() {
 
 	custom_repo := flag.Bool("custom-repo", false, "Allow custom repo names")
 
+	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files.")
+
 	combined := flag.Bool("combined", opts.Combined, "Create a single combined distribution from multiple repos.")
 	combined_name := flag.String("combined-name", opts.CombinedName, "Distribution name for a single combined distribution from multiple repos.")
 
@@ -147,6 +149,8 @@ func main() {
 
 	opts.Combined = *combined
 	opts.CombinedName = *combined_name
+
+	opts.IndexAltFiles = *index_alt_files
 
 	opts.LocalCheckout = *local_checkout
 	opts.LocalSQLite = *local_sqlite

@@ -37,6 +37,7 @@ type BuildOptions struct {
 	CombinedName     string
 	Timings          bool
 	Strict           bool
+	IndexAltFiles    bool
 }
 
 func NewBuildOptions() *BuildOptions {
@@ -76,6 +77,7 @@ func NewBuildOptions() *BuildOptions {
 		Strict:           false,
 		Combined:         false,
 		CombinedName:     "",
+		IndexAltFiles:    false,
 	}
 
 	return &opts
@@ -109,6 +111,7 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		Strict:           opts.Strict,
 		Combined:         opts.Combined,
 		CombinedName:     opts.CombinedName,
+		IndexAltFiles:    opts.IndexAltFiles,
 	}
 
 	return &clone
