@@ -114,11 +114,12 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	if opts.Timings {
 
+		dist_name := options.DistributionNameFromOptions(opts)
 		t1 := time.Now()
 
 		defer func() {
 			t2 := time.Since(t1)
-			opts.Logger.Status("time to build COMPRESSED distributions for %s %v", opts.Repo, t2)
+			opts.Logger.Status("time to build COMPRESSED distributions for %s %v", dist_name, t2)
 		}()
 	}
 
@@ -262,11 +263,12 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 	if opts.Timings {
 
+		dist_name := options.DistributionNameFromOptions(opts)
 		t1 := time.Now()
 
 		defer func() {
 			t2 := time.Since(t1)
-			opts.Logger.Status("time to build UNCOMPRESSED distributions for %s %v", opts.Repo, t2)
+			opts.Logger.Status("time to build UNCOMPRESSED distributions for %s %v", dist_name, t2)
 		}()
 	}
 
@@ -465,12 +467,11 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		}
 	}
 
-	// TBD
-	// MetaData.Repo doesn't really make any sense in a combined dist context
+	dist_name := options.DistributionNameFromOptions(opts)
 
 	meta := &dist.MetaData{
 		CommitHash: commit_hash,
-		Repo:       opts.Repo.Name(),
+		Repo:       dist_name,
 	}
 
 	return distributions, meta, nil
@@ -480,11 +481,12 @@ func cleanupBuildDistributions(ctx context.Context, opts *options.BuildOptions, 
 
 	if opts.Timings {
 
+		dist_name := options.DistributionNameFromOptions(opts)
 		t1 := time.Now()
 
 		defer func() {
 			t2 := time.Since(t1)
-			opts.Logger.Status("time to remove uncompressed files for %s %v", opts.Repo, t2)
+			opts.Logger.Status("time to remove uncompressed files for %s %v", dist_name, t2)
 		}()
 	}
 
