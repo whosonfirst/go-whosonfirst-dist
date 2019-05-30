@@ -80,9 +80,15 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 	items := make(map[string][]*dist.Item)
 	var err error
+	
+	remaining := 0
 
-	remaining := len(repos)
-
+	if opts.Combined {
+		remaining = 1
+	} else {
+		remaining = len(repos)
+	}
+	
 	for remaining > 0 {
 
 		select {
