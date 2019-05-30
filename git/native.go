@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -55,42 +56,22 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 	}
 }
 
-func (gt *NativeGitTool) CommitHash(paths ...string) (string, error) {
+func (gt *NativeGitTool) CommitHashes(paths ...string) (map[string]string, error) {
 
-	type HashResponse struct {
-		Index int
-		Hash  string
-	}
+	hashes := make(map[string]string)
 
-	done_ch := make(chan bool)
-	err_ch := make(chan error)
-	hash_ch := make(chan HashResponse)
-
-	hash_path := func(ctx context.Context, path string, idx int) {
-
-		defer func() {
-			done_ch <- true
-		}()
-
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			// pass
-		}
+	hash_path := func(path string) error {
 
 		cwd, err := os.Getwd()
 
 		if err != nil {
-			err_ch <- err
-			return
+			return err
 		}
 
 		err = os.Chdir(path)
 
 		if err != nil {
-			err_ch <- err
-			return
+			return err
 		}
 
 		defer func() {
@@ -113,38 +94,23 @@ func (gt *NativeGitTool) CommitHash(paths ...string) (string, error) {
 		hash, err := cmd.Output()
 
 		if err != nil {
-			err_ch <- err
-			return
+			return err
 		}
 
-		rsp := HashResponse{
-			Index: idx,
-			Hash:  string(hash),
-		}
+		repo := filepath.Base(path)
+		hashes[repo] = string(hash)
 
-		hash_ch <- rsp
+		return nil
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	for _, path := range paths {
 
-	for idx, path := range paths {
-		go hash_path(ctx, path, idx)
-	}
+		err := hash_path(path)
 
-	remaining := len(paths)
-	hashes := make([]string, remaining)
-
-	for remaining > 0 {
-		select {
-		case <-done_ch:
-			remaining -= 1
-		case err := <-err_ch:
-			return "", err
-		case hash_rsp := <-hash_ch:
-			hashes[hash_rsp.Index] = hash_rsp.Hash
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return strings.Join(hashes, ":"), nil
+	return hashes, nil
 }

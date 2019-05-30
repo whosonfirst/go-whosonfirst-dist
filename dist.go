@@ -3,6 +3,8 @@ package dist
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -31,8 +33,8 @@ type CompressedDistribution interface {
 }
 
 type MetaData struct {
-	Repo       string
-	CommitHash string
+	Repo         string
+	CommitHashes map[string]string
 }
 
 // for external publication
@@ -93,6 +95,22 @@ func NewItemFromDistribution(d Distribution, c CompressedDistribution, m *MetaDa
 
 	str_type := fmt.Sprintf("x-urn:whosonfirst:%s:%s#%s", t.Class(), t.Major(), t.Minor())
 
+	repos := make([]string, 0)
+	commits := make([]string, 0)
+
+	for name, _ := range m.CommitHashes {
+		repos = append(repos, name)
+	}
+
+	sort.Strings(repos)
+
+	for _, name := range repos {
+		commits = append(commits, m.CommitHashes[name])
+	}
+
+	str_repos := strings.Join(repos, ":")
+	str_commits := strings.Join(commits, ":")
+
 	i := Item{
 		Name: fname,
 		Type: str_type,
@@ -103,8 +121,8 @@ func NewItemFromDistribution(d Distribution, c CompressedDistribution, m *MetaDa
 		LastUpdate:   str_lastupdate,
 		LastModified: str_lastmod,
 
-		Repo:   m.Repo,
-		Commit: m.CommitHash,
+		Repo:   str_repos,
+		Commit: str_commits,
 
 		NameCompressed:   fname_compressed,
 		SizeCompressed:   fsize_compressed,

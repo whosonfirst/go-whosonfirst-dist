@@ -80,7 +80,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 	items := make(map[string][]*dist.Item)
 	var err error
-	
+
 	remaining := 0
 
 	if opts.Combined {
@@ -88,7 +88,7 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 	} else {
 		remaining = len(repos)
 	}
-	
+
 	for remaining > 0 {
 
 		select {
@@ -346,13 +346,13 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 	opts.Logger.Status("local_checkouts are %s", local_checkouts)
 
-	commit_hash, err := gt.CommitHash(local_checkouts...)
+	commit_hashes, err := gt.CommitHashes(local_checkouts...)
 
 	if err != nil {
 		opts.Logger.Warning("failed to determine commit hash for %s, %s", local_checkouts, err)
-		commit_hash = ""
+		commit_hashes = make(map[string]string)
 	} else {
-		opts.Logger.Status("commit hash is %s (%s)", commit_hash, local_checkouts)
+		opts.Logger.Status("commit hashes are %s (%s)", commit_hashes, local_checkouts)
 	}
 
 	if opts.SQLite {
@@ -476,8 +476,8 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 	dist_name := options.DistributionNameFromOptions(opts)
 
 	meta := &dist.MetaData{
-		CommitHash: commit_hash,
-		Repo:       dist_name,
+		CommitHashes: commit_hashes,
+		Repo:         dist_name,
 	}
 
 	return distributions, meta, nil
