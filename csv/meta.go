@@ -9,6 +9,7 @@ import (
 	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
 	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -87,6 +88,19 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 	// mode := "sqlite"	// d.Mode() ?
 	// source := []string{ d.Path() }
 
+	log.Println("BUILD META", mode, sources)
+
+	// TBD
+	// go-whosonfirst-meta STILL DOESN'T SUPPORT ALT
+	// FILES BUT NEEDS TO AND WE NEED TO PASS THE INDEX
+	// ALT FILES FLAG (ONCE IT'S BEEN MERGED...)
+	// (20190601/thisisaaronland)
+
+	// meta_opts.IndexAltFiles = dist_opts.IndexAltFile
+
+	meta_opts.Combined = dist_opts.Combined
+	meta_opts.CombinedName = dist_opts.CombinedName
+	
 	metafiles, err := meta.BuildFromIndex(meta_opts, mode, sources)
 
 	if err != nil {
