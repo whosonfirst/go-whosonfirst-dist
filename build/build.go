@@ -374,7 +374,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 			d, err := database.BuildSQLite(ctx, opts, local_checkouts...)
 
 			if err != nil {
-				opts.Logger.Warning("Failed to build SQLlite %s because %s", local_sqlite, err)
+				opts.Logger.Warning("Failed to build SQLite %s because %s", local_sqlite, err)
 				return nil, nil, err
 			}
 
