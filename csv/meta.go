@@ -9,6 +9,7 @@ import (
 	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
 	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
+	"log"
 	"os"
 	"strings"
 	"time"

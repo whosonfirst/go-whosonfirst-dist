@@ -28,6 +28,7 @@ vendor-deps: rmdeps deps
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-repo-parse cmd/wof-repo-parse.go
+	# @GOPATH=$(GOPATH) go build -o bin/test cmd/test.go
 
 fmt:
 	go fmt *.go
