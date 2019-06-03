@@ -31,7 +31,6 @@ require (
 	github.com/whosonfirst/go-whosonfirst-uri v0.1.0
 	github.com/whosonfirst/warning v0.1.0
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
-
 )
 
 go 1.12
