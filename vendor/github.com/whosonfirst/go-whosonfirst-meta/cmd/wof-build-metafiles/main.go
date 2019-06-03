@@ -25,7 +25,9 @@ func main() {
 	str_exclude := flag.String("exclude", "", "A comma-separated list of placetypes that meta files will not be created for.")
 
 	timings := flag.Bool("timings", false, "Display timings during processing.")
-	strict := flag.Bool("strict", false, "Be strict about requiring defined WOF placetypes.")	
+	strict := flag.Bool("strict", false, "Be strict about requiring defined WOF placetypes.")
+
+	old_skool := flag.Bool("old-skool", false, "Use old-skool wof-{PLACETYPE}-latest filenames")
 
 	procs := flag.Int("processes", 0, "The number of concurrent processes to use. THIS FLAG HAS BEEN DEPRECATED")
 
@@ -86,6 +88,7 @@ func main() {
 	opts.Timings = *timings
 	opts.Strict = *strict
 	opts.MaxFilehandles = *limit
+	opts.OldSkool = *old_skool
 
 	paths := flag.Args()
 

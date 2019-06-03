@@ -84,7 +84,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 		// TBD
 		// PLEASE MAKE THIS SUPPORT ALT FILES, YEAH
 		// (20190601/thisisaaronland)
-		
+
 		ok, err := utils.IsPrincipalWOFRecord(fh, ctx)
 
 		if err != nil {
@@ -157,26 +157,26 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			sort.Strings(fieldnames)
 
 			var fname string
-			
+
 			if opts.Combined {
 
 				if opts.CombinedName == "" {
 					return errors.New("Missing opts.CombinedName")
 				}
 
-				if strings.HasSuffix(opts.CombinedName, ".csv"){
+				if strings.HasSuffix(opts.CombinedName, ".csv") {
 					fname = opts.CombinedName
 				} else {
 					fname = fmt.Sprintf("%s.csv", opts.CombinedName)
 				}
-				
+
 			} else {
-				
+
 				repo_opts := repo.DefaultFilenameOptions()
 				repo_opts.Placetype = placetype
 				fname = r.MetaFilename(repo_opts)
 			}
-			
+
 			root := opts.Workdir
 
 			// this is just for backwards compatibility
