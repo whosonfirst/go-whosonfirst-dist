@@ -100,7 +100,7 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 
 	meta_opts.Combined = dist_opts.Combined
 	meta_opts.CombinedName = dist_opts.CombinedName
-	
+
 	metafiles, err := meta.BuildFromIndex(meta_opts, mode, sources)
 
 	if err != nil {

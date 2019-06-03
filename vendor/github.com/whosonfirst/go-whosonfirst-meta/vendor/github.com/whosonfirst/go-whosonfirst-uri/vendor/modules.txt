@@ -1,3 +1,0 @@
-# github.com/whosonfirst/go-whosonfirst-sources v0.1.0
-github.com/whosonfirst/go-whosonfirst-sources
-github.com/whosonfirst/go-whosonfirst-sources/sources
