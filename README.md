@@ -147,7 +147,7 @@ $> ls -al ./tmp
 -rw-r--r--  1 asc  staff     17895 Jun 11 13:10 wof-constituency-ca-latest.csv
 ```
 
-### "Combined" distributions
+#### "Combined" distributions
 
 It is also possible to create a single combined distribution from two or more repos, passing the `-combined` and `-combined-name` flag.
 
