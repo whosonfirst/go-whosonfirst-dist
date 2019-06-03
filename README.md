@@ -151,7 +151,7 @@ $> ls -al ./tmp
 
 It is also possible to create a single combined distribution from two or more repos, passing the `-combined` and `-combined-name` flag.
 
-Here's an example that in addition to creating a combined distributions, also assumes local repository, builds a "bundle" distribution and indexes alternate geometry files.
+Here's an example that in addition to creating a combined distributions, also assumes local and non-standard repositories, builds a "bundle" distribution and indexes alternate geometry files.
 
 _Note that as of this writing alternate geometry files are _not_ supported for either bundles or (CSV) meta files. They will be but today that are only indexed in SQLite databases._
 
