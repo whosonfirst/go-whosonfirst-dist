@@ -147,32 +147,11 @@ $> ls -al ./tmp
 -rw-r--r--  1 asc  staff     17895 Jun 11 13:10 wof-constituency-ca-latest.csv
 ```
 
-### wof-dist-fetch
-
-Fetch all (or some) of the files listed in a distribution inventory file. `wof-dist-fetch` will uncompress files as they are written to disk (it's possible this should or needs to be an optional flag...)
+### Combined
 
 ```
-./bin/wof-dist-fetch -h
-Usage of ./bin/wof-dist-fetch:
-  -dest string
-    	Where distribution files should be written (default "/tmp")
-  -exclude value
-    	A valid regular expression for comparing against an item's filename, for exclusion
-  -include value
-    	A valid regular expression for comparing against an item's filename, for inclusion
-  -inventory string
-    	The URL of a valid distribution inventory file (default "https://dist.whosonfirst.org/sqlite/inventory.json")
+./bin/wof-dist-build -build-bundle -custom-repo -workdir /usr/local/data -preserve-checkout -local-checkout -index-alt-files -combined -combined-name sfomuseum-data-flights -timings -verbose sfomuseum-data-flights-2019-04 sfomuseum-data-flights-2019-05
 ```
-
-For example:
-
-```
-./bin/wof-dist-fetch -include '.*constituency-.*-latest.*'
-2018/02/14 15:46:28 WROTE /tmp/whosonfirst-data-constituency-ca-latest.db (33398784 bytes)
-2018/02/14 15:47:29 WROTE /tmp/whosonfirst-data-constituency-us-latest.db (1147850752 bytes)
-```
-
-This tool is not very smart about checking whether a given distribution _needs_ to be downloaded (as in the local and remote files are the same). This is largely a function of the overall scaffolding for distributions still being a work in progress.
 
 ## See also
 
