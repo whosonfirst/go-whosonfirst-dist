@@ -97,8 +97,8 @@ github.com/whosonfirst/go-whosonfirst-index v0.1.1 h1:AV2dVzt0F9pAupbpsl4TpBxZLe
 github.com/whosonfirst/go-whosonfirst-index v0.1.1/go.mod h1:vgUaNF7Y7gFrqQ67UTkkMioXdGNUY4KpSlqhGy46wfg=
 github.com/whosonfirst/go-whosonfirst-log v0.1.0 h1:mWYI5hn16uyeLxBmPsLSvYV4rQKK/cxGVhM+bC2ZoGc=
 github.com/whosonfirst/go-whosonfirst-log v0.1.0/go.mod h1:pmgBbxZSnjGVy2nsUJBBMcFagxwIKLlmRsW7ClkXmac=
-github.com/whosonfirst/go-whosonfirst-meta v0.0.2 h1:rxhjI1ppDGyUl/xAbwnRH0VsbIEPQkCAx4dYguDJSsM=
-github.com/whosonfirst/go-whosonfirst-meta v0.0.2/go.mod h1:cIzu55ycoPBXis+143clPILggyhvoBOiW+w8jeer2g0=
+github.com/whosonfirst/go-whosonfirst-meta v0.0.3 h1:5kGJeEhDmItV+vJLm4tVhMYnVBrcrObzlb6pQ8Tgvd8=
+github.com/whosonfirst/go-whosonfirst-meta v0.0.3/go.mod h1:cIzu55ycoPBXis+143clPILggyhvoBOiW+w8jeer2g0=
 github.com/whosonfirst/go-whosonfirst-names v0.1.0 h1:uXop/DwQqH60uDBZvHCPg1yRSQLScbm6VZyqcaED2KE=
 github.com/whosonfirst/go-whosonfirst-names v0.1.0/go.mod h1:0z86/nedM9T/5C8cAdbCMfRuBrkc33oEQ6vdJ6WybSg=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0 h1:zuSk8eqeEkg42sIZ4EF71IMtphdTbG80qJsXhuZXXbM=

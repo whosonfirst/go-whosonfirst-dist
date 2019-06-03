@@ -10,7 +10,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	"github.com/whosonfirst/go-whosonfirst-index/utils"
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
@@ -82,20 +81,6 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		// TBD
-		// PLEASE MAKE THIS SUPPORT ALT FILES, YEAH
-		// (20190601/thisisaaronland)
-
-		ok, err := utils.IsPrincipalWOFRecord(fh, ctx)
-
-		if err != nil {
-			return err
-		}
-
-		if !ok {
-			return nil
-		}
-
 		var f geojson.Feature
 
 		if opts.Strict {
@@ -108,6 +93,14 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
+		// TO DO: support alt files...
+		
+		is_alt := whosonfirst.IsAlt(f)
+
+		if is_alt {
+			return nil
+		}
+		
 		atomic.AddInt32(&open, 1)
 		defer atomic.AddInt32(&open, -1)
 
@@ -194,7 +187,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			}
 
 			outfile := filepath.Join(root, fname)
-
+			
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
 			if err != nil {

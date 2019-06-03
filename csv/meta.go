@@ -9,7 +9,7 @@ import (
 	meta "github.com/whosonfirst/go-whosonfirst-meta/build"
 	meta_options "github.com/whosonfirst/go-whosonfirst-meta/options"
 	meta_stats "github.com/whosonfirst/go-whosonfirst-meta/stats"
-	"log"
+	_ "log"
 	"os"
 	"strings"
 	"time"
@@ -84,11 +84,6 @@ func BuildMetaFiles(ctx context.Context, dist_opts *options.BuildOptions, mode s
 	meta_opts.Workdir = dist_opts.Workdir
 	meta_opts.Timings = dist_opts.Timings
 	meta_opts.Logger = dist_opts.Logger
-
-	// mode := "sqlite"	// d.Mode() ?
-	// source := []string{ d.Path() }
-
-	log.Println("BUILD META", mode, sources)
 
 	// TBD
 	// go-whosonfirst-meta STILL DOESN'T SUPPORT ALT

@@ -78,7 +78,7 @@ github.com/whosonfirst/go-whosonfirst-index
 github.com/whosonfirst/go-whosonfirst-index/utils
 # github.com/whosonfirst/go-whosonfirst-log v0.1.0
 github.com/whosonfirst/go-whosonfirst-log
-# github.com/whosonfirst/go-whosonfirst-meta v0.0.2
+# github.com/whosonfirst/go-whosonfirst-meta v0.0.3
 github.com/whosonfirst/go-whosonfirst-meta/build
 github.com/whosonfirst/go-whosonfirst-meta/options
 github.com/whosonfirst/go-whosonfirst-meta/stats
