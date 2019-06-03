@@ -39,21 +39,24 @@ deps:
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-csv"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-flags"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-bundles"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-index"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/atomicfile"
 	@GOPATH=$(GOPATH) go get -u "github.com/tidwall/gjson"
+
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-sqlite src/github.com/whosonfirst/
-	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-index src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-log src/github.com/whosonfirst/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/mattn src/github.com/
 	mv src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-spatialite src/github.com/whosonfirst/
-
 	mv src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/facebookgo src/github.com/
+
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-index
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-sqlite-features/vendor/github.com/whosonfirst/go-whosonfirst-index
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-meta/vendor/github.com/whosonfirst/go-whosonfirst-log
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-log
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-meta
-	# rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-index
 	rm -rf src/github.com/whosonfirst/go-whosonfirst-bundles/vendor/github.com/whosonfirst/go-whosonfirst-sqlite
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-index/vendor/github.com/mattn
+	rm -rf src/github.com/whosonfirst/go-whosonfirst-index/vendor/github.com/whosonfirst/go-spatialite
 	rm -rf src/github.com/mholt/archiver/testdata
 
 vendor-deps: rmdeps deps
