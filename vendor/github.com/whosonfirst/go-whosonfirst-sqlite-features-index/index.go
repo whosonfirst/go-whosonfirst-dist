@@ -7,7 +7,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
-	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite/index"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/warning"
 	"io"
 	"io/ioutil"
@@ -31,6 +31,7 @@ func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table
 			closer := ioutil.NopCloser(fh)
 
 			// i, err := feature.LoadWOFFeatureFromReader(closer)
+
 			i, err := feature.LoadGeoJSONFeatureFromReader(closer)
 
 			if err != nil && !warning.IsWarning(err) {

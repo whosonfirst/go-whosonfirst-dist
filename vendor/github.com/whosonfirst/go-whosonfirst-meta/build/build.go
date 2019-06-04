@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-csv"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"	
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
@@ -93,14 +93,13 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		// TO DO: support alt files...
-		
 		is_alt := whosonfirst.IsAlt(f)
 
 		if is_alt {
+			log.Println(fmt.Sprintf("Alternate geometries are not supported yet, skipping %s (%s)", f.Id(), path))
 			return nil
 		}
-		
+
 		atomic.AddInt32(&open, 1)
 		defer atomic.AddInt32(&open, -1)
 
@@ -125,6 +124,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 		row, err := meta.FeatureToRow(f.Bytes())
 
 		if err != nil {
+			log.Println(fmt.Sprintf("Unable to convert feature to row (%s) %s", placetype, err))
 			return err
 		}
 
@@ -187,7 +187,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			}
 
 			outfile := filepath.Join(root, fname)
-			
+
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
 			if err != nil {
