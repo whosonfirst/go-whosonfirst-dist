@@ -13,5 +13,5 @@ fmt:
 	go fmt utils/*.go
 
 tools:
-	go build -o bin/wof-dist-build cmd/wof-dist-build/main.go
-	go build -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
+	go build -mod vendor -o bin/wof-dist-build cmd/wof-dist-build/main.go
+	go build -mod vendor -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
