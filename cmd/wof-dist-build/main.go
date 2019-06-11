@@ -69,6 +69,10 @@ func main() {
 		logger.AddLogger(stdout, "status")
 	}
 
+	if *index_alt_files && (*build_meta || *build_bundle) {
+		logger.Warning("-index-alt-files is set but please be aware that support for indexing alternate geometries is NOT available for meta files or bundles at this time.")
+	}
+
 	if *combined && *combined_name == "" {
 		logger.Fatal("Missing -combined-name flag")
 	}
