@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/jtacoma/uritemplates"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
+	_ "log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -60,7 +61,7 @@ func CloneRepo(ctx context.Context, gt GitTool, opts *options.BuildOptions) ([]s
 		return nil, err
 	}
 
-	local_paths := make([]string, len(opts.Repos))
+	local_paths := make([]string, 0)
 
 	// PLEASE DO THIS IN PARALLEL... (20190322/thisisaaronland)
 
