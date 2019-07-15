@@ -123,7 +123,7 @@ func DistributionNameFromOptions(opts *BuildOptions) string {
 		return opts.CombinedName
 	}
 
-	return opts.Repo.Name()
+	return opts.Repos[0].Name()
 }
 
 func DistributionRepoFromOptions(opts *BuildOptions) (repo.Repo, error) {
