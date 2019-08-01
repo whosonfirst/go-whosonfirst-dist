@@ -49,7 +49,8 @@ func CloneRepo(ctx context.Context, gt GitTool, opts *options.BuildOptions) ([]s
 
 		defer func() {
 			t2 := time.Since(t1)
-			opts.Logger.Status("time to clone %s %v\n", options.DistributionNameFromOptions(opts), t2)
+			name, _ := options.DistributionNameFromOptions(opts)
+			opts.Logger.Status("time to clone %s %v\n", name, t2)
 		}()
 	}
 

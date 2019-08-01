@@ -210,6 +210,8 @@ func main() {
 		logger.Fatal("Failed to build distributions because %s", err)
 	}
 
+	logger.Status("ITEMS %v", distribution_items)
+
 	for repo_name, items := range distribution_items {
 
 		fname := fmt.Sprintf("%s-inventory.json", repo_name)

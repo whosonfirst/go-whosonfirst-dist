@@ -1,6 +1,7 @@
 package options
 
 import (
+	"errors"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"runtime"
@@ -117,17 +118,26 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 	return &clone
 }
 
-func DistributionNameFromOptions(opts *BuildOptions) string {
+func DistributionNameFromOptions(opts *BuildOptions) (string, error) {
 
 	if opts.Combined {
-		return opts.CombinedName
+		return opts.CombinedName, nil
 	}
 
-	return opts.Repos[0].Name()
+	if len(opts.Repos) == 0 {
+		return "", errors.New("Empty repos list")
+	}
+
+	return opts.Repos[0].Name(), nil
 }
 
 func DistributionRepoFromOptions(opts *BuildOptions) (repo.Repo, error) {
 
-	name := DistributionNameFromOptions(opts)
+	name, err := DistributionNameFromOptions(opts)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return repo.NewCustomRepoFromString(name)
 }

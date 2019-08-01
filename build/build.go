@@ -53,7 +53,12 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 		items, err := BuildDistributions(ctx, local_opts)
 
-		key := options.DistributionNameFromOptions(opts)
+		key, err := options.DistributionNameFromOptions(local_opts)
+
+		if err != nil {
+			err_ch <- err
+			return
+		}
 
 		if err != nil {
 			err_ch <- err
@@ -120,7 +125,12 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	if opts.Timings {
 
-		dist_name := options.DistributionNameFromOptions(opts)
+		dist_name, err := options.DistributionNameFromOptions(opts)
+
+		if err != nil {
+			return nil, err
+		}
+
 		t1 := time.Now()
 
 		defer func() {
@@ -269,7 +279,12 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 
 	if opts.Timings {
 
-		dist_name := options.DistributionNameFromOptions(opts)
+		dist_name, err := options.DistributionNameFromOptions(opts)
+
+		if err != nil {
+			return nil, nil, err
+		}
+
 		t1 := time.Now()
 
 		defer func() {
@@ -473,7 +488,11 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		}
 	}
 
-	dist_name := options.DistributionNameFromOptions(opts)
+	dist_name, err := options.DistributionNameFromOptions(opts)
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	meta := &dist.MetaData{
 		CommitHashes: commit_hashes,
@@ -487,7 +506,12 @@ func cleanupBuildDistributions(ctx context.Context, opts *options.BuildOptions, 
 
 	if opts.Timings {
 
-		dist_name := options.DistributionNameFromOptions(opts)
+		dist_name, err := options.DistributionNameFromOptions(opts)
+
+		if err != nil {
+			return err
+		}
+
 		t1 := time.Now()
 
 		defer func() {
