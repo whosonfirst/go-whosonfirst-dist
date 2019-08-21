@@ -15,7 +15,7 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-multierror
 # github.com/jtacoma/uritemplates v1.0.0
 github.com/jtacoma/uritemplates
-# github.com/mattn/go-sqlite3 v1.10.0
+# github.com/mattn/go-sqlite3 v1.11.0
 github.com/mattn/go-sqlite3
 # github.com/mholt/archiver v3.1.1+incompatible
 github.com/mholt/archiver
@@ -47,7 +47,7 @@ github.com/ulikunitz/xz/internal/hash
 github.com/whosonfirst/atomicfile
 # github.com/whosonfirst/go-rfc-5646 v0.1.0
 github.com/whosonfirst/go-rfc-5646
-# github.com/whosonfirst/go-spatialite v0.0.0-20180220171945-cb1d9ed624a8
+# github.com/whosonfirst/go-spatialite v0.1.0
 github.com/whosonfirst/go-spatialite
 # github.com/whosonfirst/go-whosonfirst-bundles v0.1.0
 github.com/whosonfirst/go-whosonfirst-bundles
@@ -58,7 +58,7 @@ github.com/whosonfirst/go-whosonfirst-csv
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
-# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.10.2
+# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.11.0
 github.com/whosonfirst/go-whosonfirst-geojson-v2
 github.com/whosonfirst/go-whosonfirst-geojson-v2/feature
 github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst
@@ -95,7 +95,7 @@ github.com/whosonfirst/go-whosonfirst-spr
 github.com/whosonfirst/go-whosonfirst-sqlite/database
 github.com/whosonfirst/go-whosonfirst-sqlite
 github.com/whosonfirst/go-whosonfirst-sqlite/utils
-# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.0
+# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.1
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 # github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.0.1
