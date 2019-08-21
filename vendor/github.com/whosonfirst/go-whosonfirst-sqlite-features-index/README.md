@@ -215,3 +215,12 @@ And without:
 ```
 
 As of this writing individual tables are indexed atomically. There may be some improvements to be made indexing tables in separate Go routines but my hunch is this will make SQLite sad and cause a lot of table lock errors. I don't need to be right about that, though...
+
+## Dependencies and relationships
+
+These are documented in the [Dependencies and relationships section](https://github.com/whosonfirst/go-whosonfirst-sqlite#dependencies-and-relationships) of the `go-whosonfirst-sqlite` package.
+
+## See also
+
+* https://github.com/whosonfirst/go-whosonfirst-sqlite
+* https://github.com/whosonfirst/go-whosonfirst-sqlite-features

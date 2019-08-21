@@ -147,6 +147,8 @@ $> ls -al ./tmp
 
 #### "Combined" distributions
 
+_IMPORTANT: As of August 2019 the `-index-alt-files` flag will trigger a fatal error pending resolution of [issue #15](https://github.com/whosonfirst/go-whosonfirst-dist/issues/15)._
+
 It is also possible to create a single combined distribution from two or more repos, passing the `-combined` and `-combined-name` flag.
 
 Here's an example that in addition to creating a combined distributions, also assumes local and non-standard repositories, builds a "bundle" distribution and indexes alternate geometry files.
