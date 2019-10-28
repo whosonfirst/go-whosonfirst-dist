@@ -5,7 +5,7 @@ github.com/dsnet/compress/internal
 github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
 github.com/dsnet/compress
-# github.com/facebookgo/atomicfile v0.0.0-20151019160806-2de1f203e7d5
+# github.com/facebookgo/atomicfile v0.0.0-20151019000000-2de1f203e7d5e386a6833233882782932729f27e
 github.com/facebookgo/atomicfile
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
@@ -23,16 +23,16 @@ github.com/mholt/archiver
 github.com/mmcloughlin/geohash
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/pierrec/lz4 v2.0.5+incompatible
+# github.com/pierrec/lz4 v2.3.0+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
 # github.com/skelterjohn/geom v0.0.0-20180103000000-96f3e8a219c5f4276b0dda3568d80c4e02a50116
 github.com/skelterjohn/geom
-# github.com/tidwall/gjson v1.2.1
+# github.com/tidwall/gjson v1.3.2
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.1
 github.com/tidwall/match
-# github.com/tidwall/pretty v0.0.0-20190325153808-1166b9ac2b65
+# github.com/tidwall/pretty v1.0.0
 github.com/tidwall/pretty
 # github.com/twpayne/go-geom v1.0.5
 github.com/twpayne/go-geom
@@ -43,7 +43,7 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
 github.com/ulikunitz/xz/internal/hash
-# github.com/whosonfirst/atomicfile v0.0.0-20151019000000-2de1f203e7d5e386a6833233882782932729f27e
+# github.com/whosonfirst/atomicfile v0.0.0-20151019160806-2de1f203e7d5
 github.com/whosonfirst/atomicfile
 # github.com/whosonfirst/go-rfc-5646 v0.1.0
 github.com/whosonfirst/go-rfc-5646
@@ -51,7 +51,7 @@ github.com/whosonfirst/go-rfc-5646
 github.com/whosonfirst/go-spatialite
 # github.com/whosonfirst/go-whosonfirst-bundles v0.1.0
 github.com/whosonfirst/go-whosonfirst-bundles
-# github.com/whosonfirst/go-whosonfirst-crawl v0.1.0
+# github.com/whosonfirst/go-whosonfirst-crawl v0.2.0
 github.com/whosonfirst/go-whosonfirst-crawl
 # github.com/whosonfirst/go-whosonfirst-csv v0.1.0
 github.com/whosonfirst/go-whosonfirst-csv
@@ -92,7 +92,7 @@ github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
 # github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 github.com/whosonfirst/go-whosonfirst-spr
-# github.com/whosonfirst/go-whosonfirst-sqlite v0.1.0
+# github.com/whosonfirst/go-whosonfirst-sqlite v0.1.1
 github.com/whosonfirst/go-whosonfirst-sqlite/database
 github.com/whosonfirst/go-whosonfirst-sqlite
 github.com/whosonfirst/go-whosonfirst-sqlite/utils
@@ -105,7 +105,7 @@ github.com/whosonfirst/go-whosonfirst-sqlite-features-index
 github.com/whosonfirst/go-whosonfirst-sqlite-index
 # github.com/whosonfirst/go-whosonfirst-uri v0.1.0
 github.com/whosonfirst/go-whosonfirst-uri
-# github.com/whosonfirst/walk v0.0.0-20160802000000-c0a349674b73681a7272f5ce6ade8ea28055059f
+# github.com/whosonfirst/walk v0.0.0-20160803014805-c0a349674b73
 github.com/whosonfirst/walk
 # github.com/whosonfirst/warning v0.1.0
 github.com/whosonfirst/warning
