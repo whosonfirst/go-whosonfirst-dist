@@ -36,7 +36,10 @@ func (gt *NativeGitTool) Clone(ctx context.Context, remote string, local string)
 	default:
 
 		git_args := []string{
-			"lfs",
+			// leaving 'lfs' flag this here in the short-term but ultimately it should be removed because:
+			// "'git clone' has been updated in upstream Git to have comparable speeds to 'git lfs clone'."
+			// (20191028/thisisaaronland)
+			// "lfs",			
 			"clone",
 			"--depth",
 			"1",
