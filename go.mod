@@ -12,13 +12,13 @@ require (
 	github.com/tidwall/gjson v1.3.2
 	github.com/tidwall/pretty v1.0.0
 	github.com/whosonfirst/atomicfile v0.0.0-20151019160806-2de1f203e7d5
-	github.com/whosonfirst/go-whosonfirst-bundles v0.1.0
+	github.com/whosonfirst/go-whosonfirst-bundles v0.2.0
 	github.com/whosonfirst/go-whosonfirst-crawl v0.2.0
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0
-	github.com/whosonfirst/go-whosonfirst-meta v0.1.0
+	github.com/whosonfirst/go-whosonfirst-meta v0.2.0
 	github.com/whosonfirst/go-whosonfirst-repo v0.1.0
-	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.1
-	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.1
-	github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.0.3
+	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.4
+	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.2
+	github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.1.0
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 )

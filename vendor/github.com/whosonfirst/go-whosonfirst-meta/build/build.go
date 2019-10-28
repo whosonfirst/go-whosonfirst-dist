@@ -58,7 +58,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 
 	wg := new(sync.WaitGroup)
 
-	cb := func(fh io.Reader, ctx context.Context, args ...interface{}) error {
+	cb := func(ctx context.Context, fh io.Reader, args ...interface{}) error {
 
 		atomic.AddInt32(&pending, 1)
 		// log.Printf("pending %d scheduled %d\n", pending, scheduled)

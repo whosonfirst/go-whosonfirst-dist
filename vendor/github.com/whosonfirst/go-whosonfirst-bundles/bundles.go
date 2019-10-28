@@ -9,6 +9,9 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	"github.com/whosonfirst/go-whosonfirst-index"
+	_ "github.com/whosonfirst/go-whosonfirst-index/fs"
+	_ "github.com/whosonfirst/go-whosonfirst-index-csv"
+	_ "github.com/whosonfirst/go-whosonfirst-index-sqlite"		
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
@@ -300,7 +303,7 @@ func (b *Bundle) Bundle(to_index ...string) error {
 	var meta_writer *csv.DictWriter
 	var meta_fh *atomicfile.File
 
-	f := func(fh io.Reader, ctx context.Context, args ...interface{}) error {
+	f := func(ctx context.Context, fh io.Reader, args ...interface{}) error {
 
 		path, err := index.PathForContext(ctx)
 
