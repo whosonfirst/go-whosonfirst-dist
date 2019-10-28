@@ -120,16 +120,16 @@ func BuildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions,
 
 func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dist.Item, error) {
 
+	dist_name, err := options.DistributionNameFromOptions(opts)
+
+	if err != nil {
+		return nil, err
+	}
+
 	distributions := make([]dist.Distribution, 0) // uncompressed and private
 	items := make([]*dist.Item, 0)                // compressed and public
 
 	if opts.Timings {
-
-		dist_name, err := options.DistributionNameFromOptions(opts)
-
-		if err != nil {
-			return nil, err
-		}
 
 		t1 := time.Now()
 
@@ -148,7 +148,7 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 	distributions, meta, err := buildDistributionsForRepos(ctx, opts)
 
 	if err != nil {
-		opts.Logger.Warning("build (buildDistributionsForRepo) for repo %s failed: %s", opts.Repo, err)
+		opts.Logger.Warning("build (buildDistributionsForRepo) for repo %s failed: %s", dist_name, err)
 		return nil, err
 	}
 
