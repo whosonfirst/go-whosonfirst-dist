@@ -27,6 +27,8 @@ github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/mattn/go-sqlite3 v1.10.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/mattn/go-sqlite3 v1.11.0 h1:LDdKkqtYlom37fkvqs8rMPFKAMe8+SgjbwZ6ex1/A/Q=
 github.com/mattn/go-sqlite3 v1.11.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
+github.com/mattn/go-sqlite3 v2.0.2+incompatible h1:qzw9c2GNT8UFrgWNDhCTqRqYUSmu/Dav/9Z58LGpk7U=
+github.com/mattn/go-sqlite3 v2.0.2+incompatible/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/pelletier/go-buffruneio v0.2.0/go.mod h1:JkE26KsDizTr40EUHkXVtNPvgGtbSNq5BcowyYOWdKo=
@@ -61,6 +63,8 @@ github.com/whosonfirst/go-whosonfirst-index v0.2.0 h1:LqugIbQjta57Be3BPedfjKixGK
 github.com/whosonfirst/go-whosonfirst-index v0.2.0/go.mod h1:n3rY2Hza4+MFtKES9C1sS4AAIkA5va/nagzvt+4ZFBw=
 github.com/whosonfirst/go-whosonfirst-index v0.2.2 h1:P+dgqipNHgIX8a/u03sT3bHc/rqxopKIUn21mu0c/Bw=
 github.com/whosonfirst/go-whosonfirst-index v0.2.2/go.mod h1:n3rY2Hza4+MFtKES9C1sS4AAIkA5va/nagzvt+4ZFBw=
+github.com/whosonfirst/go-whosonfirst-index v0.2.3 h1:a+vfmTPp2GkyZExQqXzLTK2VwkjdnOyyKZHRbpMhB00=
+github.com/whosonfirst/go-whosonfirst-index v0.2.3/go.mod h1:n3rY2Hza4+MFtKES9C1sS4AAIkA5va/nagzvt+4ZFBw=
 github.com/whosonfirst/go-whosonfirst-log v0.1.0 h1:mWYI5hn16uyeLxBmPsLSvYV4rQKK/cxGVhM+bC2ZoGc=
 github.com/whosonfirst/go-whosonfirst-log v0.1.0/go.mod h1:pmgBbxZSnjGVy2nsUJBBMcFagxwIKLlmRsW7ClkXmac=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0/go.mod h1:Jdmug2QQLbrmg+UcYGz8k575GnrOEg63vZVS46e5fMs=
@@ -69,6 +73,8 @@ github.com/whosonfirst/go-whosonfirst-sqlite v0.0.2/go.mod h1:JmSK+NaXOzmZJXkzOd
 github.com/whosonfirst/go-whosonfirst-sqlite v0.1.0/go.mod h1:mm4RnFLe1ydCn1sItwU+Jfy2SYTHNp2zMSZasmM3/1M=
 github.com/whosonfirst/go-whosonfirst-sqlite v0.1.1 h1:mhVDxo2q2xRf9Dwi9sJ7gwhC5aWi5DMIfB+B/RZ3WQw=
 github.com/whosonfirst/go-whosonfirst-sqlite v0.1.1/go.mod h1:0/8mpMRT0BFcJcEX5TybAsSMFLKWYEO32H7b1wTPJkk=
+github.com/whosonfirst/go-whosonfirst-sqlite v0.1.5 h1:CvuzkcUbYHkdrXR9PGhohEx2uQsCmQ++1yffT7T28ks=
+github.com/whosonfirst/go-whosonfirst-sqlite v0.1.5/go.mod h1:JGveApxJW/FUeB+LQxxX0U8kSunVP7NiurXP/aUo/0g=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/walk v0.0.0-20160802000000-c0a349674b73681a7272f5ce6ade8ea28055059f/go.mod h1:U/1VXxlMzNZbyylg18AzEeHkGi1RXiBCMKpaM2XR+tQ=
 github.com/whosonfirst/walk v0.0.0-20160803014805-c0a349674b73 h1:/43peH8y6Wg+dAgQ97swaPN8c3/M6hi8lawr1vDblzs=
