@@ -49,7 +49,7 @@ func main() {
 
 	custom_repo := flag.Bool("custom-repo", false, "Allow custom repo names")
 
-	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files. THIS FEATURE HAS BEEN DISABLED TEMPORARILY.")
+	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files.")
 
 	combined := flag.Bool("combined", opts.Combined, "Create a single combined distribution from multiple repos.")
 	combined_name := flag.String("combined-name", opts.CombinedName, "Distribution name for a single combined distribution from multiple repos.")
@@ -71,10 +71,6 @@ func main() {
 
 	// https://github.com/whosonfirst/go-whosonfirst-geojson-v2/issues/5
 	// https://github.com/whosonfirst/go-whosonfirst-dist/issues/15
-
-	if *index_alt_files {
-		logger.Fatal("indexing alt files has been disabled pending fixes to issues that were producing bunk data.")
-	}
 
 	if *index_alt_files && (*build_meta || *build_bundle) {
 		logger.Warning("-index-alt-files is set but please be aware that support for indexing alternate geometries is NOT available for meta files or bundles at this time.")
