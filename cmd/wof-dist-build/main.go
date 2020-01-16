@@ -47,7 +47,7 @@ func main() {
 	local_checkout := flag.Bool("local-checkout", opts.LocalCheckout, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
 	local_sqlite := flag.Bool("local-sqlite", opts.LocalSQLite, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
 
-	custom_repo := flag.Bool("custom-repo", false, "Allow custom repo names")
+	custom_repo := flag.Bool("custom-repo", true, "Allow custom repo names")
 
 	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files.")
 

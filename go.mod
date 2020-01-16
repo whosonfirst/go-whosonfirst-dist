@@ -18,7 +18,7 @@ require (
 	github.com/whosonfirst/go-whosonfirst-meta v0.2.0
 	github.com/whosonfirst/go-whosonfirst-repo v0.1.0
 	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.5
-	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.6
+	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7
 	github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.2.1
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 )
