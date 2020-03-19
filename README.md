@@ -74,24 +74,28 @@ _`--preserve-sqlite` is assumed (and assumed to be true) if `--local-sqlite` is 
 Build one or more distribution files for a repository. _This is code that is actively been worked on so don't rely on it yet, or approach it accordingly._
 
 ```
-./bin/wof-dist-build -h
-Usage of ./bin/wof-dist-build:
   -build-bundle
     	Build a bundle distribution for a repo.
   -build-meta
     	Build meta files for a repo
   -build-sqlite
-    	Build a (common) SQLite distribution for a repo (default true)
+    	Build a (common) SQLite distribution for a repo. (default true)
+  -combined
+    	Create a single combined distribution from multiple repos.
+  -combined-name string
+    	Distribution name for a single combined distribution from multiple repos.
   -compress-all
     	... (default true)
   -compress-bundle
     	... (default true)
   -compress-max-cpus int
-    	Number of concurrent processes to use when compressing distribution items. (default 4)
+    	Number of concurrent processes to use when compressing distribution items. (default 2)
   -compress-meta
     	... (default true)
   -compress-sqlite
     	... (default true)
+  -custom-repo
+    	Allow custom repo names (default true)
   -git-clone string
     	Indicate how to clone a repo, using either a native Git binary or the go-git implementation. Currently only the native Git binary is supported. (default "native")
   -git-organization string
@@ -100,6 +104,12 @@ Usage of ./bin/wof-dist-build:
     	Fetch repos using this protocol (default "https")
   -git-source string
     	Fetch repos from this endpoint (default "github.com")
+  -index-alt-files
+    	Index alternate geometry files.
+  -index-relations
+    	Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.
+  -index-relations-reader-uri string
+    	A valid go-reader.Reader URI from which to read data for a relations candidate.
   -local-checkout
     	Do not fetch a repo from a remote source but instead use a local checkout on disk
   -local-sqlite
