@@ -56,8 +56,8 @@ func main() {
 
 	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files.")
 
-	index_belongs_to := flag.Bool("index-belongs-to", opts.SQLiteIndexBelongsTo, "...")
-	belongs_to_uri := flag.String("index-belongs-to-uri", "", "...")
+	index_relations := flag.Bool("index-relations", false, "Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.")
+	relations_uri := flag.String("index-relations-reader-uri", "", "A valid go-reader.Reader URI from which to read data for a relations candidate.")
 
 	combined := flag.Bool("combined", opts.Combined, "Create a single combined distribution from multiple repos.")
 	combined_name := flag.String("combined-name", opts.CombinedName, "Distribution name for a single combined distribution from multiple repos.")
@@ -149,16 +149,17 @@ func main() {
 		logger.Fatal("-workdir is not actually a directory")
 	}
 
-	if *index_belongs_to {
+	if *index_relations {
 
 		ctx := context.Background()
-		r, err := reader.NewReader(ctx, *belongs_to_uri)
+		r, err := reader.NewReader(ctx, *relations_uri)
 
 		if err != nil {
-			logger.Fatal("Unable to create go-reader.Reader (%s), %v", *belongs_to_uri, err)
+			logger.Fatal("Unable to create go-reader.Reader (%s), %v", *relations_uri, err)
 		}
 
-		opts.SQLiteBelongsToReader = r
+		opts.SQLiteIndexRelations = true
+		opts.SQLiteIndexRelationsReader = r
 	}
 
 	opts.Logger = logger

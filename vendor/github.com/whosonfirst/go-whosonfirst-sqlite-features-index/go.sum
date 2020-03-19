@@ -20,6 +20,7 @@ github.com/docker/go-units v0.3.3/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDD
 github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568/go.mod h1:xEzjJPgXI435gkrCt3MPfRiAkVrwSbHsst4LCFVfpJc=
 github.com/gliderlabs/ssh v0.2.2/go.mod h1:U7qILu1NlMHj9FlMhZLlkCdDnU1DBEAqr0aevW3Awn0=
+github.com/go-ini/ini v1.42.0 h1:TWr1wGj35+UiWHlBA8er89seFXxzwFn11spilrrj+38=
 github.com/go-ini/ini v1.42.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/google/go-cmp v0.3.0/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMywk6iLU=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
@@ -77,6 +78,8 @@ github.com/tidwall/gjson v1.2.1 h1:j0efZLrZUvNerEf6xqoi0NjWMK5YlLrR7Guo/dxY174=
 github.com/tidwall/gjson v1.2.1/go.mod h1:c/nTNbUr0E0OrXEhq1pwa8iEgc2DOt4ZZqAt1HtCkPA=
 github.com/tidwall/gjson v1.3.4 h1:On5waDnyKKk3SWE4EthbjjirAWXp43xx5cKCUZY1eZw=
 github.com/tidwall/gjson v1.3.4/go.mod h1:P256ACg0Mn+j1RXIDXoss50DeIABTYK1PULOJHhxOls=
+github.com/tidwall/gjson v1.3.6 h1:5b44I9SGjYH1jl1jIpMA7+nLlqV+HT7tf6qrtWZ04do=
+github.com/tidwall/gjson v1.3.6/go.mod h1:P256ACg0Mn+j1RXIDXoss50DeIABTYK1PULOJHhxOls=
 github.com/tidwall/match v1.0.1 h1:PnKP62LPNxHKTwvHHZZzdOAOCtsJTjo6dZLCwpKm5xc=
 github.com/tidwall/match v1.0.1/go.mod h1:LujAq0jyVjBy028G1WhWfIzbpQfMO8bBZ6Tyb0+pL9E=
 github.com/tidwall/pretty v0.0.0-20190325153808-1166b9ac2b65 h1:rQ229MBgvW68s1/g6f1/63TgYwYxfF4E+bi/KC19P8g=
@@ -98,6 +101,7 @@ github.com/whosonfirst/go-spatialite v0.0.0-20180220171945-cb1d9ed624a8 h1:5dtYg
 github.com/whosonfirst/go-spatialite v0.0.0-20180220171945-cb1d9ed624a8/go.mod h1:JnzadIex2v6ZyX6pLrjJ5CJ69e/ljYBCqxarHDMkMJ4=
 github.com/whosonfirst/go-spatialite v0.1.0 h1:jKbVmIeUSsDfPX4DWTeiSR9zGJFETIF1A3YdK6IShBY=
 github.com/whosonfirst/go-spatialite v0.1.0/go.mod h1:w1O/DKimk4wiV+5d2BzWYnxvbdhMhkeU01cpfIeEorQ=
+github.com/whosonfirst/go-whosonfirst-cli v0.1.0 h1:Wwj9z0R/ryHmPmpVm5jCbXdG4agJzKMWXDtPVReN/KA=
 github.com/whosonfirst/go-whosonfirst-cli v0.1.0/go.mod h1:Edy+amD+fMq1QS1yxB3u8maA8I93q/LG7JRNh+fsdfc=
 github.com/whosonfirst/go-whosonfirst-crawl v0.1.0 h1:HD8xJcPME3nWoJH58SXT84q0tjBCF3Oc5jrmk5eIriQ=
 github.com/whosonfirst/go-whosonfirst-crawl v0.1.0/go.mod h1:ZIYj6wdjduyJkWHwg4P3gNeLgWMW9uHZOn04eusRnLI=

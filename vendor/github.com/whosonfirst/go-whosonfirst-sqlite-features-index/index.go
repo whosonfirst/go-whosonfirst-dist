@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	wof_reader "github.com/whosonfirst/go-whosonfirst-reader"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
@@ -79,7 +79,7 @@ func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql
 	return cb
 }
 
-func SQLiteFeaturesIndexBelongsToFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
+func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
 
 	cb := func(ctx context.Context, db sqlite.Database, tables []sqlite.Table, record interface{}) error {
 
@@ -96,11 +96,36 @@ func SQLiteFeaturesIndexBelongsToFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 		}
 
 		f := record.(geojson.Feature)
-		belongsto := whosonfirst.BelongsTo(f)
+		body := f.Bytes()
 
+		relations := make(map[int64]bool)
 		to_index := make([]geojson.Feature, 0)
 
-		for _, id := range belongsto {
+		candidates := []string{
+			"properties.wof:belongsto",
+			"properties.wof:involves",
+			"properties.wof:depicts",
+		}
+
+		for _, path := range candidates {
+
+			// log.Println("RELATIONS", path)
+
+			rsp := gjson.GetBytes(body, path)
+
+			if !rsp.Exists() {
+				// log.Println("MISSING", path)
+				continue
+			}
+
+			for _, r := range rsp.Array() {
+				id := r.Int()
+				relations[id] = true
+				// log.Println("MATCH", path, id)
+			}
+		}
+
+		for id, _ := range relations {
 
 			sql := fmt.Sprintf("SELECT COUNT(id) FROM %s WHERE id=?", geojson_t.Name())
 			row := conn.QueryRow(sql, id)
@@ -125,6 +150,7 @@ func SQLiteFeaturesIndexBelongsToFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 			to_index = append(to_index, ancestor)
 
 			// TO DO: CHECK WHETHER TO INDEX ALT FILES FOR ANCESTOR(S)
+			// https://github.com/whosonfirst/go-whosonfirst-sqlite-features-index/issues/3
 		}
 
 		for _, record := range to_index {

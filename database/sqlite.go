@@ -154,20 +154,12 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		LoadRecordFunc: record_func,
 	}
 
-	if opts.SQLiteIndexBelongsTo {
-		belongsto_func := index.SQLiteFeaturesIndexBelongsToFunc(opts.SQLiteBelongsToReader)
-		idx_opts.PostIndexFunc = belongsto_func
+	if opts.SQLiteIndexRelations {
+		relations_func := index.SQLiteFeaturesIndexRelationsFunc(opts.SQLiteIndexRelationsReader)
+		idx_opts.PostIndexFunc = relations_func
 	}
 
 	idx, err := sql_index.NewSQLiteIndexer(idx_opts)
-
-	/*
-		idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
-
-		if err != nil {
-			return nil, err
-		}
-	*/
 
 	idx.Timings = opts.Timings
 	idx.Logger = opts.Logger

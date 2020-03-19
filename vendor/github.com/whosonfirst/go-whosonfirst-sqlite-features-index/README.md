@@ -23,10 +23,10 @@ Go package for indexing Who's On First features in SQLite databases.
     	Index the 'geometries' table (requires that libspatialite already be installed)
   -index-alt-files
     	Index alt geometries
-  -index-belongs-to
-    	Index the records listed in a feature's 'wof:belongsto' array. Alt files for 'wof:belongsto' are not indexed at this time.
-  -index-belongs-to-uri string
-    	A valid go-reader.Reader URI from which to read data for a 'wof:belongsto' candidate.
+  -index-relations
+    	Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.
+  -index-relations-reader-uri string
+    	A valid go-reader.Reader URI from which to read data for a relations candidate.	
   -live-hard-die-fast
     	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
   -mode string
