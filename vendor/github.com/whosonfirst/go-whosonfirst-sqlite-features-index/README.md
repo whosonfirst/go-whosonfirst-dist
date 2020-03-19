@@ -7,8 +7,6 @@ Go package for indexing Who's On First features in SQLite databases.
 ### wof-sqlite-index-features
 
 ```
-./bin/wof-sqlite-index-features -h
-Usage of ./bin/wof-sqlite-index-features:
   -all
     	Index all tables (except the 'search' and 'geometries' tables which you need to specify explicitly)
   -ancestors
@@ -23,18 +21,28 @@ Usage of ./bin/wof-sqlite-index-features:
     	Index the 'geojson' table
   -geometries
     	Index the 'geometries' table (requires that libspatialite already be installed)
+  -index-alt-files
+    	Index alt geometries
+  -index-belongs-to
+    	Index the records listed in a feature's 'wof:belongsto' array. Alt files for 'wof:belongsto' are not indexed at this time.
+  -index-belongs-to-uri string
+    	A valid go-reader.Reader URI from which to read data for a 'wof:belongsto' candidate.
   -live-hard-die-fast
-    	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption
+    	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
   -mode string
-    	The mode to use importing data. Valid modes are: directory,feature,feature-collection,files,geojson-ls,meta,path,repo,sqlite. (default "files")
+    	The mode to use importing data. Valid modes are: directory,featurecollection,file,filelist,geojsonl,metafile,repo,sqlite. (default "files")
   -names
     	Index the 'names' table
+  -optimize
+    	Attempt to optimize the database before closing connection (default true)
   -processes int
-    	The number of concurrent processes to index data with (default 16)
+    	The number of concurrent processes to index data with (default 8)
   -search
     	Index the 'search' table (using SQLite FTS4 full-text indexer)
   -spr
     	Index the 'spr' table
+  -strict-alt-files
+    	Be strict when indexing alt geometries (default true)
   -timings
     	Display timings during and after indexing
 ```

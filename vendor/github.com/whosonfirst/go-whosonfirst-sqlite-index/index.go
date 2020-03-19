@@ -11,7 +11,9 @@ import (
 	"time"
 )
 
-type SQLiteIndexerFunc func(context.Context, io.Reader, ...interface{}) (interface{}, error)
+type SQLiteIndexerPostIndexFunc func(context.Context, sqlite.Database, []sqlite.Table, interface{}) error
+
+type SQLiteIndexerLoadRecordFunc func(context.Context, io.Reader, ...interface{}) (interface{}, error)
 
 type SQLiteIndexer struct {
 	callback      wof_index.IndexerFunc
@@ -21,7 +23,18 @@ type SQLiteIndexer struct {
 	Logger        *log.WOFLogger
 }
 
-func NewSQLiteIndexer(db sqlite.Database, tables []sqlite.Table, callback SQLiteIndexerFunc) (*SQLiteIndexer, error) {
+type SQLiteIndexerOptions struct {
+	DB             sqlite.Database
+	Tables         []sqlite.Table
+	LoadRecordFunc SQLiteIndexerLoadRecordFunc
+	PostIndexFunc  SQLiteIndexerPostIndexFunc
+}
+
+func NewSQLiteIndexer(opts *SQLiteIndexerOptions) (*SQLiteIndexer, error) {
+
+	db := opts.DB
+	tables := opts.Tables
+	record_func := opts.LoadRecordFunc
 
 	table_timings := make(map[string]time.Duration)
 	mu := new(sync.RWMutex)
@@ -36,7 +49,7 @@ func NewSQLiteIndexer(db sqlite.Database, tables []sqlite.Table, callback SQLite
 			return err
 		}
 
-		record, err := callback(ctx, fh, args...)
+		record, err := record_func(ctx, fh, args...)
 
 		if err != nil {
 			logger.Warning("failed to load record (%s) because %s", path, err)
@@ -77,6 +90,15 @@ func NewSQLiteIndexer(db sqlite.Database, tables []sqlite.Table, callback SQLite
 			}
 
 			mu.Unlock()
+		}
+
+		if opts.PostIndexFunc != nil {
+
+			err := opts.PostIndexFunc(ctx, db, tables, record)
+
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil

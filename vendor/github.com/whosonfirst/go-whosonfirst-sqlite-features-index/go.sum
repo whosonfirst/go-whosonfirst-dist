@@ -2,6 +2,8 @@ github.com/DATA-DOG/go-sqlmock v1.3.2/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q
 github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718 h1:FSsoaa1q4jAaeiAUxf9H0PgFP7eA/UL6c3PdJH+nMN4=
 github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718/go.mod h1:VVwKsx9Dc8rNG55BWqogoJzGubjKnRoXdUvpGbWqeCc=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
+github.com/aaronland/go-roster v0.0.1 h1:r1l4n1HfWvEtOXZvhfXX0Won9Xf6QJsigdUdzOtuy/M=
+github.com/aaronland/go-roster v0.0.1/go.mod h1:AcovpxlG1XxJxX2Fjqlm63fEIBhCjEIBV4lP87FZDmI=
 github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7/go.mod h1:6zEj6s6u/ghQa61ZWa/C2Aw3RkjiTBOix7dkqa1VLIs=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
@@ -85,6 +87,11 @@ github.com/twpayne/go-geom v1.0.5 h1:XZBfc3Wx0dj4p17ZfmzqxnU9fTTa3pY4YG5RngKsVNI
 github.com/twpayne/go-geom v1.0.5/go.mod h1:gO3i8BeAvZuihwwXcw8dIOWXebCzTmy3uvXj9dZG2RA=
 github.com/twpayne/go-kml v1.0.0/go.mod h1:LlvLIQSfMqYk2O7Nx8vYAbSLv4K9rjMvLlEdUKWdjq0=
 github.com/twpayne/go-polyline v1.0.0/go.mod h1:ICh24bcLYBX8CknfvNPKqoTbe+eg+MX1NPyJmSBo7pU=
+github.com/whosonfirst/go-reader v0.0.2/go.mod h1:k/U2jXarXsFWC2yh63kYgKIJzTEmc60lN/ipyrdT3W4=
+github.com/whosonfirst/go-reader v0.1.1 h1:0fXoYQR/Yyh3PKk+9Huwoc6dCAt8l1tjg2dEShjqcFI=
+github.com/whosonfirst/go-reader v0.1.1/go.mod h1:w0AeU+Ojyfmxb7r+rcSYyxpCxrhxlHv+D9EgEwQsqcM=
+github.com/whosonfirst/go-reader-http v0.0.2 h1:uaCFfNu5Hwr5PDicduLAB1g3y6pi6fUcLJHUKlbNdOw=
+github.com/whosonfirst/go-reader-http v0.0.2/go.mod h1:u34jMGXs4smJyVHqGudWoTTy8u954gHqlz9cuIr7eBk=
 github.com/whosonfirst/go-rfc-5646 v0.1.0 h1:HNFPAem6v5De61PXLgbGzx9tfNOP83AAkVvm9WAddJY=
 github.com/whosonfirst/go-rfc-5646 v0.1.0/go.mod h1:JZj//FV9YeV3fkyOY/82V53EMLQXwRwNPuQIGs8BUmo=
 github.com/whosonfirst/go-spatialite v0.0.0-20180220171945-cb1d9ed624a8 h1:5dtYgPS6su1QqwUfVnyEL9V7GvMWX+60VRkUX5RvJsc=
@@ -106,6 +113,9 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.11.1 h1:WKIZkzlOBgfE6AuVT8xy
 github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.11.1/go.mod h1:uriIqN/EQVo1QllqvpIcAyshnEOggPlraUYjjeyGTBg=
 github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.0 h1:aYsgIq/g4fU5rVdumMTqG9ysJxwhW085buzaMxP5mjs=
 github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.0/go.mod h1:hC145O2TiPTU8zemHRriKOkG972BNwEowqjxqHeWDwM=
+github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.1/go.mod h1:hC145O2TiPTU8zemHRriKOkG972BNwEowqjxqHeWDwM=
+github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.2 h1:SRwpX4y+qGu9BmNjezhXqOfV0MEVv5o2rRnbcoAjvPU=
+github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.2/go.mod h1:hC145O2TiPTU8zemHRriKOkG972BNwEowqjxqHeWDwM=
 github.com/whosonfirst/go-whosonfirst-hash v0.1.0 h1:FpnclPIb+8M1uhSXfl3z8nYcG/3O59vgfkdV+m0hQpA=
 github.com/whosonfirst/go-whosonfirst-hash v0.1.0/go.mod h1:1ZdCFZTnQt5bwnsj2daB9yHilKOKToVh+Tyj/Z8TbUk=
 github.com/whosonfirst/go-whosonfirst-index v0.1.1 h1:AV2dVzt0F9pAupbpsl4TpBxZLeOqL4jtKZKb1gAoJT0=
@@ -128,6 +138,9 @@ github.com/whosonfirst/go-whosonfirst-names v0.1.0 h1:uXop/DwQqH60uDBZvHCPg1yRSQ
 github.com/whosonfirst/go-whosonfirst-names v0.1.0/go.mod h1:0z86/nedM9T/5C8cAdbCMfRuBrkc33oEQ6vdJ6WybSg=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0 h1:zuSk8eqeEkg42sIZ4EF71IMtphdTbG80qJsXhuZXXbM=
 github.com/whosonfirst/go-whosonfirst-placetypes v0.1.0/go.mod h1:Jdmug2QQLbrmg+UcYGz8k575GnrOEg63vZVS46e5fMs=
+github.com/whosonfirst/go-whosonfirst-reader v0.0.0-20191122203133-047f20452865/go.mod h1:xYzBn6llLD/uS6Zhh0H4LAqddEJHXdQSUIxywTnhpOU=
+github.com/whosonfirst/go-whosonfirst-reader v0.0.1 h1:8OC0/iOtElJXg6W/P3mROuNK2sZqQBDtvMN30sKfq5U=
+github.com/whosonfirst/go-whosonfirst-reader v0.0.1/go.mod h1:SNGLXBF9h8mmf2S3CYKPBtO9d4D8n1TohSKSmoRmvqo=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0 h1:JuKLa6KWke22jBfJ1pM9WQHoz1/3pbDv2C+aR+THPPQ=
 github.com/whosonfirst/go-whosonfirst-sources v0.1.0/go.mod h1:EUMHyGzUmqPPxlMmOp+28BFeoBdxxE0HCKRd67lkqGM=
 github.com/whosonfirst/go-whosonfirst-spr v0.1.0 h1:5qE629nCiucF2upy5NjPOEl9cFatsljykYY0l2JKgAk=
@@ -155,12 +168,16 @@ github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.5 h1:sicGwGk1YK26M9P+
 github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.5/go.mod h1:jXNvI/rNqrL9nXkTefSBChmepQuOn9YMb/xK1LDO+jA=
 github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.6 h1:uPvnvC3bnmVWxu8z9fCdh/uU2mf/xU5ze6t4sHWjlYs=
 github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.6/go.mod h1:C+ARiF6KebUj77c+pAawXtMf5028285Qg50FHUj5ou8=
+github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7 h1:S3H+n72XkWrLyK33IFEwnKb0yoy+xe0QIUBiOwA/bKw=
+github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7/go.mod h1:Bhtd9O7wjm9k4NMaoGErUdcbNRR0DstKD+ImtXRbc5U=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.0.1 h1:/GuAgxIHn5vZwAEDA4XUSWe7rYWZW30I4HLQRTpBeJY=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.0.1/go.mod h1:5fY1ikCDhe1u0umawonTOICPzv/2CgfFT9hTAen5nsI=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.1.0 h1:/tljUy2rchRC9XE4FDteNmYZYhYqxWX2uF4c61WlocU=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.1.0/go.mod h1:Roi0glm3gVxDq+i32dUxGWTWxb+80nPanz/UrVatmwk=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.1.1 h1:UNHdFAr1zUfDx00NoPtzaIWJUdbwV5U8WzhqtdhAmc4=
 github.com/whosonfirst/go-whosonfirst-sqlite-index v0.1.1/go.mod h1:NzDYzzrFMqRpDVkh0DUDs3WfdHywsfnInycY5JTj3zc=
+github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0 h1:biGKWUogPLXmWVOn44Jrb1FcE2fCVU3sV4w3sLYF1Yw=
+github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0/go.mod h1:Z5lr3lHDAmMkexXXjFGPP4Cw356ULmsiyv0Tok6R86k=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0 h1:JMlpam0x1hVrFBMTAPY3edIHz7azfMK8lLI2kM9BgbI=
 github.com/whosonfirst/go-whosonfirst-uri v0.1.0/go.mod h1:8eaDVcc4v+HHHEDaRbApdmhPwM4/JQllw2PktvZcPVs=
 github.com/whosonfirst/walk v0.0.0-20160802000000-c0a349674b73681a7272f5ce6ade8ea28055059f h1:hvKIIx2IuWmRtOdpDk29quD+t7GowpHZxz8bCfIGE58=

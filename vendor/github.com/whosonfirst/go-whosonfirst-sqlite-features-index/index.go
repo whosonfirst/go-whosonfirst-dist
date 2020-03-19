@@ -4,9 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/whosonfirst/go-reader"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
+	wof_reader "github.com/whosonfirst/go-whosonfirst-reader"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
+	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/warning"
 	"io"
@@ -14,20 +19,11 @@ import (
 	"log"
 )
 
-type SQLiteFeaturesIndexerCallbackOptions struct {
+type SQLiteFeaturesLoadRecordFuncOptions struct {
 	StrictAltFiles bool
 }
 
-func DefaultSQLiteFeaturesIndexerCallbackOptions() *SQLiteFeaturesIndexerCallbackOptions {
-
-	opts := &SQLiteFeaturesIndexerCallbackOptions{
-		StrictAltFiles: true,
-	}
-
-	return opts
-}
-
-func SQLiteFeaturesIndexerCallback(opts *SQLiteFeaturesIndexerCallbackOptions) sql_index.SQLiteIndexerFunc {
+func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql_index.SQLiteIndexerLoadRecordFunc {
 
 	cb := func(ctx context.Context, fh io.Reader, args ...interface{}) (interface{}, error) {
 
@@ -83,14 +79,68 @@ func SQLiteFeaturesIndexerCallback(opts *SQLiteFeaturesIndexerCallbackOptions) s
 	return cb
 }
 
-func NewDefaultSQLiteFeaturesIndexer(db sqlite.Database, to_index []sqlite.Table) (*sql_index.SQLiteIndexer, error) {
+func SQLiteFeaturesIndexBelongsToFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
 
-	opts := DefaultSQLiteFeaturesIndexerCallbackOptions()
-	cb := SQLiteFeaturesIndexerCallback(opts)
+	cb := func(ctx context.Context, db sqlite.Database, tables []sqlite.Table, record interface{}) error {
 
-	return NewSQLiteFeaturesIndexerWithCallback(db, to_index, cb)
-}
+		geojson_t, err := wof_tables.NewGeoJSONTable()
 
-func NewSQLiteFeaturesIndexerWithCallback(db sqlite.Database, to_index []sqlite.Table, cb sql_index.SQLiteIndexerFunc) (*sql_index.SQLiteIndexer, error) {
-	return sql_index.NewSQLiteIndexer(db, to_index, cb)
+		if err != nil {
+			return err
+		}
+
+		conn, err := db.Conn()
+
+		if err != nil {
+			return err
+		}
+
+		f := record.(geojson.Feature)
+		belongsto := whosonfirst.BelongsTo(f)
+
+		to_index := make([]geojson.Feature, 0)
+
+		for _, id := range belongsto {
+
+			sql := fmt.Sprintf("SELECT COUNT(id) FROM %s WHERE id=?", geojson_t.Name())
+			row := conn.QueryRow(sql, id)
+
+			var count int
+			err = row.Scan(&count)
+
+			if err != nil {
+				return err
+			}
+
+			if count != 0 {
+				continue
+			}
+
+			ancestor, err := wof_reader.LoadFeatureFromID(ctx, r, id)
+
+			if err != nil {
+				return err
+			}
+
+			to_index = append(to_index, ancestor)
+
+			// TO DO: CHECK WHETHER TO INDEX ALT FILES FOR ANCESTOR(S)
+		}
+
+		for _, record := range to_index {
+
+			for _, t := range tables {
+
+				err = t.IndexRecord(db, record)
+
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	}
+
+	return cb
 }

@@ -2,7 +2,7 @@ package compress
 
 import (
 	"fmt"
-	"github.com/mholt/archiver"
+	"github.com/mholt/archiver/v3"
 	_ "log"
 	"path/filepath"
 )
