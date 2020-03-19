@@ -37,14 +37,14 @@ github.com/mattn/go-sqlite3
 github.com/mholt/archiver/v3
 # github.com/mmcloughlin/geohash v0.9.0
 github.com/mmcloughlin/geohash
-# github.com/nwaples/rardecode v1.1.0
+# github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/pierrec/lz4 v2.4.1+incompatible
+# github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
 # github.com/skelterjohn/geom v0.0.0-20180103142417-96f3e8a219c5
 github.com/skelterjohn/geom
-# github.com/tidwall/gjson v1.3.6
+# github.com/tidwall/gjson v1.6.0
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.1
 github.com/tidwall/match
@@ -54,7 +54,7 @@ github.com/tidwall/pretty
 github.com/twpayne/go-geom
 github.com/twpayne/go-geom/encoding/geojson
 github.com/twpayne/go-geom/encoding/wkt
-# github.com/ulikunitz/xz v0.5.7
+# github.com/ulikunitz/xz v0.5.6
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
@@ -78,7 +78,7 @@ github.com/whosonfirst/go-whosonfirst-csv
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
-# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.2
+# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.3
 github.com/whosonfirst/go-whosonfirst-geojson-v2
 github.com/whosonfirst/go-whosonfirst-geojson-v2/feature
 github.com/whosonfirst/go-whosonfirst-geojson-v2/geometry
@@ -125,11 +125,11 @@ github.com/whosonfirst/go-whosonfirst-sqlite/utils
 # github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
-# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.4.0
+# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.4.1
 github.com/whosonfirst/go-whosonfirst-sqlite-features-index
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0
 github.com/whosonfirst/go-whosonfirst-sqlite-index
-# github.com/whosonfirst/go-whosonfirst-uri v0.1.0
+# github.com/whosonfirst/go-whosonfirst-uri v0.2.0
 github.com/whosonfirst/go-whosonfirst-uri
 # github.com/whosonfirst/walk v0.0.0-20160803014805-c0a349674b73
 github.com/whosonfirst/walk
