@@ -154,20 +154,10 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		LoadRecordFunc: record_func,
 	}
 
-	/*
-		if *index_belongs_to {
-
-			ctx := context.Background()
-			r, err := reader.NewReader(ctx, *belongs_to_uri)
-
-			if err != nil {
-				logger.Fatal("Failed to load reader (%s), %v", *belongs_to_uri, err)
-			}
-
-			belongsto_func := index.SQLiteFeaturesIndexBelongsToFunc(r)
-			idx_opts.PostIndexFunc = belongsto_func
-		}
-	*/
+	if opts.SQLiteIndexBelongsTo {
+		belongsto_func := index.SQLiteFeaturesIndexBelongsToFunc(opts.SQLiteBelongsToReader)
+		idx_opts.PostIndexFunc = belongsto_func
+	}
 
 	idx, err := sql_index.NewSQLiteIndexer(idx_opts)
 

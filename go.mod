@@ -14,6 +14,8 @@ require (
 	github.com/tidwall/pretty v1.0.1
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/whosonfirst/atomicfile v0.0.0-20151019160806-2de1f203e7d5
+	github.com/whosonfirst/go-reader v0.1.1
+	github.com/whosonfirst/go-reader-http v0.0.2
 	github.com/whosonfirst/go-whosonfirst-bundles v0.2.0
 	github.com/whosonfirst/go-whosonfirst-crawl v0.2.0
 	github.com/whosonfirst/go-whosonfirst-log v0.1.0

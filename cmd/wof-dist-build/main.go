@@ -1,11 +1,16 @@
 package main
 
 import (
+	_ "github.com/whosonfirst/go-reader-http"
+)
+
+import (
 	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/tidwall/pretty"
+	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-dist/build"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
@@ -50,6 +55,9 @@ func main() {
 	custom_repo := flag.Bool("custom-repo", true, "Allow custom repo names")
 
 	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files.")
+
+	index_belongs_to := flag.Bool("index-belongs-to", opts.SQLiteIndexBelongsTo, "...")
+	belongs_to_uri := flag.String("index-belongs-to-uri", "", "...")
 
 	combined := flag.Bool("combined", opts.Combined, "Create a single combined distribution from multiple repos.")
 	combined_name := flag.String("combined-name", opts.CombinedName, "Distribution name for a single combined distribution from multiple repos.")
@@ -139,6 +147,18 @@ func main() {
 
 	if !info.IsDir() {
 		logger.Fatal("-workdir is not actually a directory")
+	}
+
+	if *index_belongs_to {
+
+		ctx := context.Background()
+		r, err := reader.NewReader(ctx, *belongs_to_uri)
+
+		if err != nil {
+			logger.Fatal("Unable to create go-reader.Reader (%s), %v", *belongs_to_uri, err)
+		}
+
+		opts.SQLiteBelongsToReader = r
 	}
 
 	opts.Logger = logger

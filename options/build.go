@@ -2,19 +2,22 @@ package options
 
 import (
 	"errors"
+	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"runtime"
 )
 
 type BuildOptions struct {
-	Cloner       string
-	Protocol     string
-	Source       string
-	Organization string
-	Repo         repo.Repo
-	Repos        []repo.Repo
-	SQLite       bool
+	Cloner                string
+	Protocol              string
+	Source                string
+	Organization          string
+	Repo                  repo.Repo
+	Repos                 []repo.Repo
+	SQLite                bool
+	SQLiteIndexBelongsTo  bool
+	SQLiteBelongsToReader reader.Reader
 	// these are the new new and will replace "SQLite"
 	// SQLiteCommon     bool
 	// SQLiteSpatial    bool
@@ -52,33 +55,35 @@ func NewBuildOptions() *BuildOptions {
 	}
 
 	opts := BuildOptions{
-		Cloner:           "native",
-		Source:           "github.com",
-		Protocol:         "https",
-		Organization:     "whosonfirst-data",
-		Repo:             nil,
-		Repos:            nil,
-		SQLite:           true,
-		Meta:             false,
-		Bundle:           false,
-		Workdir:          "",
-		Logger:           logger,
-		LocalCheckout:    false,
-		LocalSQLite:      false,
-		PreserveCheckout: false,
-		PreserveSQLite:   false,
-		PreserveMeta:     false,
-		PreserveBundle:   false,
-		CustomRepo:       false,
-		CompressSQLite:   true,
-		CompressMeta:     true,
-		CompressBundle:   true,
-		CompressMaxCPUs:  max_cpus,
-		Timings:          false,
-		Strict:           false,
-		Combined:         false,
-		CombinedName:     "",
-		IndexAltFiles:    false,
+		Cloner:                "native",
+		Source:                "github.com",
+		Protocol:              "https",
+		Organization:          "whosonfirst-data",
+		Repo:                  nil,
+		Repos:                 nil,
+		SQLite:                true,
+		SQLiteIndexBelongsTo:  false,
+		SQLiteBelongsToReader: nil,
+		Meta:                  false,
+		Bundle:                false,
+		Workdir:               "",
+		Logger:                logger,
+		LocalCheckout:         false,
+		LocalSQLite:           false,
+		PreserveCheckout:      false,
+		PreserveSQLite:        false,
+		PreserveMeta:          false,
+		PreserveBundle:        false,
+		CustomRepo:            false,
+		CompressSQLite:        true,
+		CompressMeta:          true,
+		CompressBundle:        true,
+		CompressMaxCPUs:       max_cpus,
+		Timings:               false,
+		Strict:                false,
+		Combined:              false,
+		CombinedName:          "",
+		IndexAltFiles:         false,
 	}
 
 	return &opts
@@ -87,32 +92,34 @@ func NewBuildOptions() *BuildOptions {
 func (opts *BuildOptions) Clone() *BuildOptions {
 
 	clone := BuildOptions{
-		Cloner:           opts.Cloner,
-		Source:           opts.Source,
-		Protocol:         opts.Protocol,
-		Organization:     opts.Organization,
-		Repo:             opts.Repo,
-		SQLite:           opts.SQLite,
-		Meta:             opts.Meta,
-		Bundle:           opts.Bundle,
-		Workdir:          opts.Workdir,
-		Logger:           opts.Logger,
-		LocalCheckout:    opts.LocalCheckout,
-		LocalSQLite:      opts.LocalSQLite,
-		PreserveCheckout: opts.PreserveCheckout,
-		PreserveSQLite:   opts.PreserveSQLite,
-		PreserveMeta:     opts.PreserveMeta,
-		PreserveBundle:   opts.PreserveBundle,
-		CompressSQLite:   opts.CompressSQLite,
-		CompressMeta:     opts.CompressMeta,
-		CompressBundle:   opts.CompressBundle,
-		CompressMaxCPUs:  opts.CompressMaxCPUs,
-		CustomRepo:       opts.CustomRepo,
-		Timings:          opts.Timings,
-		Strict:           opts.Strict,
-		Combined:         opts.Combined,
-		CombinedName:     opts.CombinedName,
-		IndexAltFiles:    opts.IndexAltFiles,
+		Cloner:                opts.Cloner,
+		Source:                opts.Source,
+		Protocol:              opts.Protocol,
+		Organization:          opts.Organization,
+		Repo:                  opts.Repo,
+		SQLite:                opts.SQLite,
+		SQLiteIndexBelongsTo:  opts.SQLiteIndexBelongsTo,
+		SQLiteBelongsToReader: opts.SQLiteBelongsToReader,
+		Meta:                  opts.Meta,
+		Bundle:                opts.Bundle,
+		Workdir:               opts.Workdir,
+		Logger:                opts.Logger,
+		LocalCheckout:         opts.LocalCheckout,
+		LocalSQLite:           opts.LocalSQLite,
+		PreserveCheckout:      opts.PreserveCheckout,
+		PreserveSQLite:        opts.PreserveSQLite,
+		PreserveMeta:          opts.PreserveMeta,
+		PreserveBundle:        opts.PreserveBundle,
+		CompressSQLite:        opts.CompressSQLite,
+		CompressMeta:          opts.CompressMeta,
+		CompressBundle:        opts.CompressBundle,
+		CompressMaxCPUs:       opts.CompressMaxCPUs,
+		CustomRepo:            opts.CustomRepo,
+		Timings:               opts.Timings,
+		Strict:                opts.Strict,
+		Combined:              opts.Combined,
+		CombinedName:          opts.CombinedName,
+		IndexAltFiles:         opts.IndexAltFiles,
 	}
 
 	return &clone
