@@ -9,6 +9,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
+	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite/database"
 	"os"
 	"path/filepath"
@@ -141,26 +142,42 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		return nil, err
 	}
 
-	// this is not a plain-vanilla go-whosonfirst-index indexer or
-	// rather it is but with a few extra steps: this generates a
-	// go-wof-index-sqlite indexer callback that skips non-primary records
-	// and tries to load the feature in question returning a feature
-	// (or an error) - that callback is then passed to a function
-	// that creates a go-whosonfirst-sqlite-index indexer whose constructor
-	// creates a go-whosonfirst-index callback (that wraps the callback
-	// it's just been passed) - it's confusing I know but basically what's
-	// happening is that the go-whosonfirst-sqlite is a generic sqlite
-	// thingy that only knows about sqlite.Table thingies (the to_index var above)
-	// and records (interface{}) that are indexed (by tables) - the go-whosonfirst-sqlite-features
-	// callback takes the normal go-whosonfirst-index filehandle (io.Reader)
-	// and converts it in to a record (interface{}) that can be indexed.
-	// computers, right... (20181127/thisisaaronland)
-
-	idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
-
-	if err != nil {
-		return nil, err
+	record_opts := &index.SQLiteFeaturesLoadRecordFuncOptions{
+		StrictAltFiles: true,
 	}
+
+	record_func := index.SQLiteFeaturesLoadRecordFunc(record_opts)
+
+	idx_opts := &sql_index.SQLiteIndexerOptions{
+		DB:             db,
+		Tables:         to_index,
+		LoadRecordFunc: record_func,
+	}
+
+	/*
+		if *index_belongs_to {
+
+			ctx := context.Background()
+			r, err := reader.NewReader(ctx, *belongs_to_uri)
+
+			if err != nil {
+				logger.Fatal("Failed to load reader (%s), %v", *belongs_to_uri, err)
+			}
+
+			belongsto_func := index.SQLiteFeaturesIndexBelongsToFunc(r)
+			idx_opts.PostIndexFunc = belongsto_func
+		}
+	*/
+
+	idx, err := sql_index.NewSQLiteIndexer(idx_opts)
+
+	/*
+		idx, err := index.NewDefaultSQLiteFeaturesIndexer(db, to_index)
+
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	idx.Timings = opts.Timings
 	idx.Logger = opts.Logger

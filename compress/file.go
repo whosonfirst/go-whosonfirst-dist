@@ -2,7 +2,7 @@ package compress
 
 import (
 	"fmt"
-	"github.com/mholt/archiver/v3"	
+	"github.com/mholt/archiver/v3"
 	"github.com/whosonfirst/atomicfile"
 	"os"
 	"path/filepath"

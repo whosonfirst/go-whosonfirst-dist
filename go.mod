@@ -22,4 +22,5 @@ require (
 	github.com/whosonfirst/go-whosonfirst-sqlite v0.1.5
 	github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7
 	github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.3.0
+	github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0
 )
