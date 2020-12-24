@@ -9,7 +9,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	// wof_reader "github.com/whosonfirst/go-whosonfirst-reader"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-uri"	
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
@@ -18,6 +17,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"sync"
 )
 
 type SQLiteFeaturesLoadRecordFuncOptions struct {
@@ -82,21 +82,19 @@ func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql
 
 func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
 
+	seen := new(sync.Map)
+	
 	cb := func(ctx context.Context, db sqlite.Database, tables []sqlite.Table, record interface{}) error {
 
-		log.Println("INDEX RELATIONS")
-		
 		geojson_t, err := wof_tables.NewGeoJSONTable()
 
 		if err != nil {
-			log.Println("SAD", 1)
 			return err
 		}
 
 		conn, err := db.Conn()
 
 		if err != nil {
-			log.Println("SAD", 2)
 			return err
 		}
 
@@ -132,6 +130,14 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 
 		for id, _ := range relations {
 
+			_, ok := seen.Load(id)
+
+			if ok {
+				continue
+			}
+
+			seen.Store(id, true)
+			
 			sql := fmt.Sprintf("SELECT COUNT(id) FROM %s WHERE id=?", geojson_t.Name())
 			row := conn.QueryRow(sql, id)
 
@@ -139,7 +145,6 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 			err = row.Scan(&count)
 
 			if err != nil {
-				log.Println("SAD", 3, id)
 				return err
 			}
 
@@ -150,31 +155,26 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 			rel_path, err := uri.Id2RelPath(id)
 
 			if err != nil {
-				log.Println("SAD", "A", id)				
 				return err
 			}
 
 			fh, err := r.Read(ctx, rel_path)
 
-			if err != nil {
-				log.Println("SAD", "B", id, rel_path)								
-				// return err
-				continue
+			if err != nil{
+				return err
 			}
 
 			defer fh.Close()
 
 			ancestor, err := feature.LoadFeatureFromReader(fh)
-			
-			// ancestor, err := wof_reader.LoadFeatureFromID(ctx, r, id)
 
-			if err != nil {
-				log.Println("SAD", 4, id, err)
+			// check for warnings in case this record has a non-standard
+			// placetype (20201224/thisisaaronland)
+			
+			if err != nil && !warning.IsWarning(err){
 				return err
 			}
 
-			log.Println("ANCESTOR", rel_path)
-			
 			to_index = append(to_index, ancestor)
 
 			// TO DO: CHECK WHETHER TO INDEX ALT FILES FOR ANCESTOR(S)
@@ -188,7 +188,6 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 				err = t.IndexRecord(db, record)
 
 				if err != nil {
-					log.Println("SAD", 5)
 					return err
 				}
 			}

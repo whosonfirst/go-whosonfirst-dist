@@ -171,7 +171,7 @@ func RTreeTablesWithDatabase(db sqlite.Database) ([]sqlite.Table, error) {
 func RTreeTablesWithDatabaseAndOptions(db sqlite.Database, opts *TableOptions) ([]sqlite.Table, error) {
 
 	// https://github.com/whosonfirst/go-whosonfirst-spatial-sqlite#databases
-	
+
 	to_index := make([]sqlite.Table, 0)
 
 	rtree_opts, err := DefaultRTreeTableOptions()
@@ -181,7 +181,7 @@ func RTreeTablesWithDatabaseAndOptions(db sqlite.Database, opts *TableOptions) (
 	}
 
 	rtree_opts.IndexAltFiles = opts.IndexAltFiles
-	
+
 	rt, err := NewRTreeTableWithDatabaseAndOptions(db, rtree_opts)
 
 	if err != nil {
@@ -197,7 +197,7 @@ func RTreeTablesWithDatabaseAndOptions(db sqlite.Database, opts *TableOptions) (
 	}
 
 	sprt_opts.IndexAltFiles = opts.IndexAltFiles
-	
+
 	sprt, err := NewSPRTableWithDatabaseAndOptions(db, sprt_opts)
 
 	if err != nil {
@@ -206,7 +206,6 @@ func RTreeTablesWithDatabaseAndOptions(db sqlite.Database, opts *TableOptions) (
 
 	to_index = append(to_index, sprt)
 
-
 	props_opts, err := DefaultPropertiesTableOptions()
 
 	if err != nil {
@@ -214,7 +213,7 @@ func RTreeTablesWithDatabaseAndOptions(db sqlite.Database, opts *TableOptions) (
 	}
 
 	props_opts.IndexAltFiles = opts.IndexAltFiles
-	
+
 	props, err := NewPropertiesTableWithDatabaseAndOptions(db, props_opts)
 
 	if err != nil {
@@ -230,14 +229,14 @@ func RTreeTablesWithDatabaseAndOptions(db sqlite.Database, opts *TableOptions) (
 	}
 
 	geom_opts.IndexAltFiles = opts.IndexAltFiles
-	
+
 	geom, err := NewGeometryTableWithDatabaseAndOptions(db, geom_opts)
 
 	if err != nil {
 		return nil, err
 	}
 
-	to_index = append(to_index, geom)	
-	
+	to_index = append(to_index, geom)
+
 	return to_index, nil
 }
