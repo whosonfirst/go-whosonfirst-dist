@@ -10,9 +10,9 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite"
-	"github.com/whosonfirst/go-whosonfirst-uri"	
 	wof_tables "github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 	"github.com/whosonfirst/warning"
 	"io"
 	"io/ioutil"
@@ -22,6 +22,11 @@ import (
 
 type SQLiteFeaturesLoadRecordFuncOptions struct {
 	StrictAltFiles bool
+}
+
+type SQLiteFeaturesIndexRelationsFuncOptions struct {
+	Reader reader.Reader
+	Strict bool
 }
 
 func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql_index.SQLiteIndexerLoadRecordFunc {
@@ -82,8 +87,16 @@ func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql
 
 func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPostIndexFunc {
 
+	opts := &SQLiteFeaturesIndexRelationsFuncOptions{}
+	opts.Reader = r
+
+	return SQLiteFeaturesIndexRelationsFuncWithOptions(opts)
+}
+
+func SQLiteFeaturesIndexRelationsFuncWithOptions(opts *SQLiteFeaturesIndexRelationsFuncOptions) sql_index.SQLiteIndexerPostIndexFunc {
+
 	seen := new(sync.Map)
-	
+
 	cb := func(ctx context.Context, db sqlite.Database, tables []sqlite.Table, record interface{}) error {
 
 		geojson_t, err := wof_tables.NewGeoJSONTable()
@@ -122,9 +135,17 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 			}
 
 			for _, r := range rsp.Array() {
+
 				id := r.Int()
+
+				// skip -1, -4, etc.
+				// (20201224/thisisaaronland)
+
+				if id <= 0 {
+					continue
+				}
+
 				relations[id] = true
-				// log.Println("MATCH", path, id)
 			}
 		}
 
@@ -137,7 +158,7 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 			}
 
 			seen.Store(id, true)
-			
+
 			sql := fmt.Sprintf("SELECT COUNT(id) FROM %s WHERE id=?", geojson_t.Name())
 			row := conn.QueryRow(sql, id)
 
@@ -158,10 +179,16 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 				return err
 			}
 
-			fh, err := r.Read(ctx, rel_path)
+			fh, err := opts.Reader.Read(ctx, rel_path)
 
-			if err != nil{
-				return err
+			if err != nil {
+
+				if opts.Strict {
+					return err
+				}
+
+				log.Printf("Failed to read '%s' because '%v'. Strict mode is disabled so skipping\n", rel_path, err)
+				continue
 			}
 
 			defer fh.Close()
@@ -170,9 +197,15 @@ func SQLiteFeaturesIndexRelationsFunc(r reader.Reader) sql_index.SQLiteIndexerPo
 
 			// check for warnings in case this record has a non-standard
 			// placetype (20201224/thisisaaronland)
-			
-			if err != nil && !warning.IsWarning(err){
-				return err
+
+			if err != nil && !warning.IsWarning(err) {
+
+				if opts.Strict {
+					return err
+				}
+
+				log.Printf("Failed to load feature for '%s' because '%v'. Strict mode is disabled so skipping\n", rel_path, err)
+				continue
 			}
 
 			to_index = append(to_index, ancestor)
