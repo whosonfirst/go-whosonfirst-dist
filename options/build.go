@@ -15,33 +15,31 @@ type BuildOptions struct {
 	Organization               string
 	Repo                       repo.Repo
 	Repos                      []repo.Repo
-	SQLite                     bool
+	SQLiteCommon               bool
+	SQLiteRTree                bool
+	SQLiteSearch               bool
 	SQLiteIndexRelations       bool
 	SQLiteIndexRelationsReader reader.Reader
-	// these are the new new and will replace "SQLite"
-	// SQLiteCommon     bool
-	// SQLiteSpatial    bool
-	// SQLiteSearch     bool
-	Meta             bool
-	Bundle           bool
-	Workdir          string
-	Logger           *log.WOFLogger
-	LocalCheckout    bool
-	LocalSQLite      bool
-	PreserveCheckout bool
-	PreserveSQLite   bool
-	PreserveMeta     bool
-	PreserveBundle   bool
-	CompressSQLite   bool
-	CompressMeta     bool
-	CompressBundle   bool
-	CompressMaxCPUs  int
-	CustomRepo       bool
-	Combined         bool
-	CombinedName     string
-	Timings          bool
-	Strict           bool
-	IndexAltFiles    bool
+	Meta                       bool
+	Bundle                     bool
+	Workdir                    string
+	Logger                     *log.WOFLogger
+	LocalCheckout              bool
+	LocalSQLite                bool
+	PreserveCheckout           bool
+	PreserveSQLite             bool
+	PreserveMeta               bool
+	PreserveBundle             bool
+	CompressSQLite             bool
+	CompressMeta               bool
+	CompressBundle             bool
+	CompressMaxCPUs            int
+	CustomRepo                 bool
+	Combined                   bool
+	CombinedName               string
+	Timings                    bool
+	Strict                     bool
+	IndexAltFiles              bool
 }
 
 func NewBuildOptions() *BuildOptions {
@@ -61,7 +59,9 @@ func NewBuildOptions() *BuildOptions {
 		Organization:               "whosonfirst-data",
 		Repo:                       nil,
 		Repos:                      nil,
-		SQLite:                     true,
+		SQLiteCommon:               true,
+		SQLiteRTree:                false,
+		SQLiteSearch:               false,
 		SQLiteIndexRelations:       false,
 		SQLiteIndexRelationsReader: nil,
 		Meta:                       false,
@@ -97,7 +97,9 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		Protocol:                   opts.Protocol,
 		Organization:               opts.Organization,
 		Repo:                       opts.Repo,
-		SQLite:                     opts.SQLite,
+		SQLiteCommon:               opts.SQLiteCommon,
+		SQLiteRTree:                opts.SQLiteRTree,
+		SQLiteSearch:               opts.SQLiteSearch,
 		SQLiteIndexRelations:       opts.SQLiteIndexRelations,
 		SQLiteIndexRelationsReader: opts.SQLiteIndexRelationsReader,
 		Meta:                       opts.Meta,
@@ -147,4 +149,13 @@ func DistributionRepoFromOptions(opts *BuildOptions) (repo.Repo, error) {
 	}
 
 	return repo.NewCustomRepoFromString(name)
+}
+
+func IndexSQLiteTables(opts *BuildOptions) bool {
+
+	if opts.SQLiteCommon || opts.SQLiteRTree || opts.SQLiteSearch {
+		return true
+	}
+
+	return false
 }

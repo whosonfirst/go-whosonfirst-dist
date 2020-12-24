@@ -370,7 +370,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		opts.Logger.Status("commit hashes are %s (%s)", commit_hashes, local_checkouts)
 	}
 
-	if opts.SQLite {
+	if options.IndexSQLiteTables(opts) {
 
 		select {
 
@@ -418,7 +418,7 @@ func buildDistributionsForRepos(ctx context.Context, opts *options.BuildOptions)
 		mode := "repo"
 		sources := local_checkouts
 
-		if opts.SQLite {
+		if options.IndexSQLiteTables(opts) {
 			mode = "sqlite"
 			sources = []string{local_sqlite}
 		}

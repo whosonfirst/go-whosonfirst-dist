@@ -7,6 +7,8 @@ Go package for indexing Who's On First features in SQLite databases.
 ### wof-sqlite-index-features
 
 ```
+$> ./bin/wof-sqlite-index-features -h
+Usage of ./bin/wof-sqlite-index-features:
   -all
     	Index all tables (except the 'search' and 'geometries' tables which you need to specify explicitly)
   -ancestors
@@ -21,12 +23,14 @@ Go package for indexing Who's On First features in SQLite databases.
     	Index the 'geojson' table
   -geometries
     	Index the 'geometries' table (requires that libspatialite already be installed)
+  -geometry
+    	Index the 'geometry' table
   -index-alt-files
     	Index alt geometries
   -index-relations
     	Index the records related to a feature, specifically wof:belongsto, wof:depicts and wof:involves. Alt files for relations are not indexed at this time.
   -index-relations-reader-uri string
-    	A valid go-reader.Reader URI from which to read data for a relations candidate.	
+    	A valid go-reader.Reader URI from which to read data for a relations candidate.
   -live-hard-die-fast
     	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
   -mode string
@@ -37,6 +41,10 @@ Go package for indexing Who's On First features in SQLite databases.
     	Attempt to optimize the database before closing connection (default true)
   -processes int
     	The number of concurrent processes to index data with (default 8)
+  -properties
+    	Index the 'properties' table
+  -rtree
+    	Index the 'rtree' table
   -search
     	Index the 'search' table (using SQLite FTS4 full-text indexer)
   -spr

@@ -26,7 +26,11 @@ func main() {
 
 	opts := options.NewBuildOptions()
 
-	build_sqlite := flag.Bool("build-sqlite", opts.SQLite, "Build a (common) SQLite distribution for a repo.")
+	build_sqlite := flag.Bool("build-sqlite", opts.SQLiteCommon, "Build a (common) SQLite distribution for a repo. This flag is DEPRECATED.")
+	build_sqlite_common := flag.Bool("build-sqlite-common", opts.SQLiteCommon, "Build a SQLite distribution for a repo, with common tables.")
+	build_sqlite_rtree := flag.Bool("build-sqlite-rtree", opts.SQLiteRTree, "Build a SQLite distribution for a repo, with rtree-related tables.")
+	build_sqlite_search := flag.Bool("build-sqlite-search", opts.SQLiteSearch, "Build a (common) SQLite distribution for a repo, with search-tables.")
+	build_sqlite_all := flag.Bool("build-sqlite-all", false, "Build a SQLite distribution for a repo, with all tables defined by the other -build-sqlite flags.")
 
 	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo")
 	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo.")
@@ -162,6 +166,18 @@ func main() {
 		opts.SQLiteIndexRelationsReader = r
 	}
 
+	if *build_sqlite {
+		logger.Info("-build-sqlite flag is DEPRECATED but is set so auto-enabling -build-sqlite-common")
+		*build_sqlite_common = true
+	}
+
+	if *build_sqlite_all {
+		logger.Info("-build-sqlite-all flag is set so auto-enabling -build-sqlite-common -build-sqlite-rtree -build-sqlite-search")
+		*build_sqlite_common = true
+		*build_sqlite_rtree = true
+		*build_sqlite_search = true
+	}
+
 	opts.Logger = logger
 
 	opts.Cloner = *clone
@@ -171,7 +187,10 @@ func main() {
 
 	opts.Workdir = *workdir
 
-	opts.SQLite = *build_sqlite
+	opts.SQLiteCommon = *build_sqlite_common
+	opts.SQLiteRTree = *build_sqlite_rtree
+	opts.SQLiteSearch = *build_sqlite_search
+
 	opts.Meta = *build_meta
 	opts.Bundle = *build_bundle
 

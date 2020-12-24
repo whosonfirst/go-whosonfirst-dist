@@ -2,11 +2,13 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-dist"
 	"github.com/whosonfirst/go-whosonfirst-dist/options"
 	"github.com/whosonfirst/go-whosonfirst-dist/utils"
 	"github.com/whosonfirst/go-whosonfirst-repo"
+	"github.com/whosonfirst/go-whosonfirst-sqlite"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features-index"
 	"github.com/whosonfirst/go-whosonfirst-sqlite-features/tables"
 	sql_index "github.com/whosonfirst/go-whosonfirst-sqlite-index"
@@ -124,22 +126,88 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		return nil, err
 	}
 
-	geojson_opts, err := tables.DefaultGeoJSONTableOptions()
+	to_index := make(map[string]sqlite.Table)
 
-	if err != nil {
-		return nil, err
+	if opts.SQLiteCommon {
+
+		table_opts := &tables.CommonTablesOptions{
+			IndexAltFiles: opts.IndexAltFiles,
+		}
+
+		common_tables, err := tables.CommonTablesWithDatabaseAndOptions(db, table_opts)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, t := range common_tables {
+
+			name := t.Name()
+
+			_, ok := to_index[name]
+
+			if !ok {
+				to_index[name] = t
+			}
+		}
 	}
 
-	geojson_opts.IndexAltFiles = opts.IndexAltFiles
+	if opts.SQLiteRTree {
 
-	table_opts := &tables.CommonTablesOptions{
-		GeoJSON: geojson_opts,
+		table_opts := &tables.TableOptions{
+			IndexAltFiles: opts.IndexAltFiles,
+		}
+
+		rtree_tables, err := tables.RTreeTablesWithDatabaseAndOptions(db, table_opts)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, t := range rtree_tables {
+
+			name := t.Name()
+
+			_, ok := to_index[name]
+
+			if !ok {
+				to_index[name] = t
+			}
+		}
 	}
 
-	to_index, err := tables.CommonTablesWithDatabaseAndOptions(db, table_opts)
+	if opts.SQLiteSearch {
 
-	if err != nil {
-		return nil, err
+		table_opts := &tables.TableOptions{
+			IndexAltFiles: opts.IndexAltFiles,
+		}
+
+		search_tables, err := tables.SearchTablesWithDatabaseAndOptions(db, table_opts)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, t := range search_tables {
+
+			name := t.Name()
+
+			_, ok := to_index[name]
+
+			if !ok {
+				to_index[name] = t
+			}
+		}
+	}
+
+	sqlite_tables := make([]sqlite.Table, 0)
+
+	for _, t := range to_index {
+		sqlite_tables = append(sqlite_tables, t)
+	}
+
+	if len(sqlite_tables) == 0 {
+		return nil, errors.New("No tables to index")
 	}
 
 	record_opts := &index.SQLiteFeaturesLoadRecordFuncOptions{
@@ -150,7 +218,7 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 
 	idx_opts := &sql_index.SQLiteIndexerOptions{
 		DB:             db,
-		Tables:         to_index,
+		Tables:         sqlite_tables,
 		LoadRecordFunc: record_func,
 	}
 
@@ -169,6 +237,8 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 	if err != nil {
 		return nil, err
 	}
+
+	// indexing complete - now do some sanity checking
 
 	t, err := tables.NewGeoJSONTable()
 

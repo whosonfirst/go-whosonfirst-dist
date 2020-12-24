@@ -1,6 +1,6 @@
-# github.com/aaronland/go-roster v0.0.1
+# github.com/aaronland/go-roster v0.0.2
 github.com/aaronland/go-roster
-# github.com/andybalholm/brotli v0.0.0-20190621154722-5f990b63d2d6
+# github.com/andybalholm/brotli v1.0.0
 github.com/andybalholm/brotli
 # github.com/dsnet/compress v0.0.1
 github.com/dsnet/compress
@@ -11,9 +11,6 @@ github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
 # github.com/facebookgo/atomicfile v0.0.0-20151019160806-2de1f203e7d5
 github.com/facebookgo/atomicfile
-# github.com/golang/gddo v0.0.0-20190419222130-af0f2af80721
-github.com/golang/gddo/httputil
-github.com/golang/gddo/httputil/header
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
@@ -22,63 +19,69 @@ github.com/hashicorp/errwrap
 github.com/hashicorp/go-multierror
 # github.com/jtacoma/uritemplates v1.0.0
 github.com/jtacoma/uritemplates
-# github.com/klauspost/compress v1.9.2
+# github.com/klauspost/compress v1.10.10
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/fse
+github.com/klauspost/compress/gzip
 github.com/klauspost/compress/huff0
 github.com/klauspost/compress/snappy
 github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
-# github.com/klauspost/pgzip v1.2.1
+# github.com/klauspost/pgzip v1.2.4
 github.com/klauspost/pgzip
 # github.com/mattn/go-sqlite3 v2.0.2+incompatible
 github.com/mattn/go-sqlite3
-# github.com/mholt/archiver/v3 v3.3.0
+# github.com/mholt/archiver/v3 v3.5.0
 github.com/mholt/archiver/v3
 # github.com/mmcloughlin/geohash v0.9.0
 github.com/mmcloughlin/geohash
-# github.com/nwaples/rardecode v1.0.0
+# github.com/nwaples/rardecode v1.1.0
 github.com/nwaples/rardecode
-# github.com/pierrec/lz4 v2.0.5+incompatible
-github.com/pierrec/lz4
-github.com/pierrec/lz4/internal/xxh32
+# github.com/paulmach/go.geojson v1.4.0
+github.com/paulmach/go.geojson
+# github.com/pierrec/lz4/v4 v4.0.3
+github.com/pierrec/lz4/v4
+github.com/pierrec/lz4/v4/internal/lz4block
+github.com/pierrec/lz4/v4/internal/lz4errors
+github.com/pierrec/lz4/v4/internal/lz4stream
+github.com/pierrec/lz4/v4/internal/xxh32
 # github.com/skelterjohn/geom v0.0.0-20180103142417-96f3e8a219c5
 github.com/skelterjohn/geom
-# github.com/tidwall/gjson v1.6.0
+# github.com/tidwall/gjson v1.6.6
 github.com/tidwall/gjson
-# github.com/tidwall/match v1.0.1
+# github.com/tidwall/match v1.0.3
 github.com/tidwall/match
-# github.com/tidwall/pretty v1.0.1
+# github.com/tidwall/pretty v1.0.2
 github.com/tidwall/pretty
-# github.com/twpayne/go-geom v1.0.5
+# github.com/twpayne/go-geom v1.3.6
 github.com/twpayne/go-geom
 github.com/twpayne/go-geom/encoding/geojson
 github.com/twpayne/go-geom/encoding/wkt
-# github.com/ulikunitz/xz v0.5.6
+# github.com/ulikunitz/xz v0.5.7
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
 # github.com/whosonfirst/atomicfile v0.0.0-20151019160806-2de1f203e7d5
 github.com/whosonfirst/atomicfile
-# github.com/whosonfirst/go-reader v0.1.1
+# github.com/whosonfirst/go-reader v0.2.0
 github.com/whosonfirst/go-reader
-# github.com/whosonfirst/go-reader-http v0.0.2
+# github.com/whosonfirst/go-reader-http v0.1.0
 github.com/whosonfirst/go-reader-http
 # github.com/whosonfirst/go-rfc-5646 v0.1.0
 github.com/whosonfirst/go-rfc-5646
-# github.com/whosonfirst/go-spatialite v0.1.0
+# github.com/whosonfirst/go-spatialite v0.1.1
 github.com/whosonfirst/go-spatialite
 # github.com/whosonfirst/go-whosonfirst-bundles v0.2.0
 github.com/whosonfirst/go-whosonfirst-bundles
-# github.com/whosonfirst/go-whosonfirst-crawl v0.2.0
+# github.com/whosonfirst/go-whosonfirst-crawl v0.2.1
 github.com/whosonfirst/go-whosonfirst-crawl
 # github.com/whosonfirst/go-whosonfirst-csv v0.1.0
 github.com/whosonfirst/go-whosonfirst-csv
 # github.com/whosonfirst/go-whosonfirst-flags v0.1.0
 github.com/whosonfirst/go-whosonfirst-flags
 github.com/whosonfirst/go-whosonfirst-flags/existential
-# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.12.3
+# github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.14.0
 github.com/whosonfirst/go-whosonfirst-geojson-v2
 github.com/whosonfirst/go-whosonfirst-geojson-v2/feature
 github.com/whosonfirst/go-whosonfirst-geojson-v2/geometry
@@ -87,7 +90,7 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst
 github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
 # github.com/whosonfirst/go-whosonfirst-hash v0.1.0
 github.com/whosonfirst/go-whosonfirst-hash
-# github.com/whosonfirst/go-whosonfirst-index v0.2.3
+# github.com/whosonfirst/go-whosonfirst-index v0.3.2
 github.com/whosonfirst/go-whosonfirst-index
 github.com/whosonfirst/go-whosonfirst-index/fs
 # github.com/whosonfirst/go-whosonfirst-index-csv v0.0.0-20191002171239-c6712fe20972
@@ -118,22 +121,22 @@ github.com/whosonfirst/go-whosonfirst-sources
 github.com/whosonfirst/go-whosonfirst-sources/sources
 # github.com/whosonfirst/go-whosonfirst-spr v0.1.0
 github.com/whosonfirst/go-whosonfirst-spr
-# github.com/whosonfirst/go-whosonfirst-sqlite v0.1.5
+# github.com/whosonfirst/go-whosonfirst-sqlite v0.1.6
 github.com/whosonfirst/go-whosonfirst-sqlite
 github.com/whosonfirst/go-whosonfirst-sqlite/database
 github.com/whosonfirst/go-whosonfirst-sqlite/utils
-# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.2.7
+# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.6.3
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
-# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.4.1
+# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.6.1
 github.com/whosonfirst/go-whosonfirst-sqlite-features-index
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0
 github.com/whosonfirst/go-whosonfirst-sqlite-index
 # github.com/whosonfirst/go-whosonfirst-uri v0.2.0
 github.com/whosonfirst/go-whosonfirst-uri
-# github.com/whosonfirst/walk v0.0.0-20160803014805-c0a349674b73
+# github.com/whosonfirst/walk v0.0.1
 github.com/whosonfirst/walk
-# github.com/whosonfirst/warning v0.1.0
+# github.com/whosonfirst/warning v0.1.1
 github.com/whosonfirst/warning
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
