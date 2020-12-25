@@ -2,19 +2,9 @@
 
 Go package for working with Who's On First distributions.
 
-## Install
-
-You will need to have both `Go` (specifically [1.12](https://golang.org/dl/) or higher) and the `make` programs installed on your computer. Assuming you do just type:
-
-```
-make tools
-```
-
-All of this package's dependencies are bundled with the code in the `vendor` directory.
-
 ## Important
 
-This is work in progress. It seems to work, though. Until it doesn't. It still needs to be properly documented.
+This is work in progress and documentation is incomplete.
 
 ## Git
 
@@ -40,11 +30,11 @@ _These are works in progress. I am still trying to work it out..._
 For example:
 
 ```
-wof-dist-build --build-sqlite --preserve-checkout --workdir /usr/local/dist whosonfirst-data
+wof-dist-build --build-sqlite-common --preserve-checkout --workdir /usr/local/dist whosonfirst-data
 ```
 
 ```
-wof-dist-build --build-sqlite --local-checkout --compress-all --workdir /usr/local/dist /usr/local/data/dist/whosonfirst-data
+wof-dist-build --build-sqlite-common --local-checkout --compress-all --workdir /usr/local/dist /usr/local/data/dist/whosonfirst-data
 ```
 
 _`--preserve-checkout` is assumed (and assumed to be true) if `--local-checkout` is true._
@@ -62,24 +52,40 @@ _Please write me._
 * Clean up (remote clone or remote (compressed) SQLite database or local (uncompressed) SQLite database)
 
 ```
-wof-dist-build --build-sqlite=false --build-bundle --local-sqlite --workdir /usr/local/dist whosonfirst-data
+$> wof-dist-build -build-sqlite-common=false -build-bundle -local-sqlite -workdir /usr/local/dist whosonfirst-data
 ```
 
 _`--preserve-sqlite` is assumed (and assumed to be true) if `--local-sqlite` is true._
 
 ## Tools
 
+```
+$> make cli
+go build -mod vendor -o bin/wof-dist-build cmd/wof-dist-build/main.go
+go build -mod vendor -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
+```
+
 ### wof-dist-build
 
 Build one or more distribution files for a repository. _This is code that is actively been worked on so don't rely on it yet, or approach it accordingly._
 
 ```
+$> ./bin/wof-dist-build -h
+Usage of ./bin/wof-dist-build:
   -build-bundle
     	Build a bundle distribution for a repo.
   -build-meta
     	Build meta files for a repo
   -build-sqlite
-    	Build a (common) SQLite distribution for a repo. (default true)
+    	Build a (common) SQLite distribution for a repo. This flag is DEPRECATED. (default true)
+  -build-sqlite-all
+    	Build a SQLite distribution for a repo, with all tables defined by the other -build-sqlite flags.
+  -build-sqlite-common
+    	Build a SQLite distribution for a repo, with common tables. (default true)
+  -build-sqlite-rtree
+    	Build a SQLite distribution for a repo, with rtree-related tables.
+  -build-sqlite-search
+    	Build a (common) SQLite distribution for a repo, with search-tables.
   -combined
     	Create a single combined distribution from multiple repos.
   -combined-name string
@@ -139,7 +145,7 @@ For example:
 ```
 $> mkdir tmp
 
-$> ./bin/wof-dist-build -timings -verbose -workdir ./tmp -build-sqlite -build-meta whosonfirst-data-constituency-ca
+$> ./bin/wof-dist-build -timings -verbose -workdir ./tmp -build-sqlite-common -build-meta whosonfirst-data-constituency-ca
 
 13:09:59.008358 [wof-dist-build] STATUS git lfs clone --depth 1 https://github.com/whosonfirst-data/whosonfirst-data-constituency-ca.git tmp/whosonfirst-data-constituency-ca
 13:10:04.008358 [wof-dist-build] STATUS time to clone whosonfirst-data-constituency-ca 4.425250127s
@@ -156,8 +162,6 @@ $> ls -al ./tmp
 ```
 
 #### "Combined" distributions
-
-_IMPORTANT: As of August 2019 the `-index-alt-files` flag will trigger a fatal error pending resolution of [issue #15](https://github.com/whosonfirst/go-whosonfirst-dist/issues/15)._
 
 It is also possible to create a single combined distribution from two or more repos, passing the `-combined` and `-combined-name` flag.
 
