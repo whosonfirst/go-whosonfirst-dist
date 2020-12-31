@@ -99,7 +99,7 @@ func (t *SearchTable) IndexFeature(db sqlite.Database, f geojson.Feature) error 
 	if err != nil {
 		return err
 	}
-	
+
 	names_all := make([]string, 0)
 	names_preferred := make([]string, 0)
 	names_variant := make([]string, 0)
@@ -108,8 +108,8 @@ func (t *SearchTable) IndexFeature(db sqlite.Database, f geojson.Feature) error 
 	name := f.Name()
 
 	names_all = append(names_all, name)
-	names_preferred = append(names_preferred, name)	
-	
+	names_preferred = append(names_preferred, name)
+
 	for tag, names := range whosonfirst.Names(f) {
 
 		lt, err := tags.NewLangTag(tag)

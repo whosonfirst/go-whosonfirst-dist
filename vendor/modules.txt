@@ -47,7 +47,7 @@ github.com/pierrec/lz4/v4/internal/lz4stream
 github.com/pierrec/lz4/v4/internal/xxh32
 # github.com/skelterjohn/geom v0.0.0-20180103142417-96f3e8a219c5
 github.com/skelterjohn/geom
-# github.com/tidwall/gjson v1.6.6
+# github.com/tidwall/gjson v1.6.7
 github.com/tidwall/gjson
 # github.com/tidwall/match v1.0.3
 github.com/tidwall/match
@@ -123,10 +123,10 @@ github.com/whosonfirst/go-whosonfirst-spr
 github.com/whosonfirst/go-whosonfirst-sqlite
 github.com/whosonfirst/go-whosonfirst-sqlite/database
 github.com/whosonfirst/go-whosonfirst-sqlite/utils
-# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.6.4
+# github.com/whosonfirst/go-whosonfirst-sqlite-features v0.6.5
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
-# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.6.3
+# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.6.4
 github.com/whosonfirst/go-whosonfirst-sqlite-features-index
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0
 github.com/whosonfirst/go-whosonfirst-sqlite-index
