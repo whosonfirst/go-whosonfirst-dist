@@ -168,6 +168,44 @@ func BuildDistributions(ctx context.Context, opts *options.BuildOptions) ([]*dis
 
 	for _, d := range distributions {
 
+		compress_dist := true
+
+		t := d.Type()
+
+		switch t.Class() {
+		case "csv":
+
+			if t.Major() == "meta" {
+				compress_dist = opts.CompressMeta
+			}
+
+		case "database":
+
+			if t.Major() == "sqlite" {
+				compress_dist = opts.CompressSQLite
+			}
+
+		case "fs":
+
+			if t.Major() == "bundle" {
+				compress_dist = opts.CompressBundle
+			}
+
+		default:
+			opts.Logger.Status("Unhandle distribution type for checking whether or not to compress, %s", t.Class())
+		}
+
+		if !compress_dist {
+
+			// ?
+
+			go func() {
+				done_ch <- true
+			}()
+
+			continue
+		}
+
 		// this appears to be a problem when compressing both the sqlite and bundles
 		// distribution at the same time - specifically out-of-memory errors so we
 		// need to do some testing to see how a) running them in sequence would affect
@@ -560,15 +598,27 @@ func cleanupBuildDistributions(ctx context.Context, opts *options.BuildOptions, 
 				continue
 			}
 
+			if t.Major() == "meta" && !opts.CompressMeta {
+				continue
+			}
+
 		case "database":
 
 			if t.Major() == "sqlite" && opts.PreserveSQLite {
 				continue
 			}
 
+			if t.Major() == "sqlite" && !opts.CompressSQLite {
+				continue
+			}
+
 		case "fs":
 
 			if t.Major() == "bundle" && opts.PreserveBundle {
+				continue
+			}
+
+			if t.Major() == "sqlite" && !opts.CompressBundle {
 				continue
 			}
 

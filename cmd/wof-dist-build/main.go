@@ -17,7 +17,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"io"
-	_ "log"
 	"os"
 	"path/filepath"
 )
@@ -99,6 +98,14 @@ func main() {
 		*compress_sqlite = true
 		*compress_meta = true
 		*compress_bundle = true
+
+	} else {
+
+		logger.Info("-compress-all flag is set as false so auto-disabling -compress-sqlite -compress-meta -compress-bundle")
+
+		*compress_sqlite = false
+		*compress_meta = false
+		*compress_bundle = false
 	}
 
 	if *preserve_all {

@@ -228,7 +228,7 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 			Strict: false,
 			Reader: opts.SQLiteIndexRelationsReader,
 		}
-		
+
 		relations_func := index.SQLiteFeaturesIndexRelationsFuncWithOptions(index_rel_opts)
 		idx_opts.PostIndexFunc = relations_func
 	}
