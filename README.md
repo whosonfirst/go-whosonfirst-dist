@@ -74,8 +74,13 @@ go build -mod vendor -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
 Build one or more distribution files for a list of Who's On First repositories.
 
 ```
-> ./bin/wof-dist-build -h
-Usage of ./bin/wof-dist-build:
+$> ./bin/wof-dist-build -h
+Build one or more distribution files for a list of Who's On First repositories.
+
+Usage:
+	 ./bin/wof-dist-build [options] repo(N) repo(N)
+
+Valid options are:
   -build-bundle
     	Build a bundle distribution for a repo.
   -build-meta
@@ -188,6 +193,17 @@ Paths follow the dot notation syntax used by the [tidwall/gjson](https://github.
 For example:
 
 ```
+$> ./bin/wof-dist-build \
+	-query 'properties.wof:placetype=locality' \
+	-compress-all=false \
+	-workdir /tmp \
+	whosonfirst-data-admin-ca
+
+$> sqlite3 /tmp/whosonfirst-data-admin-ca-latest.db
+SQLite version 3.28.0 2019-04-15 14:49:49
+Enter ".help" for usage hints.
+sqlite> SELECT DISTINCT(placetype) FROM spr;
+locality
 ```
 
 You can pass multiple `-query` parameters. For example:
