@@ -4,7 +4,7 @@ Go package for working with Who's On First distributions.
 
 ## Important
 
-This is work in progress and documentation is incomplete.
+Documentation is incomplete.
 
 ## Git
 
@@ -18,8 +18,6 @@ Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the 
 
 ## Build process(es)
 
-_These are works in progress. I am still trying to work it out..._
-
 ### Building SQLite databases
 
 * Fetch remote clone or use local checkout
@@ -30,18 +28,27 @@ _These are works in progress. I am still trying to work it out..._
 For example:
 
 ```
-wof-dist-build --build-sqlite-common --preserve-checkout --workdir /usr/local/dist whosonfirst-data
+$> wof-dist-build \
+	-build-sqlite-common \
+	-preserve-checkout \
+	-workdir /usr/local/dist \
+	whosonfirst-data-admin-ca
 ```
 
 ```
-wof-dist-build --build-sqlite-common --local-checkout --compress-all --workdir /usr/local/dist /usr/local/data/dist/whosonfirst-data
+$> wof-dist-build \
+	-build-sqlite-common \
+	-local-checkout \
+	-compress-all \
+	-workdir /usr/local/dist \
+	/usr/local/data/dist/whosonfirst-data
 ```
 
-_`--preserve-checkout` is assumed (and assumed to be true) if `--local-checkout` is true._
+_`-preserve-checkout` is assumed (and assumed to be true) if `-local-checkout` is true._
 
 ### Building meta file(s)
 
-_Please write me._
+_To be written._
 
 ### Building bundles
 
@@ -52,12 +59,19 @@ _Please write me._
 * Clean up (remote clone or remote (compressed) SQLite database or local (uncompressed) SQLite database)
 
 ```
-$> wof-dist-build -build-sqlite-common=false -build-bundle -local-sqlite -workdir /usr/local/dist whosonfirst-data
+$> wof-dist-build \
+	-build-sqlite-common=false \
+	-build-bundle \
+	-local-sqlite \
+	-workdir /usr/local/dist \
+	whosonfirst-data-admin-ca
 ```
 
-_`--preserve-sqlite` is assumed (and assumed to be true) if `--local-sqlite` is true._
+_`-preserve-sqlite` is assumed (and assumed to be true) if `-local-sqlite` is true._
 
 ## Tools
+
+To build binary versions of these tools run the `cli` Makefile target. For example:
 
 ```
 $> make cli
@@ -67,7 +81,7 @@ go build -mod vendor -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
 
 ### wof-dist-build
 
-Build one or more distribution files for a repository. _This is code that is actively been worked on so don't rely on it yet, or approach it accordingly._
+Build one or more distribution files for a list of Who's On First repositories.
 
 ```
 $> ./bin/wof-dist-build -h
@@ -145,9 +159,15 @@ For example:
 ```
 $> mkdir tmp
 
-$> ./bin/wof-dist-build -timings -verbose -workdir ./tmp -build-sqlite-common -build-meta whosonfirst-data-constituency-ca
+$> ./bin/wof-dist-build \
+	-timings \
+	-verbose \
+	-workdir ./tmp \
+	-build-sqlite-common \
+	-build-meta \
+	whosonfirst-data-constituency-ca
 
-13:09:59.008358 [wof-dist-build] STATUS git lfs clone --depth 1 https://github.com/whosonfirst-data/whosonfirst-data-constituency-ca.git tmp/whosonfirst-data-constituency-ca
+13:09:59.008358 [wof-dist-build] STATUS git lfs clone -depth 1 https://github.com/whosonfirst-data/whosonfirst-data-constituency-ca.git tmp/whosonfirst-data-constituency-ca
 13:10:04.008358 [wof-dist-build] STATUS time to clone whosonfirst-data-constituency-ca 4.425250127s
 13:10:04.008388 [wof-dist-build] STATUS LOCAL tmp/whosonfirst-data-constituency-ca
 13:10:07.620093 [wof-dist-build] STATUS CREATED tmp/whosonfirst-data-constituency-ca-latest.db
@@ -276,8 +296,6 @@ $> cat /usr/local/data/sfomuseum-data-flights-inventory.json
 
 ## See also
 
-* https://dist.whosonfirst.org
+* https://github.com/whosonfirst/go-whosonfirst-sqlite-features-index
+* https://github.com/whosonfirst/go-whosonfirst-sqlite-features
 * https://github.com/whosonfirst/go-whosonfirst-dist-publish
-* https://git-scm.com/
-* https://git-lfs.github.com/
-* https://github.com/src-d/go-git

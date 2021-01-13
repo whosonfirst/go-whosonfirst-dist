@@ -214,6 +214,10 @@ func BuildSQLiteCommon(ctx context.Context, opts *options.BuildOptions, local_re
 		StrictAltFiles: true,
 	}
 
+	if opts.QuerySet != nil {
+		record_opts.QuerySet = opts.QuerySet
+	}
+
 	record_func := index.SQLiteFeaturesLoadRecordFunc(record_opts)
 
 	idx_opts := &sql_index.SQLiteIndexerOptions{

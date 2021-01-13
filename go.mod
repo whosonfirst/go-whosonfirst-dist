@@ -3,6 +3,7 @@ module github.com/whosonfirst/go-whosonfirst-dist
 go 1.12
 
 require (
+	github.com/aaronland/go-json-query v0.0.2
 	github.com/jtacoma/uritemplates v1.0.0
 	github.com/mholt/archiver/v3 v3.5.0
 	github.com/tidwall/gjson v1.6.7

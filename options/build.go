@@ -2,6 +2,7 @@ package options
 
 import (
 	"errors"
+	"github.com/aaronland/go-json-query"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-log"
 	"github.com/whosonfirst/go-whosonfirst-repo"
@@ -15,6 +16,7 @@ type BuildOptions struct {
 	Organization               string
 	Repo                       repo.Repo
 	Repos                      []repo.Repo
+	QuerySet                   *query.QuerySet
 	SQLiteCommon               bool
 	SQLiteRTree                bool
 	SQLiteSearch               bool
@@ -97,6 +99,7 @@ func (opts *BuildOptions) Clone() *BuildOptions {
 		Protocol:                   opts.Protocol,
 		Organization:               opts.Organization,
 		Repo:                       opts.Repo,
+		QuerySet:                   opts.QuerySet,
 		SQLiteCommon:               opts.SQLiteCommon,
 		SQLiteRTree:                opts.SQLiteRTree,
 		SQLiteSearch:               opts.SQLiteSearch,

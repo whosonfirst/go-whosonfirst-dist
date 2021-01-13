@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/aaronland/go-json-query"
 	"github.com/tidwall/pretty"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-dist/build"
@@ -19,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -64,6 +66,14 @@ func main() {
 
 	combined := flag.Bool("combined", opts.Combined, "Create a single combined distribution from multiple repos.")
 	combined_name := flag.String("combined-name", opts.CombinedName, "Distribution name for a single combined distribution from multiple repos.")
+
+	var queries query.QueryFlags
+	flag.Var(&queries, "query", "One or more {PATH}={REGEXP} parameters for filtering records.")
+
+	valid_query_modes := strings.Join([]string{query.QUERYSET_MODE_ALL, query.QUERYSET_MODE_ANY}, ", ")
+	desc_query_modes := fmt.Sprintf("Specify how query filtering should be evaluated. Valid modes are: %s", valid_query_modes)
+
+	query_mode := flag.String("query-mode", query.QUERYSET_MODE_ALL, desc_query_modes)
 
 	strict := flag.Bool("strict", opts.Strict, "...")
 	timings := flag.Bool("timings", opts.Timings, "Display timings during the build process")
@@ -223,6 +233,16 @@ func main() {
 
 	opts.Strict = *strict
 	opts.Timings = *timings
+
+	if len(queries) > 0 {
+
+		qs := &query.QuerySet{
+			Queries: queries,
+			Mode:    *query_mode,
+		}
+
+		opts.QuerySet = qs
+	}
 
 	repos := make([]repo.Repo, 0)
 
