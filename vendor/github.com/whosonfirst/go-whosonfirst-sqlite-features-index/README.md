@@ -4,6 +4,13 @@ Go package for indexing Who's On First features in SQLite databases.
 
 ## Tools
 
+To build binary versions of these tools run the `cli` Makefile target. For example:
+
+```
+$> make cli
+go build -mod vendor -o bin/wof-sqlite-index-features cmd/wof-sqlite-index-features/main.go
+```
+
 ### wof-sqlite-index-features
 
 ```
@@ -34,7 +41,7 @@ Usage of ./bin/wof-sqlite-index-features:
   -live-hard-die-fast
     	Enable various performance-related pragmas at the expense of possible (unlikely) database corruption (default true)
   -mode string
-    	The mode to use importing data. Valid modes are: directory,featurecollection,file,filelist,geojsonl,metafile,repo,sqlite. (default "files")
+    	The mode to use importing data. Valid modes are: directory://, featurecollection://, file://, filelist://, geojsonl://, metafile://, repo://, sqlite://. (default "repo://")	
   -names
     	Index the 'names' table
   -optimize
@@ -43,6 +50,10 @@ Usage of ./bin/wof-sqlite-index-features:
     	The number of concurrent processes to index data with (default 8)
   -properties
     	Index the 'properties' table
+  -query value
+    	One or more {PATH}={REGEXP} parameters for filtering records.
+  -query-mode string
+    	Specify how query filtering should be evaluated. Valid modes are: ALL, ANY (default "ALL")
   -rtree
     	Index the 'rtree' table
   -search
@@ -58,19 +69,11 @@ Usage of ./bin/wof-sqlite-index-features:
 For example:
 
 ```
-./bin/wof-sqlite-index-features -live-hard-die-fast -dsn microhoods.db -all -mode meta /usr/local/data/whosonfirst-data/meta/wof-microhood-latest.csv
-```
-
-See the way we're passing a `-live-hard-die-fast` flag? That is to enable a number of performace-related PRAGMA commands (described [here](https://blog.devart.com/increasing-sqlite-performance.html) and [here](https://www.gaia-gis.it/gaia-sins/spatialite-cookbook/html/system.html)) without which database index can be prohibitive and time-consuming. These is a small but unlikely chance of database corruptions when this flag is enabled.
-
-Also note that the `-live-hard-die-fast` flag will cause the `PAGE_SIZE` and `CACHE_SIZE` PRAGMAs to be set to `4096` and `1000000` respectively so the eventual cache size will require 4GB of memory. This is probably fine on most systems where you'll be indexing data but I am open to the idea that we may need to revisit those numbers or at least make them configurable.
-
-You can also use `wof-sqlite-index-features` in combination with the [go-whosonfirst-api](https://github.com/whosonfirst/go-whosonfirst-api) `wof-api` tool and populate your SQLite database by piping API results on STDIN. For example, here's how you might index all the neighbourhoods in Montreal:
-
-```
-/usr/local/bin/wof-api -param method=whosonfirst.places.getDescendants -param id=101736545 \
--param placetype=neighbourhood -param api_key=mapzen-xxxxxx -geojson-ls | \
-/usr/local/bin/wof-sqlite-index-features -dsn neighbourhoods.db -all -mode geojson-ls STDIN
+$> ./bin/wof-sqlite-index-features \
+	-dsn microhoods.db \
+	-all \
+	-mode meta:// \
+	/usr/local/data/whosonfirst-data/meta/wof-microhood-latest.csv
 ```
 
 Or creating databases for all the Who's On First repos:
@@ -95,10 +98,81 @@ do
 	rm /usr/local/data/whosonfirst-sqlite/${FNAME}.db
     fi
 
-    ./bin/wof-sqlite-index-features -timings -live-hard-die-fast -all -dsn /usr/local/data/whosonfirst-sqlite/${FNAME}-latest.db -mode repo ${REPO} 
+    ./bin/wof-sqlite-index-features -timings -all -dsn /usr/local/data/whosonfirst-sqlite/${FNAME}-latest.db -mode repo:// ${REPO} 
 
 done
 ```    
+
+#### Inline queries
+
+You can also specify inline queries by passing a `-query` parameter which is a string in the format of:
+
+```
+{PATH}={REGULAR EXPRESSION}
+```
+
+Paths follow the dot notation syntax used by the [tidwall/gjson](https://github.com/tidwall/gjson) package and regular expressions are any valid [Go language regular expression](https://golang.org/pkg/regexp/). Successful path lookups will be treated as a list of candidates and each candidate's string value will be tested against the regular expression's [MatchString](https://golang.org/pkg/regexp/#Regexp.MatchString) method.
+
+For example:
+
+```
+$> ./bin/wof-sqlite-index-features \
+	-all \
+	-dsn ca-region.db \
+	-query 'properties.wof:placetype=region' \
+	-mode repo:// \	
+	/usr/local/data/whosonfirst-data-admin-ca
+
+$> sqlite3 ca-region.db
+
+SQLite version 3.28.0 2019-04-15 14:49:49
+Enter ".help" for usage hints.
+sqlite> SELECT id,name,placetype FROM spr;
+85682057|Ontario|region
+85682117|British Columbia|region
+85682065|New Brunswick|region
+85682123|Newfoundland and Labrador|region
+85682067|Northwest Territories|region
+85682075|Nova Scotia|region
+85682081|Prince Edward Island|region
+85682085|Manitoba|region
+85682091|Alberta|region
+85682095|Yukon|region
+85682113|Saskatchewan|region
+136251273|Quebec|region
+85682105|Nunavut|region
+sqlite>
+
+```
+
+You can pass multiple `-query` parameters. For example:
+
+```
+$> ./bin/wof-sqlite-index-features \
+	-all \
+	-dsn ca-region.db \
+	-query 'properties.wof:placetype=region' \
+	-query 'properties.wof:name=(?i)new.*'	
+	-mode repo:// \	
+	/usr/local/data/whosonfirst-data-admin-ca
+
+$> sqlite3 ca-region-new.db
+
+SQLite version 3.28.0 2019-04-15 14:49:49
+Enter ".help" for usage hints.
+sqlite> SELECT id,name,placetype FROM spr;
+85682065|New Brunswick|region
+85682123|Newfoundland and Labrador|region
+sqlite>
+```
+
+The default query mode is to ensure that all queries match but you can also specify that only one or more queries need to match by passing the `-query-mode ANY` flag:
+
+#### SQLite performace-related PRAGMA
+
+Note that the `-live-hard-die-fast` flag is enabled by default. That is to enable a number of performace-related PRAGMA commands (described [here](https://blog.devart.com/increasing-sqlite-performance.html) and [here](https://www.gaia-gis.it/gaia-sins/spatialite-cookbook/html/system.html)) without which database index can be prohibitive and time-consuming. These is a small but unlikely chance of database corruptions when this flag is enabled.
+
+Also note that the `-live-hard-die-fast` flag will cause the `PAGE_SIZE` and `CACHE_SIZE` PRAGMAs to be set to `4096` and `1000000` respectively so the eventual cache size will require 4GB of memory. This is probably fine on most systems where you'll be indexing data but I am open to the idea that we may need to revisit those numbers or at least make them configurable.
 
 ### wof-sqlite-query-features
 
@@ -107,7 +181,7 @@ Query a search-enabled SQLite database by name(s). Results are output as CSV enc
 _This assumes you have created the database using the `wof-sqlite-index-features` tool with the `-search` paramter._
 
 ```
-./bin/wof-sqlite-query-features -h
+$> ./bin/wof-sqlite-query-features -h
 Usage of ./bin/wof-sqlite-query-features:
   -column string
     	The 'names_*' column to query against. Valid columns are: names_all, names_preferred, names_variant, names_colloquial. (default "names_all")
@@ -132,10 +206,10 @@ Usage of ./bin/wof-sqlite-query-features:
 For example:
 
 ```
-./bin/wof-sqlite-query-features -dsn test2.db JFK
+$> ./bin/wof-sqlite-query-features -dsn test2.db JFK
 102534365,John F Kennedy Int'l Airport
 
-./bin/wof-sqlite-query-features -dsn test2.db -column names_colloquial Paris
+$> ./bin/wof-sqlite-query-features -dsn test2.db -column names_colloquial Paris
 85922583,San Francisco
 102027181,Shanghai
 102030585,Kolkata
@@ -146,15 +220,40 @@ Full-text search is supported using SQLite's FTS4 indexer. In order to index the
 
 ## Spatial indexes
 
-Yes, if you have the [Spatialite extension](https://www.gaia-gis.it/fossil/libspatialite/index) installed and have indexed the `geometries` table. For example:
+### RTree
+
+RTree indexes are available if SQLite has been compiled with the [R*Tree module](https://www.sqlite.org/rtree.html) and you have indexed the [rtree](https://github.com/whosonfirst/go-whosonfirst-sqlite-features#rtree), [spr](https://github.com/whosonfirst/go-whosonfirst-sqlite-features#spr) and [properties](https://github.com/whosonfirst/go-whosonfirst-sqlite-features#properties) tables. For example:
 
 ```
-> ./bin/wof-sqlite-index-features -timings -live-hard-die-fast -spr -geometries -driver spatialite -mode repo -dsn test.db /usr/local/data/whosonfirst-data-constituency-ca/
+$> ./bin/wof-sqlite-index-features \
+	-index-alt-files \
+	-rtree \
+	-spr \
+	-properties \
+	-timings \
+	-dsn /usr/local/ca-alt.db \
+	-mode repo:// \
+	/usr/local/data/whosonfirst-data-admin-ca/
+```
+
+### Spatialite
+
+Spatial indexes are also available if you have the [Spatialite extension](https://www.gaia-gis.it/fossil/libspatialite/index) installed and have indexed the `geometries` table. For example:
+
+```
+$> ./bin/wof-sqlite-index-features \
+	-driver spatialite \
+	-timings \
+	-spr \
+	-geometries \
+	-mode repo:// \
+	-dsn test.db /usr/local/data/whosonfirst-data-constituency-ca/
+
 10:09:46.534281 [wof-sqlite-index-features] STATUS time to index geometries (87) : 21.251828704s
 10:09:46.534379 [wof-sqlite-index-features] STATUS time to index spr (87) : 3.206930799s
 10:09:46.534385 [wof-sqlite-index-features] STATUS time to index all (87) : 24.48004637s
 
-> sqlite3 test.db
+$> sqlite3 test.db
 SQLite version 3.21.0 2017-10-24 18:55:49
 Enter ".help" for usage hints.
 
@@ -196,7 +295,15 @@ _Remember: When indexing geometries you will need to explcitly pass both the `-g
 Indexing time will vary depending on the specifics of your hardware (available RAM, CPU, disk I/O) but as a rule building indexes with the `geometries` table will take longer, and create a larger database, than doing so without. For example indexing the [whosonfirst-data](https://github.com/whosonfirst-data/whosonfirst-data) repository with spatial indexes:
 
 ```
-> ./bin/wof-sqlite-index-features -all -driver spatialite -geometries -dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest.db -live-hard-die-fast -timings -mode repo /usr/local/data/whosonfirst-data
+$> ./bin/wof-sqlite-index-features \
+	-driver spatialite \
+	-all \
+	-geometries \
+	-dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest.db \
+	-timings \
+	-mode repo:// \
+	/usr/local/data/whosonfirst-data
+
 ...time passes...
 06:12:51.274132 [wof-sqlite-index-features] STATUS time to index geojson (951541) : 13m41.994217581s
 06:12:51.274158 [wof-sqlite-index-features] STATUS time to index spr (951541) : 13m0.21007633s
@@ -213,7 +320,12 @@ Indexing time will vary depending on the specifics of your hardware (available R
 And without:
 
 ```
-> ./bin/wof-sqlite-index-features -all -dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest-nospatial.db -live-hard-die-fast -timings -mode repo /usr/local/data/whosonfirst-data
+$> ./bin/wof-sqlite-index-features \
+	-all \
+	-dsn /usr/local/data/dist/sqlite/whosonfirst-data-latest-nospatial.db \
+	-timings \
+	-mode repo:// \
+	/usr/local/data/whosonfirst-data
 ...time passes...
 10:06:13.226187 [wof-sqlite-index-features] STATUS time to index names (951541) : 12m32.359733539s
 10:06:13.226206 [wof-sqlite-index-features] STATUS time to index ancestors (951541) : 3m27.294843778s

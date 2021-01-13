@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aaronland/go-json-query"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-reader"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
@@ -22,6 +23,7 @@ import (
 
 type SQLiteFeaturesLoadRecordFuncOptions struct {
 	StrictAltFiles bool
+	QuerySet       *query.QuerySet
 }
 
 type SQLiteFeaturesIndexRelationsFuncOptions struct {
@@ -55,6 +57,19 @@ func SQLiteFeaturesLoadRecordFunc(opts *SQLiteFeaturesLoadRecordFuncOptions) sql
 
 			if err != nil {
 				return nil, err
+			}
+
+			if opts.QuerySet != nil && len(opts.QuerySet.Queries) > 0 {
+
+				matches, err := query.Matches(ctx, opts.QuerySet, body)
+
+				if err != nil {
+					return nil, err
+				}
+
+				if !matches {
+					return nil, nil
+				}
 			}
 
 			i, err := feature.NewWOFFeature(body)

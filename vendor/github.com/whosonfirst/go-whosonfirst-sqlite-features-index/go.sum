@@ -8,6 +8,8 @@ github.com/MichaelTJones/walk v0.0.0-20161122175330-4748e29d5718/go.mod h1:VVwKs
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
 github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
+github.com/aaronland/go-json-query v0.0.2 h1:cKw/DnxtGaPsClb78ONgmXPOJkqHhaBMU2RTBbPoXos=
+github.com/aaronland/go-json-query v0.0.2/go.mod h1:dGc7y824R93ugQMTldL7PFD/SPVGPwKdqrUJFLE/ILU=
 github.com/aaronland/go-roster v0.0.1 h1:r1l4n1HfWvEtOXZvhfXX0Won9Xf6QJsigdUdzOtuy/M=
 github.com/aaronland/go-roster v0.0.1/go.mod h1:AcovpxlG1XxJxX2Fjqlm63fEIBhCjEIBV4lP87FZDmI=
 github.com/aaronland/go-roster v0.0.2 h1:2Fu7v4VQLRLRL/Zgr6R9S5JxsW75Ab/K88QtMVX532s=
@@ -195,6 +197,8 @@ github.com/whosonfirst/go-whosonfirst-index v0.2.3 h1:a+vfmTPp2GkyZExQqXzLTK2Vwk
 github.com/whosonfirst/go-whosonfirst-index v0.2.3/go.mod h1:n3rY2Hza4+MFtKES9C1sS4AAIkA5va/nagzvt+4ZFBw=
 github.com/whosonfirst/go-whosonfirst-index v0.3.2 h1:Hxbw5W3npHgC9cL9Ea909yzFi8aPM62R9gJrWCE+UY0=
 github.com/whosonfirst/go-whosonfirst-index v0.3.2/go.mod h1:lebfpAgDKaDBJL3u98IJclttOKTnj7GvCsRZv14wmbE=
+github.com/whosonfirst/go-whosonfirst-index v0.3.4 h1:Ix6IxQOt3FEDcsgtD7uf/cfaKS9AkOgvFePkpWHWIFc=
+github.com/whosonfirst/go-whosonfirst-index v0.3.4/go.mod h1:6PU507JqA3wK/WbCeA3jVGMqcBD/QZ6JGbzmDEXdlfU=
 github.com/whosonfirst/go-whosonfirst-index-csv v0.0.0-20191002171239-c6712fe20972 h1:xPrg89CfHOG3u7eaW6fa9ke4Px5kErS21D4mBf6usXE=
 github.com/whosonfirst/go-whosonfirst-index-csv v0.0.0-20191002171239-c6712fe20972/go.mod h1:TNMdhUDIVyCrcr9WziZRt9UARQAvM/T1x4h69gVkxsA=
 github.com/whosonfirst/go-whosonfirst-index-sqlite v0.0.2 h1:rmp0Nm6adNVPEZ7A/LlvNjK8ANHzLm6z03aNR9yQ028=

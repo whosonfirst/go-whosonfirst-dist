@@ -1,3 +1,5 @@
+# github.com/aaronland/go-json-query v0.0.2
+github.com/aaronland/go-json-query
 # github.com/aaronland/go-roster v0.0.2
 github.com/aaronland/go-roster
 # github.com/andybalholm/brotli v1.0.0
@@ -90,7 +92,7 @@ github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst
 github.com/whosonfirst/go-whosonfirst-geojson-v2/utils
 # github.com/whosonfirst/go-whosonfirst-hash v0.1.0
 github.com/whosonfirst/go-whosonfirst-hash
-# github.com/whosonfirst/go-whosonfirst-index v0.3.2
+# github.com/whosonfirst/go-whosonfirst-index v0.3.4
 github.com/whosonfirst/go-whosonfirst-index
 github.com/whosonfirst/go-whosonfirst-index/fs
 # github.com/whosonfirst/go-whosonfirst-index-csv v0.0.0-20191002171239-c6712fe20972
@@ -126,7 +128,7 @@ github.com/whosonfirst/go-whosonfirst-sqlite/utils
 # github.com/whosonfirst/go-whosonfirst-sqlite-features v0.6.5
 github.com/whosonfirst/go-whosonfirst-sqlite-features
 github.com/whosonfirst/go-whosonfirst-sqlite-features/tables
-# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.6.4
+# github.com/whosonfirst/go-whosonfirst-sqlite-features-index v0.7.0
 github.com/whosonfirst/go-whosonfirst-sqlite-features-index
 # github.com/whosonfirst/go-whosonfirst-sqlite-index v0.2.0
 github.com/whosonfirst/go-whosonfirst-sqlite-index
