@@ -4,17 +4,7 @@ Go package for working with Who's On First distributions.
 
 ## Important
 
-Documentation is incomplete.
-
-## Git
-
-This package depends on there being a platform-specific `git` and `git-lfs` binaries present on the system where this is running. There is a branch of the code that uses the `go-git` package for cloning repositories but some Who's On First repos still require `lfs` support (hello `whosonfirst-data`...) It seems like that should be possible in `go-git` but if it is I haven't figured it out.
-
-Ultimately I'd like to build everything on top of `go-git` because then we would have a proper pure-Go distribution tool which means we could build platform-native binaries with no extra depedencies. Today, everything depends on Git. 
-
-## What is a "distribution".
-
-Things like the [SQLite](https://dist.whosonfirst.org/sqlite/) databases or the "[bundles](https://dist.whosonfirst.org/bundles/)".
+The documentation for this package is incomplete.
 
 ## Build process(es)
 
@@ -84,7 +74,7 @@ go build -mod vendor -o bin/wof-dist-fetch cmd/wof-dist-fetch/main.go
 Build one or more distribution files for a list of Who's On First repositories.
 
 ```
-$> ./bin/wof-dist-build -h
+> ./bin/wof-dist-build -h
 Usage of ./bin/wof-dist-build:
   -build-bundle
     	Build a bundle distribution for a repo.
@@ -105,15 +95,15 @@ Usage of ./bin/wof-dist-build:
   -combined-name string
     	Distribution name for a single combined distribution from multiple repos.
   -compress-all
-    	... (default true)
+    	Compress all distributions that are created. (default true)
   -compress-bundle
-    	... (default true)
+    	Compress bundle distribution. (default true)
   -compress-max-cpus int
     	Number of concurrent processes to use when compressing distribution items. (default 2)
   -compress-meta
-    	... (default true)
+    	Compess meta (CSV) file distribution. (default true)
   -compress-sqlite
-    	... (default true)
+    	Compress SQLite database distribution. (default true)
   -custom-repo
     	Allow custom repo names (default true)
   -git-clone string
@@ -135,17 +125,21 @@ Usage of ./bin/wof-dist-build:
   -local-sqlite
     	Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)
   -preserve-all
-    	...
+    	Preserve all intermediary files that are used or created while building distributions.
   -preserve-bundle
-    	...
+    	Preserve any intermediary bundles used or created while building distributions.
   -preserve-checkout
     	Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.
   -preserve-meta
-    	...
+    	Preserve any intermediary meta (CSV) files used or created while building distributions.
   -preserve-sqlite
-    	...
+    	Preserve any intermediary SQLite databases used or created while building distributions.
+  -query value
+    	One or more {PATH}={REGEXP} parameters for filtering records.
+  -query-mode string
+    	Specify how query filtering should be evaluated. Valid modes are: ALL, ANY (default "ALL")
   -strict
-    	...
+    	Stop execution if any errors loading files (typically alternate geometries) are encountered.
   -timings
     	Display timings during the build process
   -verbose
@@ -180,6 +174,28 @@ $> ls -al ./tmp
 -rw-r--r--  1 asc  staff  33390592 Jun 11 13:10 whosonfirst-data-constituency-ca-latest.db
 -rw-r--r--  1 asc  staff     17895 Jun 11 13:10 wof-constituency-ca-latest.csv
 ```
+
+#### Inline queries
+
+You can also specify inline queries by passing a `-query` parameter which is a string in the format of:
+
+```
+{PATH}={REGULAR EXPRESSION}
+```
+
+Paths follow the dot notation syntax used by the [tidwall/gjson](https://github.com/tidwall/gjson) package and regular expressions are any valid [Go language regular expression](https://golang.org/pkg/regexp/). Successful path lookups will be treated as a list of candidates and each candidate's string value will be tested against the regular expression's [MatchString](https://golang.org/pkg/regexp/#Regexp.MatchString) method.
+
+For example:
+
+```
+```
+
+You can pass multiple `-query` parameters. For example:
+
+```
+```
+
+The default query mode is to ensure that all queries match but you can also specify that only one or more queries need to match by passing the `-query-mode ANY` flag:
 
 #### "Combined" distributions
 
@@ -293,6 +309,12 @@ $> cat /usr/local/data/sfomuseum-data-flights-inventory.json
   }
 ]
 ```
+
+## Git
+
+This package depends on there being a platform-specific `git` and `git-lfs` binaries present on the system where this is running. There is a branch of the code that uses the `go-git` package for cloning repositories but some Who's On First repos still require `lfs` support (hello `whosonfirst-data`...) It seems like that should be possible in `go-git` but if it is I haven't figured it out.
+
+Ultimately I'd like to build everything on top of `go-git` because then we would have a proper pure-Go distribution tool which means we could build platform-native binaries with no extra depedencies. Today, everything depends on Git. 
 
 ## See also
 

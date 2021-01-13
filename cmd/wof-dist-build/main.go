@@ -33,31 +33,31 @@ func main() {
 	build_sqlite_search := flag.Bool("build-sqlite-search", opts.SQLiteSearch, "Build a (common) SQLite distribution for a repo, with search-tables.")
 	build_sqlite_all := flag.Bool("build-sqlite-all", false, "Build a SQLite distribution for a repo, with all tables defined by the other -build-sqlite flags.")
 
-	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo")
+	build_meta := flag.Bool("build-meta", opts.Meta, "Build meta files for a repo.")
 	build_bundle := flag.Bool("build-bundle", opts.Bundle, "Build a bundle distribution for a repo.")
 
-	compress_sqlite := flag.Bool("compress-sqlite", opts.CompressSQLite, "...")
-	compress_meta := flag.Bool("compress-meta", opts.CompressMeta, "...")
-	compress_bundle := flag.Bool("compress-bundle", opts.CompressBundle, "...")
-	compress_all := flag.Bool("compress-all", true, "...")
+	compress_sqlite := flag.Bool("compress-sqlite", opts.CompressSQLite, "Compress SQLite database distribution.")
+	compress_meta := flag.Bool("compress-meta", opts.CompressMeta, "Compess meta (CSV) file distribution.")
+	compress_bundle := flag.Bool("compress-bundle", opts.CompressBundle, "Compress bundle distribution.")
+	compress_all := flag.Bool("compress-all", true, "Compress all distributions that are created.")
 
 	compress_max_cpus := flag.Int("compress-max-cpus", opts.CompressMaxCPUs, "Number of concurrent processes to use when compressing distribution items.")
 
 	preserve_checkout := flag.Bool("preserve-checkout", opts.PreserveCheckout, "Do not remove repo from disk after the build process is complete. This is automatically set to true if the -local-checkout flag is true.")
-	preserve_sqlite := flag.Bool("preserve-sqlite", opts.PreserveSQLite, "...")
-	preserve_meta := flag.Bool("preserve-meta", opts.PreserveMeta, "...")
-	preserve_bundle := flag.Bool("preserve-bundle", opts.PreserveBundle, "...")
-	preserve_all := flag.Bool("preserve-all", false, "...")
+	preserve_sqlite := flag.Bool("preserve-sqlite", opts.PreserveSQLite, "Preserve any intermediary SQLite databases used or created while building distributions.")
+	preserve_meta := flag.Bool("preserve-meta", opts.PreserveMeta, "Preserve any intermediary meta (CSV) files used or created while building distributions.")
+	preserve_bundle := flag.Bool("preserve-bundle", opts.PreserveBundle, "Preserve any intermediary bundles used or created while building distributions.")
+	preserve_all := flag.Bool("preserve-all", false, "Preserve all intermediary files that are used or created while building distributions.")
 
 	clone := flag.String("git-clone", opts.Cloner, "Indicate how to clone a repo, using either a native Git binary or the go-git implementation. Currently only the native Git binary is supported.")
-	proto := flag.String("git-protocol", opts.Protocol, "Fetch repos using this protocol")
-	source := flag.String("git-source", opts.Source, "Fetch repos from this endpoint")
-	org := flag.String("git-organization", opts.Organization, "Fetch repos from the user (or organization)")
+	proto := flag.String("git-protocol", opts.Protocol, "Fetch repos using this protocol.")
+	source := flag.String("git-source", opts.Source, "Fetch repos from this endpoint.")
+	org := flag.String("git-organization", opts.Organization, "Fetch repos from the user (or organization).")
 
-	local_checkout := flag.Bool("local-checkout", opts.LocalCheckout, "Do not fetch a repo from a remote source but instead use a local checkout on disk")
-	local_sqlite := flag.Bool("local-sqlite", opts.LocalSQLite, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch)")
+	local_checkout := flag.Bool("local-checkout", opts.LocalCheckout, "Do not fetch a repo from a remote source but instead use a local checkout on disk.")
+	local_sqlite := flag.Bool("local-sqlite", opts.LocalSQLite, "Do not build a new SQLite database but use a pre-existing database on disk (this expects to find the database at the same path it would be stored if the database were created from scratch).")
 
-	custom_repo := flag.Bool("custom-repo", true, "Allow custom repo names")
+	custom_repo := flag.Bool("custom-repo", true, "Allow custom repo names. This disables checks enforced by the whosonfirst/go-whosonfirst-repo package.")
 
 	index_alt_files := flag.Bool("index-alt-files", opts.IndexAltFiles, "Index alternate geometry files.")
 
@@ -71,13 +71,13 @@ func main() {
 	flag.Var(&queries, "query", "One or more {PATH}={REGEXP} parameters for filtering records.")
 
 	valid_query_modes := strings.Join([]string{query.QUERYSET_MODE_ALL, query.QUERYSET_MODE_ANY}, ", ")
-	desc_query_modes := fmt.Sprintf("Specify how query filtering should be evaluated. Valid modes are: %s", valid_query_modes)
+	desc_query_modes := fmt.Sprintf("Specify how query filtering should be evaluated. Valid modes are: %s.", valid_query_modes)
 
 	query_mode := flag.String("query-mode", query.QUERYSET_MODE_ALL, desc_query_modes)
 
-	strict := flag.Bool("strict", opts.Strict, "...")
-	timings := flag.Bool("timings", opts.Timings, "Display timings during the build process")
-	verbose := flag.Bool("verbose", false, "Be chatty")
+	strict := flag.Bool("strict", opts.Strict, "Stop execution if any errors loading files (typically alternate geometries) are encountered.")
+	timings := flag.Bool("timings", opts.Timings, "Display timings during the build process.")
+	verbose := flag.Bool("verbose", false, "Be chatty about what's been done and how things are going.")
 
 	workdir := flag.String("workdir", opts.Workdir, "Where to store temporary and final build files. If empty the code will attempt to use the current working directory.")
 
