@@ -209,6 +209,19 @@ locality
 You can pass multiple `-query` parameters. For example:
 
 ```
+$> ./bin/wof-dist-build \
+	-query 'properties.wof:placetype=locality' \
+	-query 'properties.wof:belongsto=136251273' \
+	-compress-all=false \
+	-workdir /tmp
+	whosonfirst-data-admin-ca
+
+$> sqlite3 /tmp/whosonfirst-data-admin-ca-latest.db
+
+SQLite version 3.28.0 2019-04-15 14:49:49
+Enter ".help" for usage hints.
+sqlite> SELECT COUNT(id) FROM geojson;
+2892
 ```
 
 The default query mode is to ensure that all queries match but you can also specify that only one or more queries need to match by passing the `-query-mode ANY` flag:

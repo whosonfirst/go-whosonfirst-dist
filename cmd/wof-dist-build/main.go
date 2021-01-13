@@ -81,13 +81,13 @@ func main() {
 
 	workdir := flag.String("workdir", opts.Workdir, "Where to store temporary and final build files. If empty the code will attempt to use the current working directory.")
 
-	flag.Usage = func(){
+	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Build one or more distribution files for a list of Who's On First repositories.\n\n")
 		fmt.Fprintf(os.Stderr, "Usage:\n\t %s [options] repo(N) repo(N)\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Valid options are:\n")
 		flag.PrintDefaults()
 	}
-	
+
 	flag.Parse()
 
 	logger := log.SimpleWOFLogger()
